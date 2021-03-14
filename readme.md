@@ -27,3 +27,9 @@ Rasterization will also NOT be the centerpiece of this library.
 
 A separate focus will be given to compatibility with regular OpenGL.
 
+## Motivation
+
+- https://github.com/Glavnokoman/vuh
+- https://github.com/jgbit/vuda
+- https://github.com/kpet/clvk
+- https://github.com/EthicalML/vulkan-kompute
