@@ -4,16 +4,17 @@
 #include "./core.hpp"
 #include "./device.hpp"
 
+// 
 namespace tom {
 
     // 
     class Queue: public std::enable_shared_from_this<Queue> {
-        protected:
+    protected:  //
         std::shared_ptr<tom::Device> device = {};
         vk::Queue queue = {};
         
 
-        public: 
+    public: // 
         Queue() {
             
         }

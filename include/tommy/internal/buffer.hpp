@@ -3,20 +3,61 @@
 //#include <tommy/core.hpp>
 #include "./core.hpp"
 #include "./device.hpp"
+#include "./memory.hpp"
 
+// 
 namespace tom {
 
     // 
-    class Buffer: public std::enable_shared_from_this<Buffer> {
-        protected:
+    class DeviceBuffer: public std::enable_shared_from_this<DeviceBuffer> {
+    protected:  // 
         std::shared_ptr<tom::Device> device = {};
-        vk::Buffer buffer = {};
-        vk::DeviceMemory memory = {};
+        std::shared_ptr<tom::MemoryAllocation> memoryAllocation = {};
 
-        public: 
-        Buffer() {
+        // 
+        vk::Buffer buffer = {};
+
+    public: // 
+        DeviceBuffer(const std::shared_ptr<tom::Device>& device): device(device) {
             
-        }
+        };
+
+        // 
+        std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() { return memoryAllocation; };
+        std::shared_ptr<tom::Device>& getDevice() { return device; };
+        vk::Buffer& getBuffer() { return buffer; };
+
+        // 
+        const std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() const { return memoryAllocation; };
+        const std::shared_ptr<tom::Device>& getDevice() const { return device; };
+        const vk::Buffer& getBuffer() const { return buffer; };
+    };
+
+    // 
+    class BufferAllocation: public std::enable_shared_from_this<BufferAllocation> {
+    protected:  // 
+        std::shared_ptr<tom::DeviceBuffer> deviceBuffer = {};
+
+        // 
+        vk::DescriptorBufferInfo bufferInfo = { {}, 0ull, VK_WHOLE_SIZE };
+        vk::DeviceAddress address = 0ull;
+
+    public: // 
+        BufferAllocation(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer, const vk::DeviceSize& offset = 0ull, const vk::DeviceSize& range = VK_WHOLE_SIZE): deviceBuffer(deviceBuffer) {
+            if (deviceBuffer) { bufferInfo.buffer = deviceBuffer->getBuffer(); };
+            bufferInfo.offset = offset;
+            bufferInfo.range = range;
+        };
+
+        // 
+        vk::DescriptorBufferInfo& getBufferInfo() { if (deviceBuffer) { bufferInfo.buffer = deviceBuffer->getBuffer(); }; return bufferInfo; };
+        vk::DeviceSize& getOffset() { return bufferInfo.offset; };
+        vk::DeviceSize& getRange() { return bufferInfo.range; };
+
+        //
+        const vk::DescriptorBufferInfo& getBufferInfo() const { return bufferInfo; };
+        const vk::DeviceSize& getOffset() const { return bufferInfo.offset; };
+        const vk::DeviceSize& getRange() const { return bufferInfo.range; };
     };
 
 };
