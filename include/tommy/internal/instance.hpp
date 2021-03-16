@@ -60,11 +60,11 @@ namespace tom {
         };
 
         // 
-        std::vector<std::weak_ptr<PhysicalDevice>>& enumeratePhysicalDevices();
+        std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices();
         vk::Instance& getInstance() { return instance; };
 
         // 
-        const std::vector<std::weak_ptr<PhysicalDevice>>& enumeratePhysicalDevices() const;
+        const std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices() const;
         const vk::Instance& getInstance() const { return instance; };
     };
 
