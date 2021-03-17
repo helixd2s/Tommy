@@ -23,14 +23,14 @@ namespace tom {
         };
 
         // 
-        std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() { return memoryAllocation; };
-        std::shared_ptr<tom::Device>& getDevice() { return device; };
-        vk::Buffer& getBuffer() { return buffer; };
+        virtual std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() { return memoryAllocation; };
+        virtual std::shared_ptr<tom::Device>& getDevice() { return device; };
+        virtual vk::Buffer& getBuffer() { return buffer; };
 
         // 
-        const std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() const { return memoryAllocation; };
-        const std::shared_ptr<tom::Device>& getDevice() const { return device; };
-        const vk::Buffer& getBuffer() const { return buffer; };
+        virtual const std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() const { return memoryAllocation; };
+        virtual const std::shared_ptr<tom::Device>& getDevice() const { return device; };
+        virtual const vk::Buffer& getBuffer() const { return buffer; };
     };
 
     // 
@@ -39,7 +39,7 @@ namespace tom {
         std::shared_ptr<tom::DeviceBuffer> deviceBuffer = {};
 
         // 
-        vk::DescriptorBufferInfo bufferInfo = { {}, 0ull, VK_WHOLE_SIZE };
+        vk::DescriptorBufferInfo bufferInfo = { vk::Buffer{}, 0ull, VK_WHOLE_SIZE };
         vk::DeviceAddress address = 0ull;
 
     public: // 
@@ -50,14 +50,14 @@ namespace tom {
         };
 
         // 
-        vk::DescriptorBufferInfo& getBufferInfo() { if (deviceBuffer) { bufferInfo.buffer = deviceBuffer->getBuffer(); }; return bufferInfo; };
-        vk::DeviceSize& getOffset() { return bufferInfo.offset; };
-        vk::DeviceSize& getRange() { return bufferInfo.range; };
+        virtual vk::DescriptorBufferInfo& getBufferInfo() { if (deviceBuffer) { bufferInfo.buffer = deviceBuffer->getBuffer(); }; return bufferInfo; };
+        virtual vk::DeviceSize& getOffset() { return bufferInfo.offset; };
+        virtual vk::DeviceSize& getRange() { return bufferInfo.range; };
 
         //
-        const vk::DescriptorBufferInfo& getBufferInfo() const { return bufferInfo; };
-        const vk::DeviceSize& getOffset() const { return bufferInfo.offset; };
-        const vk::DeviceSize& getRange() const { return bufferInfo.range; };
+        virtual const vk::DescriptorBufferInfo& getBufferInfo() const { return bufferInfo; };
+        virtual const vk::DeviceSize& getOffset() const { return bufferInfo.offset; };
+        virtual const vk::DeviceSize& getRange() const { return bufferInfo.range; };
     };
 
 };

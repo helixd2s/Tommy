@@ -60,12 +60,12 @@ namespace tom {
         };
 
         // 
-        std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices();
-        vk::Instance& getInstance() { return instance; };
+        virtual std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices();
+        virtual vk::Instance& getInstance() { return instance; };
 
         // 
-        const std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices() const;
-        const vk::Instance& getInstance() const { return instance; };
+        virtual const std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices() const;
+        virtual const vk::Instance& getInstance() const { return instance; };
     };
 
     // 
@@ -87,6 +87,10 @@ namespace tom {
         PhysicalDevicePropertiesChain propertiesChain = {};
         PhysicalDeviceFeaturesChain featuresChain = {};
 
+        //
+        vk::PhysicalDeviceMemoryProperties2 memoryProperties = {};
+        std::vector<vk::QueueFamilyProperties2> queueFamilyProperties = {};
+
     public: // 
         PhysicalDevice(const std::shared_ptr<tom::Instance>& instance, const vk::PhysicalDevice& physicalDevice): instance(instance), physicalDevice(physicalDevice) {
             this->properties = PhysicalDeviceProperties{};
@@ -99,22 +103,32 @@ namespace tom {
             // 
             physicalDevice.getProperties2(this->propertiesChain = propertiesChain);
             physicalDevice.getFeatures2(this->featuresChain = featuresChain);
+
+            //
+            memoryProperties = physicalDevice.getMemoryProperties2();
+            queueFamilyProperties = physicalDevice.getQueueFamilyProperties2();
         };
 
-        //
-        PhysicalDeviceProperties& getPropertiesDefined() { return properties; };
-        PhysicalDeviceFeatures& getFeaturesDefined() { return features; };
-        PhysicalDevicePropertiesChain& getPropertiesChainDefined() { return propertiesChain; };
-        PhysicalDeviceFeaturesChain& getFeaturesChainDefined() { return featuresChain; };
-        vk::PhysicalDevice& getPhysicalDevice() { return physicalDevice; };
+        // 
+        virtual std::shared_ptr<Instance> getInstance() { return instance.lock(); };
+        virtual std::vector<vk::QueueFamilyProperties2>& getQueueFamilyProperties() { return queueFamilyProperties; };
+        virtual PhysicalDeviceProperties& getPropertiesDefined() { return properties; };
+        virtual PhysicalDeviceFeatures& getFeaturesDefined() { return features; };
+        virtual PhysicalDevicePropertiesChain& getPropertiesChainDefined() { return propertiesChain; };
+        virtual PhysicalDeviceFeaturesChain& getFeaturesChainDefined() { return featuresChain; };
+        virtual vk::PhysicalDevice& getPhysicalDevice() { return physicalDevice; };
+        virtual vk::PhysicalDeviceMemoryProperties2& getMemoryPropertiesDefined() { return memoryProperties; };
 
         // 
-        const PhysicalDeviceProperties& getPropertiesDefined() const { return properties; };
-        const PhysicalDeviceFeatures& getFeaturesDefined() const { return features; };
-        const PhysicalDevicePropertiesChain& getPropertiesChainDefined() const { return propertiesChain; };
-        const PhysicalDeviceFeaturesChain& getFeaturesChainDefined() const { return featuresChain; };
-        const vk::PhysicalDevice& getPhysicalDevice() const { return physicalDevice; };
-        
+        virtual std::shared_ptr<Instance> getInstance() const { return instance.lock(); };
+        virtual const std::vector<vk::QueueFamilyProperties2>& getQueueFamilyProperties() const { return queueFamilyProperties; };
+        virtual const PhysicalDeviceProperties& getPropertiesDefined() const { return properties; };
+        virtual const PhysicalDeviceFeatures& getFeaturesDefined() const { return features; };
+        virtual const PhysicalDevicePropertiesChain& getPropertiesChainDefined() const { return propertiesChain; };
+        virtual const PhysicalDeviceFeaturesChain& getFeaturesChainDefined() const { return featuresChain; };
+        virtual const vk::PhysicalDevice& getPhysicalDevice() const { return physicalDevice; };
+        virtual const vk::PhysicalDeviceMemoryProperties2& getMemoryPropertiesDefined() const { return memoryProperties; };
+
     };
 
 
@@ -134,6 +148,5 @@ namespace tom {
         return physicalDevices;
     };
 
-    
 
 };
