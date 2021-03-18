@@ -26,18 +26,22 @@ namespace tom {
 
     public: // 
         Queue(const std::shared_ptr<tom::Device>& device, const vk::Queue& queue = {}, const uint32_t& queueFamilyIndex = 0u) : device(device), queue(queue), queueFamilyIndex(queueFamilyIndex) {
-            
+            this->commandPool = this->device.lock()->getDevice().createCommandPool(vk::CommandPoolCreateInfo{ .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = queueFamilyIndex });
         };
 
         // 
-        const uint32_t& getQueueFamilyIndex() const { return queueFamilyIndex; };
-        const vk::Queue& getQueue() const { return queue; };
-        const vk::CommandPool& getCommandPool() const { return commandPool; };
+        virtual inline const uint32_t& getQueueFamilyIndex() const { return queueFamilyIndex; };
+        virtual inline const vk::Queue& getQueue() const { return queue; };
+        virtual inline const vk::CommandPool& getCommandPool() const { return commandPool; };
 
         // 
-        uint32_t& getQueueFamilyIndex() { return queueFamilyIndex; };
-        vk::Queue& getQueue() { return queue; };
-        vk::CommandPool& getCommandPool() { return commandPool; };
+        virtual inline uint32_t& getQueueFamilyIndex() { return queueFamilyIndex; };
+        virtual inline vk::Queue& getQueue() { return queue; };
+        virtual inline vk::CommandPool& getCommandPool() { return commandPool; };
+
+        //
+        virtual vk::Fence submitCmds(const std::vector<vk::CommandBuffer>& commandBuffers, vk::SubmitInfo2KHR submitInfo = vk::SubmitInfo2KHR{}) const;
+        virtual std::future<vk::Result> submitOnce(const std::function<void(const vk::CommandBuffer&)>& submitCommand, const vk::SubmitInfo2KHR& submitInfo = vk::SubmitInfo2KHR{}) const;
     };
 
     // 
@@ -103,19 +107,67 @@ namespace tom {
         };
 
         // 
-        virtual std::vector<uint32_t>& getQueueFamilyIndices() { return queueFamilyIndices; };
-        virtual std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) { return queues.at(queueFamilyIndex)[index]; };
-        virtual std::shared_ptr<Instance>& getInstance() { return instance; };
+        virtual inline vk::Device& getDevice() { return device; };
+        virtual inline std::vector<uint32_t>& getQueueFamilyIndices() { return queueFamilyIndices; };
+        virtual inline std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) { return queues.at(queueFamilyIndex)[index]; };
+        virtual inline std::shared_ptr<Instance>& getInstance() { return instance; };
         virtual std::shared_ptr<DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer);
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory);
 
         // 
-        virtual const std::vector<uint32_t>& getQueueFamilyIndices() const { return queueFamilyIndices; };
-        virtual const std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) const { return queues.at(queueFamilyIndex)[index]; };
-        virtual const std::shared_ptr<Instance>& getInstance() const { return instance; };
+        virtual inline const vk::Device& getDevice() const { return device; };
+        virtual inline const std::vector<uint32_t>& getQueueFamilyIndices() const { return queueFamilyIndices; };
+        virtual inline const std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) const { return queues.at(queueFamilyIndex)[index]; };
+        virtual inline const std::shared_ptr<Instance>& getInstance() const { return instance; };
         virtual std::shared_ptr<DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer) const;
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) const;
+        
+        
+    };
 
+
+
+    //
+    vk::Fence Queue::submitCmds(const std::vector<vk::CommandBuffer>& commandBuffers, vk::SubmitInfo2KHR submitInfo) const {
+        if (commandBuffers.size() <= 0) return vk::Fence{};
+
+        // 
+        vk::Fence fence = this->device.lock()->getDevice().createFence(vk::FenceCreateInfo{});
+
+        // 
+        std::vector<vk::CommandBufferSubmitInfoKHR> commandInfos = {};
+        for (auto& commandBuffer : commandBuffers) {
+            commandInfos.push_back(vk::CommandBufferSubmitInfoKHR{
+                .commandBuffer = commandBuffer,
+                .deviceMask = ~0x0
+            });
+        };
+
+        // 
+        submitInfo.commandBufferInfoCount = commandInfos.size();
+        submitInfo.pCommandBufferInfos = commandInfos.data();
+
+        // 
+        this->queue.submit2KHR(submitInfo, fence);
+        return fence;
+    };
+
+    //
+    std::future<vk::Result> Queue::submitOnce(const std::function<void(const vk::CommandBuffer&)>& cmdFn, const vk::SubmitInfo2KHR& submitInfo) const {
+        auto vkDevice = this->device.lock()->getDevice();
+        auto commandBuffers = vkDevice.allocateCommandBuffers(vk::CommandBufferAllocateInfo{
+            .commandPool = commandPool,
+            .level = vk::CommandBufferLevel::ePrimary,
+            .commandBufferCount = 1
+        });
+        cmdFn(commandBuffers[0]); // execute command constructor
+        auto fence = this->submitCmds(commandBuffers, submitInfo);
+        return std::async(std::launch::async | std::launch::deferred, [this, fence, commandBuffers, vkDevice](){
+            auto result = vkDevice.waitForFences({fence}, true, 30ull * 1000ull * 1000ull * 1000ull);
+            vkDevice.destroyFence(fence);
+            vkDevice.freeCommandBuffers(commandPool, commandBuffers);
+            return result;
+        });
     };
 
 };

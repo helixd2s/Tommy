@@ -23,12 +23,12 @@ namespace tom {
         };
 
         // 
-        virtual std::shared_ptr<tom::Device>& getDevice() { return device; };
-        virtual vk::DeviceMemory& getMemory() { return memory; };
+        virtual inline std::shared_ptr<tom::Device>& getDevice() { return device; };
+        virtual inline vk::DeviceMemory& getMemory() { return memory; };
 
         //
-        virtual const std::shared_ptr<tom::Device>& getDevice() const { return device; };
-        virtual const vk::DeviceMemory& getMemory() const { return memory; };
+        virtual inline const std::shared_ptr<tom::Device>& getDevice() const { return device; };
+        virtual inline const vk::DeviceMemory& getMemory() const { return memory; };
     };
 
     // 
@@ -45,12 +45,12 @@ namespace tom {
         };
 
         // 
-        virtual std::shared_ptr<tom::DeviceMemory>& getDeviceMemory() { return deviceMemory; };
-        virtual vk::DeviceSize& getOffset() { return memoryOffset; };
+        virtual inline std::shared_ptr<tom::DeviceMemory>& getDeviceMemory() { return deviceMemory; };
+        virtual inline vk::DeviceSize& getOffset() { return memoryOffset; };
 
         // 
-        virtual const std::shared_ptr<tom::DeviceMemory>& getDeviceMemory() const { return deviceMemory; };
-        virtual const vk::DeviceSize& getOffset() const { return memoryOffset; };
+        virtual inline const std::shared_ptr<tom::DeviceMemory>& getDeviceMemory() const { return deviceMemory; };
+        virtual inline const vk::DeviceSize& getOffset() const { return memoryOffset; };
     };
 
 };

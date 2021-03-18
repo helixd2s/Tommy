@@ -111,23 +111,23 @@ namespace tom {
 
         // 
         virtual std::shared_ptr<Instance> getInstance() { return instance.lock(); };
-        virtual std::vector<vk::QueueFamilyProperties2>& getQueueFamilyProperties() { return queueFamilyProperties; };
-        virtual PhysicalDeviceProperties& getPropertiesDefined() { return properties; };
-        virtual PhysicalDeviceFeatures& getFeaturesDefined() { return features; };
-        virtual PhysicalDevicePropertiesChain& getPropertiesChainDefined() { return propertiesChain; };
-        virtual PhysicalDeviceFeaturesChain& getFeaturesChainDefined() { return featuresChain; };
-        virtual vk::PhysicalDevice& getPhysicalDevice() { return physicalDevice; };
-        virtual vk::PhysicalDeviceMemoryProperties2& getMemoryPropertiesDefined() { return memoryProperties; };
+        virtual inline std::vector<vk::QueueFamilyProperties2>& getQueueFamilyProperties() { return queueFamilyProperties; };
+        virtual inline PhysicalDeviceProperties& getPropertiesDefined() { return properties; };
+        virtual inline PhysicalDeviceFeatures& getFeaturesDefined() { return features; };
+        virtual inline PhysicalDevicePropertiesChain& getPropertiesChainDefined() { return propertiesChain; };
+        virtual inline PhysicalDeviceFeaturesChain& getFeaturesChainDefined() { return featuresChain; };
+        virtual inline vk::PhysicalDevice& getPhysicalDevice() { return physicalDevice; };
+        virtual inline vk::PhysicalDeviceMemoryProperties2& getMemoryPropertiesDefined() { return memoryProperties; };
 
         // 
         virtual std::shared_ptr<Instance> getInstance() const { return instance.lock(); };
-        virtual const std::vector<vk::QueueFamilyProperties2>& getQueueFamilyProperties() const { return queueFamilyProperties; };
-        virtual const PhysicalDeviceProperties& getPropertiesDefined() const { return properties; };
-        virtual const PhysicalDeviceFeatures& getFeaturesDefined() const { return features; };
-        virtual const PhysicalDevicePropertiesChain& getPropertiesChainDefined() const { return propertiesChain; };
-        virtual const PhysicalDeviceFeaturesChain& getFeaturesChainDefined() const { return featuresChain; };
-        virtual const vk::PhysicalDevice& getPhysicalDevice() const { return physicalDevice; };
-        virtual const vk::PhysicalDeviceMemoryProperties2& getMemoryPropertiesDefined() const { return memoryProperties; };
+        virtual inline const std::vector<vk::QueueFamilyProperties2>& getQueueFamilyProperties() const { return queueFamilyProperties; };
+        virtual inline const PhysicalDeviceProperties& getPropertiesDefined() const { return properties; };
+        virtual inline const PhysicalDeviceFeatures& getFeaturesDefined() const { return features; };
+        virtual inline const PhysicalDevicePropertiesChain& getPropertiesChainDefined() const { return propertiesChain; };
+        virtual inline const PhysicalDeviceFeaturesChain& getFeaturesChainDefined() const { return featuresChain; };
+        virtual inline const vk::PhysicalDevice& getPhysicalDevice() const { return physicalDevice; };
+        virtual inline const vk::PhysicalDeviceMemoryProperties2& getMemoryPropertiesDefined() const { return memoryProperties; };
 
     };
 

@@ -23,14 +23,14 @@ namespace tom {
         };
 
         // 
-        virtual std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() { return memoryAllocation; };
-        virtual std::shared_ptr<tom::Device>& getDevice() { return device; };
-        virtual vk::Buffer& getBuffer() { return buffer; };
+        virtual inline std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() { return memoryAllocation; };
+        virtual inline std::shared_ptr<tom::Device>& getDevice() { return device; };
+        virtual inline vk::Buffer& getBuffer() { return buffer; };
 
         // 
-        virtual const std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() const { return memoryAllocation; };
-        virtual const std::shared_ptr<tom::Device>& getDevice() const { return device; };
-        virtual const vk::Buffer& getBuffer() const { return buffer; };
+        virtual inline const std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() const { return memoryAllocation; };
+        virtual inline const std::shared_ptr<tom::Device>& getDevice() const { return device; };
+        virtual inline const vk::Buffer& getBuffer() const { return buffer; };
     };
 
     // 
@@ -50,14 +50,14 @@ namespace tom {
         };
 
         // 
-        virtual vk::DescriptorBufferInfo& getBufferInfo() { if (deviceBuffer) { bufferInfo.buffer = deviceBuffer->getBuffer(); }; return bufferInfo; };
-        virtual vk::DeviceSize& getOffset() { return bufferInfo.offset; };
-        virtual vk::DeviceSize& getRange() { return bufferInfo.range; };
+        virtual inline vk::DescriptorBufferInfo& getBufferInfo() { if (deviceBuffer) { bufferInfo.buffer = deviceBuffer->getBuffer(); }; return bufferInfo; };
+        virtual inline vk::DeviceSize& getOffset() { return bufferInfo.offset; };
+        virtual inline vk::DeviceSize& getRange() { return bufferInfo.range; };
 
         //
-        virtual const vk::DescriptorBufferInfo& getBufferInfo() const { return bufferInfo; };
-        virtual const vk::DeviceSize& getOffset() const { return bufferInfo.offset; };
-        virtual const vk::DeviceSize& getRange() const { return bufferInfo.range; };
+        virtual inline const vk::DescriptorBufferInfo& getBufferInfo() const { return bufferInfo; };
+        virtual inline const vk::DeviceSize& getOffset() const { return bufferInfo.offset; };
+        virtual inline const vk::DeviceSize& getRange() const { return bufferInfo.range; };
     };
 
 };
