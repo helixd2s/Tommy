@@ -50,11 +50,13 @@ namespace tom {
         };
 
         // 
+        virtual inline std::shared_ptr<tom::DeviceBuffer>& getDeviceBuffer() { return deviceBuffer; };
         virtual inline vk::DescriptorBufferInfo& getBufferInfo() { if (deviceBuffer) { bufferInfo.buffer = deviceBuffer->getBuffer(); }; return bufferInfo; };
         virtual inline vk::DeviceSize& getOffset() { return bufferInfo.offset; };
         virtual inline vk::DeviceSize& getRange() { return bufferInfo.range; };
 
         //
+        virtual inline const std::shared_ptr<tom::DeviceBuffer>& getDeviceBuffer() const { return deviceBuffer; };
         virtual inline const vk::DescriptorBufferInfo& getBufferInfo() const { return bufferInfo; };
         virtual inline const vk::DeviceSize& getOffset() const { return bufferInfo.offset; };
         virtual inline const vk::DeviceSize& getRange() const { return bufferInfo.range; };

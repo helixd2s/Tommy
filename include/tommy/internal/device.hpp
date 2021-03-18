@@ -8,9 +8,23 @@
 namespace tom {
 
     // 
-    class DescriptorSetSource: public std::enable_shared_from_this<DescriptorSetSource> {
+    class DescriptorSetSource: public std::enable_shared_from_this<DescriptorSetSource> { public:
         std::vector<vk::DescriptorBufferInfo> buffers = {};
         std::vector<vk::DescriptorImageInfo> textures2d = {};
+    };
+
+    // 
+    class DescriptorSetLayouts: public std::enable_shared_from_this<DescriptorSetLayouts> { public:
+        vk::DescriptorSetLayout buffers = {};
+        vk::DescriptorSetLayout textures = {};
+        vk::DescriptorSetLayout images = {};
+    };
+
+    // 
+    class DescriptorSet: public std::enable_shared_from_this<DescriptorSet> { public:
+        vk::DescriptorSet buffers = {};
+        vk::DescriptorSet textures = {};
+        vk::DescriptorSet images = {};
     };
 
     // 
@@ -52,6 +66,7 @@ namespace tom {
 
         // 
         vk::Device device = {};
+        vk::DescriptorPool descriptorPool = {};
 
         // 
         std::unordered_map<uintptr_t, std::weak_ptr<Buffer>> bufferAllocations = {};
@@ -60,15 +75,18 @@ namespace tom {
 
         // 
         std::shared_ptr<tom::DescriptorSetSource> descriptions = {};
+        std::shared_ptr<tom::DescriptorSetLayouts> descriptorSetLayouts = {};
+        std::shared_ptr<tom::DescriptorSet> descriptorSets = {};
 
         // 
         std::unordered_map<uint32_t, std::vector<std::shared_ptr<Queue>>> queues = {};
         std::vector<uint32_t> queueFamilyIndices = {};
 
-
     public: // 
         Device(const std::shared_ptr<tom::Instance>& instance, const std::shared_ptr<PhysicalDevice>& physical): instance(instance), physical(physical) { // 
             this->descriptions = std::make_shared<tom::DescriptorSetSource>();
+            this->descriptorSets = std::make_shared<tom::DescriptorSet>();
+            this->descriptorSetLayouts = std::make_shared<tom::DescriptorSetLayouts>();
 
             // 
             std::vector<vk::DeviceQueueCreateInfo> queue_create_info = {};
@@ -104,10 +122,36 @@ namespace tom {
                     queues[queue_create_info[i].queueFamilyIndex].push_back(std::make_shared<Queue>(shared_from_this(), this->device.getQueue(queueFamilyIndex, j), queueFamilyIndex));
                 };
             };
+
+            // 
+            auto dps = std::vector<vk::DescriptorPoolSize>{
+                vk::DescriptorPoolSize{.type = vk::DescriptorType::eCombinedImageSampler, .descriptorCount = 256u },
+                vk::DescriptorPoolSize{.type = vk::DescriptorType::eSampledImage, .descriptorCount = 256u },
+                vk::DescriptorPoolSize{.type = vk::DescriptorType::eSampler, .descriptorCount = 256u },
+                vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageBuffer, .descriptorCount = 1024u },
+                vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformBuffer, .descriptorCount = 256u },
+                vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageTexelBuffer, .descriptorCount = 256u },
+                vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformTexelBuffer, .descriptorCount = 256u },
+                vk::DescriptorPoolSize{.type = vk::DescriptorType::eAccelerationStructureKHR, .descriptorCount = 256u },
+            };
+
+            // 
+            this->descriptorPool = this->device.createDescriptorPool(vk::StructureChain<vk::DescriptorPoolCreateInfo, vk::DescriptorPoolInlineUniformBlockCreateInfoEXT>(
+                vk::DescriptorPoolCreateInfo{
+                    .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind,
+                    .maxSets = 256u,
+                    .poolSizeCount = dps.size(),
+                    .pPoolSizes = dps.data()
+                }, 
+                vk::DescriptorPoolInlineUniformBlockCreateInfoEXT{
+                    .maxInlineUniformBlockBindings = 32u
+                }
+            ).get<vk::DescriptorPoolCreateInfo>());
         };
 
         // 
         virtual inline vk::Device& getDevice() { return device; };
+        virtual inline vk::DescriptorPool& getDescriptorPool() { return descriptorPool; };
         virtual inline std::vector<uint32_t>& getQueueFamilyIndices() { return queueFamilyIndices; };
         virtual inline std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) { return queues.at(queueFamilyIndex)[index]; };
         virtual inline std::shared_ptr<Instance>& getInstance() { return instance; };
@@ -116,13 +160,12 @@ namespace tom {
 
         // 
         virtual inline const vk::Device& getDevice() const { return device; };
+        virtual inline const vk::DescriptorPool& getDescriptorPool() const { return descriptorPool; };
         virtual inline const std::vector<uint32_t>& getQueueFamilyIndices() const { return queueFamilyIndices; };
         virtual inline const std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) const { return queues.at(queueFamilyIndex)[index]; };
         virtual inline const std::shared_ptr<Instance>& getInstance() const { return instance; };
         virtual std::shared_ptr<DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer) const;
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) const;
-        
-        
     };
 
 

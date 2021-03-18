@@ -21,6 +21,14 @@ namespace tom {
         vk::PhysicalDeviceProperties2 properties = {};
     };
 
+    //
+    struct SurfaceProperties {
+        vk::Bool32 supported = false;
+        vk::SurfaceCapabilities2KHR capabilities = {};
+        std::vector<vk::PresentModeKHR> presentModes = {};
+        std::vector<vk::SurfaceFormat2KHR> formats = {};
+    };
+
     // 
     class Instance: public std::enable_shared_from_this<Instance> {
     protected:  // 
@@ -107,6 +115,20 @@ namespace tom {
             //
             memoryProperties = physicalDevice.getMemoryProperties2();
             queueFamilyProperties = physicalDevice.getQueueFamilyProperties2();
+        };
+
+        //
+        virtual std::unordered_map<uint32_t, SurfaceProperties> getSurfaceInfo(const vk::SurfaceKHR& surface) const {
+            std::unordered_map<uint32_t, SurfaceProperties> surfaceInfo = {};
+            uint32_t I=0u; for (auto& property : queueFamilyProperties) { const uint32_t i = I++;
+                SurfaceProperties props = {};
+                props.supported = physicalDevice.getSurfaceSupportKHR(i, surface);
+                props.capabilities = physicalDevice.getSurfaceCapabilities2KHR(vk::PhysicalDeviceSurfaceInfo2KHR{ .surface = surface });
+                props.formats = physicalDevice.getSurfaceFormats2KHR(vk::PhysicalDeviceSurfaceInfo2KHR{ .surface = surface });
+                props.presentModes = physicalDevice.getSurfacePresentModesKHR(surface);
+                surfaceInfo[i] = props;
+            };
+            return surfaceInfo;
         };
 
         // 
