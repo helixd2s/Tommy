@@ -44,6 +44,11 @@ namespace tom {
 
     public: // 
         BufferAllocation(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer, const vk::DeviceSize& offset = 0ull, const vk::DeviceSize& range = VK_WHOLE_SIZE): deviceBuffer(deviceBuffer) {
+            this->constructor(offset, range);
+        };
+
+        //
+        virtual void constructor(const vk::DeviceSize& offset = 0ull, const vk::DeviceSize& range = VK_WHOLE_SIZE) {
             if (deviceBuffer) { bufferInfo.buffer = deviceBuffer->getBuffer(); };
             bufferInfo.offset = offset;
             bufferInfo.range = range;

@@ -29,17 +29,41 @@ namespace tom {
         std::vector<vk::SurfaceFormat2KHR> formats = {};
     };
 
+    //
+    class InstanceStatic: public std::enable_shared_from_this<InstanceStatic> { public: 
+        bool initialized = false;
+        vk::DispatchLoaderDynamic dispatch = {};
+        std::unordered_map<uintptr_t, std::shared_ptr<Instance>> instanceMap;
+        std::vector<vk::ExtensionProperties> extensionProperties = {};
+        std::vector<vk::LayerProperties> layerProperties = {};
+        virtual void initialize();
+        //std::function<void()> initialize = {};
+
+        InstanceStatic() {
+            this->initialize();
+        };
+    };
+
     // 
     class Instance: public std::enable_shared_from_this<Instance> {
     protected:  // 
         vk::Instance instance = {};
+        vk::DispatchLoaderDynamic dispatch = {};
+
+        // 
         std::unordered_map<uintptr_t, std::weak_ptr<Device>> deviceMap = {};
 
         // 
         std::vector<std::shared_ptr<PhysicalDevice>> physicalDevices = {};
 
+        //
+        static std::shared_ptr<InstanceStatic> context;
+
     public: // 
-        Instance() {
+        Instance() { this->constructor(); };
+
+        //
+        virtual void constructor() {
             vk::ApplicationInfo application_info = vk::ApplicationInfo{
                 .pApplicationName = "Tommy Based App",
                 .applicationVersion = VK_MAKE_VERSION(1,0,0),
@@ -48,23 +72,46 @@ namespace tom {
                 .apiVersion = VK_MAKE_VERSION(1,2,0)
             };
 
+            // 
+            std::vector<const char*> preferedLayers = {};
+            std::vector<const char*> preferedExtensions = { "VK_KHR_surface","VK_KHR_win32_surface" };
+
 #ifdef NDEBUG
-            std::vector<const char*> desired_validation_layers = {};
-            std::vector<const char*> desired_instance_level_extensions = { "VK_KHR_surface","VK_KHR_win32_surface" };
-#else
-            std::vector<const char*> desired_validation_layers = { "VK_LAYER_LUNARG_standard_validation" };
-            std::vector<const char*> desired_instance_level_extensions = { "VK_KHR_surface","VK_KHR_win32_surface","VK_EXT_debug_report" };
+            preferedLayers.push_back("VK_LAYER_LUNARG_standard_validation");
+            preferedExtensions.push_back("VK_EXT_debug_report");
 #endif
 
-            vk::InstanceCreateInfo instance_create_info = vk::InstanceCreateInfo{
-                .pApplicationInfo = &application_info,
-                .enabledLayerCount = desired_validation_layers.size(),
-                .ppEnabledLayerNames = desired_validation_layers.data(),
-                .enabledExtensionCount = desired_instance_level_extensions.size(),
-                .ppEnabledExtensionNames = desired_instance_level_extensions.data()
+            //
+            if (!context) { context = std::make_shared<InstanceStatic>(); };
+
+            // 
+            for (uintptr_t i=0;i<preferedExtensions.size();i++) {
+                const auto& name = preferedExtensions[i];
+                bool found = false;
+                for (auto& prop : context->extensionProperties) {
+                    if (found = found || (strcmp(name, prop.extensionName) == 0)) break;
+                };
+                if (!found) { preferedExtensions.erase(preferedExtensions.begin()+i); };
             };
 
-            instance = vk::createInstance(instance_create_info);
+            // 
+            for (uintptr_t i=0;i<preferedLayers.size();i++) {
+                const auto& name = preferedLayers[i];
+                bool found = false;
+                for (auto& prop : context->layerProperties) {
+                    if (found = found || (strcmp(name, prop.layerName) == 0)) break;
+                };
+                if (!found) { preferedLayers.erase(preferedLayers.begin()+i); };
+            };
+
+            // 
+            this->dispatch = vk::DispatchLoaderDynamic(this->instance = vk::createInstance(vk::InstanceCreateInfo{
+                .pApplicationInfo = &application_info,
+                .enabledLayerCount = preferedLayers.size(),
+                .ppEnabledLayerNames = preferedLayers.data(),
+                .enabledExtensionCount = preferedExtensions.size(),
+                .ppEnabledExtensionNames = preferedExtensions.data()
+            }), vkGetInstanceProcAddr);
         };
 
         // 
@@ -76,8 +123,17 @@ namespace tom {
         virtual const vk::Instance& getInstance() const { return instance; };
     };
 
-    // 
-    std::unordered_map<uintptr_t, std::shared_ptr<Instance>> instanceMap = {};
+    //
+    void InstanceStatic::initialize() {
+        auto& self = *this;
+        if (!self.initialized) {
+            self.dispatch = vk::DispatchLoaderDynamic(vkGetInstanceProcAddr);
+            self.initialized = true;
+            self.instanceMap = {};
+            self.extensionProperties = vk::enumerateInstanceExtensionProperties();
+            self.layerProperties = vk::enumerateInstanceLayerProperties();
+        };
+    };
 
     // 
     class PhysicalDevice: public std::enable_shared_from_this<PhysicalDevice> {
@@ -98,9 +154,16 @@ namespace tom {
         //
         vk::PhysicalDeviceMemoryProperties2 memoryProperties = {};
         std::vector<vk::QueueFamilyProperties2> queueFamilyProperties = {};
+        std::vector<vk::ExtensionProperties> extensionProperties = {};
+        std::vector<vk::LayerProperties> layerProperties = {};
 
     public: // 
         PhysicalDevice(const std::shared_ptr<tom::Instance>& instance, const vk::PhysicalDevice& physicalDevice): instance(instance), physicalDevice(physicalDevice) {
+            this->constructor();
+        };
+
+        //
+        virtual void constructor() {
             this->properties = PhysicalDeviceProperties{};
             this->features = PhysicalDeviceFeatures{};
 
@@ -112,9 +175,11 @@ namespace tom {
             physicalDevice.getProperties2(this->propertiesChain = propertiesChain);
             physicalDevice.getFeatures2(this->featuresChain = featuresChain);
 
-            //
-            memoryProperties = physicalDevice.getMemoryProperties2();
-            queueFamilyProperties = physicalDevice.getQueueFamilyProperties2();
+            // 
+            this->memoryProperties = physicalDevice.getMemoryProperties2();
+            this->queueFamilyProperties = physicalDevice.getQueueFamilyProperties2();
+            this->extensionProperties = physicalDevice.enumerateDeviceExtensionProperties();
+            this->layerProperties = physicalDevice.enumerateDeviceLayerProperties();
         };
 
         //
@@ -140,6 +205,8 @@ namespace tom {
         virtual inline PhysicalDeviceFeaturesChain& getFeaturesChainDefined() { return featuresChain; };
         virtual inline vk::PhysicalDevice& getPhysicalDevice() { return physicalDevice; };
         virtual inline vk::PhysicalDeviceMemoryProperties2& getMemoryPropertiesDefined() { return memoryProperties; };
+        virtual inline std::vector<vk::ExtensionProperties>& getExtensionPropertiesDefined() { return extensionProperties; };
+        virtual inline std::vector<vk::LayerProperties>& getLayerPropertiesDefined() { return layerProperties; };
 
         // 
         virtual std::shared_ptr<Instance> getInstance() const { return instance.lock(); };
@@ -150,7 +217,8 @@ namespace tom {
         virtual inline const PhysicalDeviceFeaturesChain& getFeaturesChainDefined() const { return featuresChain; };
         virtual inline const vk::PhysicalDevice& getPhysicalDevice() const { return physicalDevice; };
         virtual inline const vk::PhysicalDeviceMemoryProperties2& getMemoryPropertiesDefined() const { return memoryProperties; };
-
+        virtual inline const std::vector<vk::ExtensionProperties>& getExtensionPropertiesDefined() const { return extensionProperties; };
+        virtual inline const std::vector<vk::LayerProperties>& getLayerPropertiesDefined() const { return layerProperties; };
     };
 
 

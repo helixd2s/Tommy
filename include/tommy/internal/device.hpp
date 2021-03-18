@@ -40,6 +40,11 @@ namespace tom {
 
     public: // 
         Queue(const std::shared_ptr<tom::Device>& device, const vk::Queue& queue = {}, const uint32_t& queueFamilyIndex = 0u) : device(device), queue(queue), queueFamilyIndex(queueFamilyIndex) {
+            this->constructor();
+        };
+
+        //
+        virtual void constructor() {
             this->commandPool = this->device.lock()->getDevice().createCommandPool(vk::CommandPoolCreateInfo{ .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = queueFamilyIndex });
         };
 
@@ -67,6 +72,7 @@ namespace tom {
         // 
         vk::Device device = {};
         vk::DescriptorPool descriptorPool = {};
+        vk::DispatchLoaderDynamic dispatch = {};
 
         // 
         std::unordered_map<uintptr_t, std::weak_ptr<Buffer>> bufferAllocations = {};
@@ -84,13 +90,48 @@ namespace tom {
 
     public: // 
         Device(const std::shared_ptr<tom::Instance>& instance, const std::shared_ptr<PhysicalDevice>& physical): instance(instance), physical(physical) { // 
+            this->constructor();
+        };
+
+        // 
+        virtual void constructor() {
             this->descriptions = std::make_shared<tom::DescriptorSetSource>();
             this->descriptorSets = std::make_shared<tom::DescriptorSet>();
             this->descriptorSetLayouts = std::make_shared<tom::DescriptorSetLayouts>();
 
             // 
-            std::vector<vk::DeviceQueueCreateInfo> queue_create_info = {};
-            std::vector<const char*> desired_device_level_extensions = { "VK_KHR_swapchain", "VK_KHR_buffer_device_address" };
+            std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos = {};
+
+            // 
+            std::vector<const char*> preferedLayers = {};
+            std::vector<const char*> preferedExtensions = { "VK_KHR_swapchain", "VK_KHR_buffer_device_address" };
+
+#ifdef NDEBUG
+            preferedLayers.push_back("VK_LAYER_LUNARG_standard_validation");
+            preferedExtensions.push_back("VK_EXT_debug_report");
+#endif
+
+            // 
+            const auto& extensions = physical->getExtensionPropertiesDefined();
+            for (uintptr_t i=0;i<preferedExtensions.size();i++) {
+                const auto& name = preferedExtensions[i];
+                bool found = false;
+                for (auto& prop : extensions) {
+                    if (found = found || (strcmp(name, prop.extensionName) == 0)) break;
+                };
+                if (!found) { preferedExtensions.erase(preferedExtensions.begin()+i); };
+            };
+
+            // 
+            const auto& layers = physical->getLayerPropertiesDefined();
+            for (uintptr_t i=0;i<preferedLayers.size();i++) {
+                const auto& name = preferedLayers[i];
+                bool found = false;
+                for (auto& prop : layers) {
+                    if (found = found || (strcmp(name, prop.layerName) == 0)) break;
+                };
+                if (!found) { preferedLayers.erase(preferedLayers.begin()+i); };
+            };
 
             // 
             auto& queueFamilyProperties = physical->getQueueFamilyProperties();
@@ -98,7 +139,7 @@ namespace tom {
                 std::vector<float> queue_priorities = { 1.f }; // queues per every family
                 if (property.queueFamilyProperties.queueFlags & vk::QueueFlagBits::eCompute) {
                     queues[i] = std::vector<std::shared_ptr<Queue>>{};
-                    queue_create_info.push_back(vk::DeviceQueueCreateInfo{
+                    queueCreateInfos.push_back(vk::DeviceQueueCreateInfo{
                         .queueFamilyIndex = i,
                         .queueCount = queue_priorities.size(),
                         .pQueuePriorities = queue_priorities.data()
@@ -108,18 +149,21 @@ namespace tom {
             };
 
             // 
-            this->device = this->physical->getPhysicalDevice().createDevice(vk::DeviceCreateInfo{
-                .queueCreateInfoCount = queue_create_info.size(),
-                .pQueueCreateInfos = queue_create_info.data(),
-                .enabledExtensionCount = desired_device_level_extensions.size(),
-                .ppEnabledExtensionNames = desired_device_level_extensions.data()
-            });
+            this->dispatch = vk::DispatchLoaderDynamic( this->instance->getInstance(), vkGetInstanceProcAddr, this->device = this->physical->getPhysicalDevice().createDevice(vk::DeviceCreateInfo{
+                .queueCreateInfoCount = queueCreateInfos.size(),
+                .pQueueCreateInfos = queueCreateInfos.data(),
+                .enabledLayerCount = preferedLayers.size(),
+                .ppEnabledLayerNames = preferedLayers.data(),
+                .enabledExtensionCount = preferedExtensions.size(),
+                .ppEnabledExtensionNames = preferedExtensions.data()
+            }), vkGetDeviceProcAddr );
 
             // 
-            for (uint32_t i=0u;i<queue_create_info.size();i++) {
-                const auto& queueFamilyIndex = queue_create_info[i].queueFamilyIndex;
-                for (uint32_t j=0;j<queue_create_info[i].queueCount;j++) {
-                    queues[queue_create_info[i].queueFamilyIndex].push_back(std::make_shared<Queue>(shared_from_this(), this->device.getQueue(queueFamilyIndex, j), queueFamilyIndex));
+            for (uint32_t i=0u;i<queueCreateInfos.size();i++) {
+                const auto& info = queueCreateInfos[i];
+                const auto& queueFamilyIndex = info.queueFamilyIndex;
+                for (uint32_t j=0;j<info.queueCount;j++) {
+                    queues[info.queueFamilyIndex].push_back(std::make_shared<Queue>(shared_from_this(), this->device.getQueue(queueFamilyIndex, j), queueFamilyIndex));
                 };
             };
 
