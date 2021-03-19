@@ -16,10 +16,57 @@ namespace tom {
 
         // 
         vk::Buffer buffer = {};
+        void* allocation = nullptr;
 
     public: // 
-        DeviceBuffer(const std::shared_ptr<tom::Device>& device): device(device) {
+        DeviceBuffer(const std::shared_ptr<tom::Device>& device, const vk::Buffer& buffer = {}): device(device), buffer(buffer) {
             
+        };
+
+        // 
+        virtual void bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
+            if (memoryAllocation) {
+                this->memoryAllocation = memoryAllocation;
+                this->device->getDevice().bindBufferMemory2(vk::BindBufferMemoryInfo{
+                    .buffer = this->buffer,
+                    .memory = this->memoryAllocation->getDeviceMemory()->getMemory(),
+                    .memoryOffset = this->memoryAllocation->getOffset()
+                });
+            };
+        };
+
+        // 
+        virtual vk::Result create(const vk::BufferCreateInfo& info = {}, const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
+            vk::Result result = this->device->getDevice().createBuffer(info);
+            this->bindMemory(memoryAllocation);
+            return result;
+        };
+
+
+        // TODO: correct create info
+        virtual vk::Result vmaAllocate(const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
+            VmaAllocationCreateInfo allocCreateInfo = {};
+            allocCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+            if (allocCreateInfo.usage != VMA_MEMORY_USAGE_GPU_ONLY) { 
+                allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT; 
+            };
+
+            // 
+            vk::Result result = vk::Result(vmaCreateBuffer(this->device->getAllocator(), (const VkBufferCreateInfo*)&info, &allocCreateInfo, (VkBuffer*)&buffer, &((VmaAllocation&)this->allocation), nullptr));
+
+            // get allocation info
+            VmaAllocationInfo allocInfo = {};
+            vmaGetAllocationInfo(this->device->getAllocator(), ((VmaAllocation&)this->allocation), &allocInfo);
+
+            // wrap device memory
+            auto deviceMemory = this->device->getDeviceMemoryObject(allocInfo.deviceMemory);
+            this->memoryAllocation = std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset);
+            this->memoryAllocation->getAllocation() = allocation;
+            deviceMemory->getMapped() = allocInfo.pMappedData;
+            //deviceMemory->getAllocation() = allocation; // not sure...
+
+            //
+            return result;
         };
 
         // 

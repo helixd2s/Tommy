@@ -75,6 +75,9 @@ namespace tom {
         vk::DispatchLoaderDynamic dispatch = {};
 
         // 
+        VmaAllocator allocator = {};
+
+        // 
         std::unordered_map<uintptr_t, std::weak_ptr<Buffer>> bufferAllocations = {};
         std::unordered_map<vk::Buffer, std::weak_ptr<DeviceBuffer>> buffers = {};
         std::unordered_map<vk::DeviceMemory, std::weak_ptr<DeviceMemory>> memories = {};
@@ -159,14 +162,16 @@ namespace tom {
             };
 
             // 
-            this->dispatch = vk::DispatchLoaderDynamic( this->instance->getInstance(), vkGetInstanceProcAddr, this->device = this->physical->getPhysicalDevice().createDevice(vk::DeviceCreateInfo{
-                .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
-                .pQueueCreateInfos = queueCreateInfos.data(),
-                .enabledLayerCount = static_cast<uint32_t>(preferedLayers.size()),
-                .ppEnabledLayerNames = preferedLayers.data(),
-                .enabledExtensionCount = static_cast<uint32_t>(preferedExtensions.size()),
-                .ppEnabledExtensionNames = preferedExtensions.data()
-            }), vkGetDeviceProcAddr );
+            this->dispatch = vk::DispatchLoaderDynamic( this->instance->getInstance(), vkGetInstanceProcAddr, this->device = this->physical->getPhysicalDevice().createDevice(vk::StructureChain<vk::DeviceCreateInfo, vk::PhysicalDeviceFeatures2>{
+                vk::DeviceCreateInfo{
+                    .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
+                    .pQueueCreateInfos = queueCreateInfos.data(),
+                    .enabledLayerCount = static_cast<uint32_t>(preferedLayers.size()),
+                    .ppEnabledLayerNames = preferedLayers.data(),
+                    .enabledExtensionCount = static_cast<uint32_t>(preferedExtensions.size()),
+                    .ppEnabledExtensionNames = preferedExtensions.data()
+                }, this->physical->getFeaturesChainDefined().get<vk::PhysicalDeviceFeatures2>()
+            }.get<vk::DeviceCreateInfo>()), vkGetDeviceProcAddr );
 
             // 
             for (uint32_t i=0u;i<queueCreateInfos.size();i++) {
@@ -201,9 +206,53 @@ namespace tom {
                     .maxInlineUniformBlockBindings = 32u
                 }
             ).get<vk::DescriptorPoolCreateInfo>());
+
+            
+        };
+
+        //
+        virtual inline vk::Result createAllocator() { //
+            auto& instanceDispatch = this->instance->getDispatch();
+
+            //
+            VmaVulkanFunctions func = {};
+            func.vkAllocateMemory = this->dispatch.vkAllocateMemory;
+            func.vkBindBufferMemory = this->dispatch.vkBindBufferMemory;
+            func.vkBindBufferMemory2KHR = this->dispatch.vkBindBufferMemory2;
+            func.vkBindImageMemory = this->dispatch.vkBindImageMemory;
+            func.vkBindImageMemory2KHR = this->dispatch.vkBindImageMemory2;
+            func.vkCmdCopyBuffer = this->dispatch.vkCmdCopyBuffer;
+            func.vkCreateBuffer = this->dispatch.vkCreateBuffer;
+            func.vkCreateImage = this->dispatch.vkCreateImage;
+            func.vkDestroyBuffer = this->dispatch.vkDestroyBuffer;
+            func.vkDestroyImage = this->dispatch.vkDestroyImage;
+            func.vkFlushMappedMemoryRanges = this->dispatch.vkFlushMappedMemoryRanges;
+            func.vkFreeMemory = this->dispatch.vkFreeMemory;
+            func.vkGetBufferMemoryRequirements = this->dispatch.vkGetBufferMemoryRequirements;
+            func.vkGetBufferMemoryRequirements2KHR = this->dispatch.vkGetBufferMemoryRequirements2;
+            func.vkGetImageMemoryRequirements = this->dispatch.vkGetImageMemoryRequirements;
+            func.vkGetImageMemoryRequirements2KHR = this->dispatch.vkGetImageMemoryRequirements2;
+            func.vkGetPhysicalDeviceMemoryProperties = instanceDispatch.vkGetPhysicalDeviceMemoryProperties;
+            func.vkGetPhysicalDeviceMemoryProperties2KHR = instanceDispatch.vkGetPhysicalDeviceMemoryProperties2;
+            func.vkGetPhysicalDeviceProperties = instanceDispatch.vkGetPhysicalDeviceProperties;
+            func.vkInvalidateMappedMemoryRanges = this->dispatch.vkInvalidateMappedMemoryRanges;
+            func.vkMapMemory = this->dispatch.vkMapMemory;
+            func.vkUnmapMemory = this->dispatch.vkUnmapMemory;
+
+            // 
+            VmaAllocatorCreateInfo vmaInfo = {};
+            vmaInfo.pVulkanFunctions = &func;
+            vmaInfo.device = this->device;
+            vmaInfo.instance = this->instance->getInstance();
+            vmaInfo.physicalDevice = this->physical->getPhysicalDevice();
+            vmaInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+
+            // 
+            return vk::Result(vmaCreateAllocator(&vmaInfo, &this->allocator));
         };
 
         // 
+        virtual inline VmaAllocator& getAllocator() { return allocator; };
         virtual inline vk::DispatchLoaderDynamic& getDispatch() { return dispatch; };
         virtual inline vk::Device& getDevice() { return device; };
         virtual inline vk::DescriptorPool& getDescriptorPool() { return descriptorPool; };
@@ -214,6 +263,7 @@ namespace tom {
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory);
 
         // 
+        virtual inline const VmaAllocator& getAllocator() const { return allocator; };
         virtual inline const vk::DispatchLoaderDynamic& getDispatch() const { return dispatch; };
         virtual inline const vk::Device& getDevice() const { return device; };
         virtual inline const vk::DescriptorPool& getDescriptorPool() const { return descriptorPool; };

@@ -36,7 +36,7 @@ namespace tom {
         std::unordered_map<uintptr_t, std::shared_ptr<Instance>> instanceMap = {};
         std::vector<vk::ExtensionProperties> extensionProperties = {};
         std::vector<vk::LayerProperties> layerProperties = {};
-        
+
     public: 
         Context() {
             this->initialize();
