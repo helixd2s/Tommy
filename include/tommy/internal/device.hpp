@@ -106,6 +106,10 @@ namespace tom {
             std::vector<const char*> preferedLayers = {};
             std::vector<const char*> preferedExtensions = { "VK_KHR_swapchain", "VK_KHR_buffer_device_address" };
 
+            //
+            std::vector<const char*> excludedLayers = {};
+            std::vector<const char*> excludedExtensions = {};
+
 #ifdef NDEBUG
             preferedLayers.push_back("VK_LAYER_LUNARG_standard_validation");
             preferedExtensions.push_back("VK_EXT_debug_report");
@@ -119,7 +123,10 @@ namespace tom {
                 for (auto& prop : extensions) {
                     if (found = found || (strcmp(name, prop.extensionName) == 0)) break;
                 };
-                if (!found) { preferedExtensions.erase(preferedExtensions.begin()+i); };
+                if (!found) { 
+                    excludedExtensions.push_back(name);
+                    preferedExtensions.erase(preferedExtensions.begin()+i); 
+                };
             };
 
             // 
@@ -130,7 +137,10 @@ namespace tom {
                 for (auto& prop : layers) {
                     if (found = found || (strcmp(name, prop.layerName) == 0)) break;
                 };
-                if (!found) { preferedLayers.erase(preferedLayers.begin()+i); };
+                if (!found) { 
+                    excludedLayers.push_back(name);
+                    preferedLayers.erase(preferedLayers.begin()+i);
+                };
             };
 
             // 
@@ -141,7 +151,7 @@ namespace tom {
                     queues[i] = std::vector<std::shared_ptr<Queue>>{};
                     queueCreateInfos.push_back(vk::DeviceQueueCreateInfo{
                         .queueFamilyIndex = i,
-                        .queueCount = queue_priorities.size(),
+                        .queueCount = static_cast<uint32_t>(queue_priorities.size()),
                         .pQueuePriorities = queue_priorities.data()
                     });
                     queueFamilyIndices.push_back(i);
@@ -150,11 +160,11 @@ namespace tom {
 
             // 
             this->dispatch = vk::DispatchLoaderDynamic( this->instance->getInstance(), vkGetInstanceProcAddr, this->device = this->physical->getPhysicalDevice().createDevice(vk::DeviceCreateInfo{
-                .queueCreateInfoCount = queueCreateInfos.size(),
+                .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
                 .pQueueCreateInfos = queueCreateInfos.data(),
-                .enabledLayerCount = preferedLayers.size(),
+                .enabledLayerCount = static_cast<uint32_t>(preferedLayers.size()),
                 .ppEnabledLayerNames = preferedLayers.data(),
-                .enabledExtensionCount = preferedExtensions.size(),
+                .enabledExtensionCount = static_cast<uint32_t>(preferedExtensions.size()),
                 .ppEnabledExtensionNames = preferedExtensions.data()
             }), vkGetDeviceProcAddr );
 
@@ -184,7 +194,7 @@ namespace tom {
                 vk::DescriptorPoolCreateInfo{
                     .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind,
                     .maxSets = 256u,
-                    .poolSizeCount = dps.size(),
+                    .poolSizeCount = static_cast<uint32_t>(dps.size()),
                     .pPoolSizes = dps.data()
                 }, 
                 vk::DescriptorPoolInlineUniformBlockCreateInfoEXT{
@@ -194,6 +204,7 @@ namespace tom {
         };
 
         // 
+        virtual inline vk::DispatchLoaderDynamic& getDispatch() { return dispatch; };
         virtual inline vk::Device& getDevice() { return device; };
         virtual inline vk::DescriptorPool& getDescriptorPool() { return descriptorPool; };
         virtual inline std::vector<uint32_t>& getQueueFamilyIndices() { return queueFamilyIndices; };
@@ -203,6 +214,7 @@ namespace tom {
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory);
 
         // 
+        virtual inline const vk::DispatchLoaderDynamic& getDispatch() const { return dispatch; };
         virtual inline const vk::Device& getDevice() const { return device; };
         virtual inline const vk::DescriptorPool& getDescriptorPool() const { return descriptorPool; };
         virtual inline const std::vector<uint32_t>& getQueueFamilyIndices() const { return queueFamilyIndices; };
@@ -226,7 +238,7 @@ namespace tom {
         for (auto& commandBuffer : commandBuffers) {
             commandInfos.push_back(vk::CommandBufferSubmitInfoKHR{
                 .commandBuffer = commandBuffer,
-                .deviceMask = ~0x0
+                .deviceMask = ~0x0u
             });
         };
 

@@ -30,18 +30,19 @@ namespace tom {
     };
 
     //
-    class InstanceStatic: public std::enable_shared_from_this<InstanceStatic> { public: 
+    class Context: public std::enable_shared_from_this<Context> { public: 
         bool initialized = false;
         vk::DispatchLoaderDynamic dispatch = {};
-        std::unordered_map<uintptr_t, std::shared_ptr<Instance>> instanceMap;
+        std::unordered_map<uintptr_t, std::shared_ptr<Instance>> instanceMap = {};
         std::vector<vk::ExtensionProperties> extensionProperties = {};
         std::vector<vk::LayerProperties> layerProperties = {};
-        virtual void initialize();
-        //std::function<void()> initialize = {};
-
-        InstanceStatic() {
+        
+    public: 
+        Context() {
             this->initialize();
         };
+
+        virtual void initialize();
     };
 
     // 
@@ -57,7 +58,7 @@ namespace tom {
         std::vector<std::shared_ptr<PhysicalDevice>> physicalDevices = {};
 
         //
-        static std::shared_ptr<InstanceStatic> context;
+        static std::shared_ptr<Context> context;
 
     public: // 
         Instance() { this->constructor(); };
@@ -76,13 +77,17 @@ namespace tom {
             std::vector<const char*> preferedLayers = {};
             std::vector<const char*> preferedExtensions = { "VK_KHR_surface","VK_KHR_win32_surface" };
 
+            //
+            std::vector<const char*> excludedLayers = {};
+            std::vector<const char*> excludedExtensions = {};
+
 #ifdef NDEBUG
             preferedLayers.push_back("VK_LAYER_LUNARG_standard_validation");
             preferedExtensions.push_back("VK_EXT_debug_report");
 #endif
 
             //
-            if (!context) { context = std::make_shared<InstanceStatic>(); };
+            if (!context) { context = std::make_shared<Context>(); };
 
             // 
             for (uintptr_t i=0;i<preferedExtensions.size();i++) {
@@ -91,7 +96,10 @@ namespace tom {
                 for (auto& prop : context->extensionProperties) {
                     if (found = found || (strcmp(name, prop.extensionName) == 0)) break;
                 };
-                if (!found) { preferedExtensions.erase(preferedExtensions.begin()+i); };
+                if (!found) {
+                    excludedExtensions.push_back(name);
+                    preferedExtensions.erase(preferedExtensions.begin()+i);
+                };
             };
 
             // 
@@ -101,30 +109,35 @@ namespace tom {
                 for (auto& prop : context->layerProperties) {
                     if (found = found || (strcmp(name, prop.layerName) == 0)) break;
                 };
-                if (!found) { preferedLayers.erase(preferedLayers.begin()+i); };
+                if (!found) {
+                    excludedLayers.push_back(name);
+                    preferedLayers.erase(preferedLayers.begin()+i);
+                };
             };
 
             // 
             this->dispatch = vk::DispatchLoaderDynamic(this->instance = vk::createInstance(vk::InstanceCreateInfo{
                 .pApplicationInfo = &application_info,
-                .enabledLayerCount = preferedLayers.size(),
+                .enabledLayerCount = static_cast<uint32_t>(preferedLayers.size()),
                 .ppEnabledLayerNames = preferedLayers.data(),
-                .enabledExtensionCount = preferedExtensions.size(),
+                .enabledExtensionCount = static_cast<uint32_t>(preferedExtensions.size()),
                 .ppEnabledExtensionNames = preferedExtensions.data()
             }), vkGetInstanceProcAddr);
         };
 
         // 
-        virtual std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices();
-        virtual vk::Instance& getInstance() { return instance; };
+        virtual inline std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices();
+        virtual inline vk::Instance& getInstance() { return instance; };
+        virtual inline vk::DispatchLoaderDynamic& getDispatch() { return dispatch; };
 
         // 
-        virtual const std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices() const;
-        virtual const vk::Instance& getInstance() const { return instance; };
+        virtual inline const std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices() const;
+        virtual inline const vk::Instance& getInstance() const { return instance; };
+        virtual inline const vk::DispatchLoaderDynamic& getDispatch() const { return dispatch; };
     };
 
     //
-    void InstanceStatic::initialize() {
+    void Context::initialize() {
         auto& self = *this;
         if (!self.initialized) {
             self.dispatch = vk::DispatchLoaderDynamic(vkGetInstanceProcAddr);
@@ -139,7 +152,7 @@ namespace tom {
     class PhysicalDevice: public std::enable_shared_from_this<PhysicalDevice> {
     protected:  // 
         std::weak_ptr<tom::Instance> instance = {};
-        
+
         //
         vk::PhysicalDevice physicalDevice = {};
 
