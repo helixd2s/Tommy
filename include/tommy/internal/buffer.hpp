@@ -36,10 +36,9 @@ namespace tom {
         };
 
         // 
-        virtual vk::Result create(const vk::BufferCreateInfo& info = {}, const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
-            vk::Result result = this->device->getDevice().createBuffer(info);
+        virtual void create(const vk::BufferCreateInfo& info = {}, const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
+            this->buffer = this->device->getDevice().createBuffer(info);
             this->bindMemory(memoryAllocation);
-            return result;
         };
 
 
