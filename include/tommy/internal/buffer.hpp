@@ -61,7 +61,9 @@ namespace tom {
             auto deviceMemory = this->device->getDeviceMemoryObject(allocInfo.deviceMemory);
             this->memoryAllocation = std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset);
             this->memoryAllocation->getAllocation() = allocation;
+            //this->memoryAllocation->getMappedDefined() = allocInfo.pMappedData; // not sure...
             deviceMemory->getMapped() = allocInfo.pMappedData;
+
             //deviceMemory->getAllocation() = allocation; // not sure...
 
             //

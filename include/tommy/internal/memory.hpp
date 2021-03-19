@@ -55,14 +55,16 @@ namespace tom {
         // 
         virtual inline std::shared_ptr<tom::DeviceMemory>& getDeviceMemory() { return deviceMemory; };
         virtual inline vk::DeviceSize& getOffset() { return memoryOffset; };
-        virtual inline void* getMapped() { return ((uint8_t*)deviceMemory->getMapped() + memoryOffset); };
+        virtual inline void* getMapped() { return mapped ? mapped : ((uint8_t*)deviceMemory->getMapped() + memoryOffset); };
         virtual inline void*& getAllocation() { return allocation; };
+        virtual inline void*& getMappedDefined() { return mapped; };
 
         // 
         virtual inline const std::shared_ptr<tom::DeviceMemory>& getDeviceMemory() const { return deviceMemory; };
         virtual inline const vk::DeviceSize& getOffset() const { return memoryOffset; };
-        virtual inline const void* getMapped() const { return ((const uint8_t*)deviceMemory->getMapped() + memoryOffset); };
+        virtual inline const void* getMapped() const { return mapped ? mapped : ((const uint8_t*)deviceMemory->getMapped() + memoryOffset); };
         virtual inline void* const& getAllocation() const { return allocation; };
+        virtual inline void* const& getMappedDefined() const { return mapped; };
     };
 
 };
