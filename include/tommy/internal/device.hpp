@@ -63,6 +63,10 @@ namespace tom {
         virtual std::future<vk::Result> submitOnce(const std::function<void(const vk::CommandBuffer&)>& submitCommand, const vk::SubmitInfo2KHR& submitInfo = vk::SubmitInfo2KHR{}) const;
     };
 
+    //
+    class MemoryAllocator;
+    class MemoryAllocatorVma;
+
     // 
     class Device: public std::enable_shared_from_this<Device> {
     protected:  // 
@@ -75,7 +79,7 @@ namespace tom {
         vk::DispatchLoaderDynamic dispatch = {};
 
         // 
-        VmaAllocator allocator = {};
+        std::shared_ptr<MemoryAllocator> allocator = {};
 
         // 
         std::unordered_map<uintptr_t, std::weak_ptr<Buffer>> bufferAllocations = {};
@@ -210,49 +214,8 @@ namespace tom {
             
         };
 
-        //
-        virtual inline vk::Result createAllocatorVma() { //
-            auto& instanceDispatch = this->instance->getDispatch();
-
-            //
-            VmaVulkanFunctions func = {};
-            func.vkAllocateMemory = this->dispatch.vkAllocateMemory;
-            func.vkBindBufferMemory = this->dispatch.vkBindBufferMemory;
-            func.vkBindBufferMemory2KHR = this->dispatch.vkBindBufferMemory2;
-            func.vkBindImageMemory = this->dispatch.vkBindImageMemory;
-            func.vkBindImageMemory2KHR = this->dispatch.vkBindImageMemory2;
-            func.vkCmdCopyBuffer = this->dispatch.vkCmdCopyBuffer;
-            func.vkCreateBuffer = this->dispatch.vkCreateBuffer;
-            func.vkCreateImage = this->dispatch.vkCreateImage;
-            func.vkDestroyBuffer = this->dispatch.vkDestroyBuffer;
-            func.vkDestroyImage = this->dispatch.vkDestroyImage;
-            func.vkFlushMappedMemoryRanges = this->dispatch.vkFlushMappedMemoryRanges;
-            func.vkFreeMemory = this->dispatch.vkFreeMemory;
-            func.vkGetBufferMemoryRequirements = this->dispatch.vkGetBufferMemoryRequirements;
-            func.vkGetBufferMemoryRequirements2KHR = this->dispatch.vkGetBufferMemoryRequirements2;
-            func.vkGetImageMemoryRequirements = this->dispatch.vkGetImageMemoryRequirements;
-            func.vkGetImageMemoryRequirements2KHR = this->dispatch.vkGetImageMemoryRequirements2;
-            func.vkGetPhysicalDeviceMemoryProperties = instanceDispatch.vkGetPhysicalDeviceMemoryProperties;
-            func.vkGetPhysicalDeviceMemoryProperties2KHR = instanceDispatch.vkGetPhysicalDeviceMemoryProperties2;
-            func.vkGetPhysicalDeviceProperties = instanceDispatch.vkGetPhysicalDeviceProperties;
-            func.vkInvalidateMappedMemoryRanges = this->dispatch.vkInvalidateMappedMemoryRanges;
-            func.vkMapMemory = this->dispatch.vkMapMemory;
-            func.vkUnmapMemory = this->dispatch.vkUnmapMemory;
-
-            // 
-            VmaAllocatorCreateInfo vmaInfo = {};
-            vmaInfo.pVulkanFunctions = &func;
-            vmaInfo.device = this->device;
-            vmaInfo.instance = this->instance->getInstance();
-            vmaInfo.physicalDevice = this->physical->getPhysicalDevice();
-            vmaInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
-
-            // 
-            return vk::Result(vmaCreateAllocator(&vmaInfo, &this->allocator));
-        };
 
         // 
-        virtual inline VmaAllocator& getAllocator() { return allocator; };
         virtual inline vk::DispatchLoaderDynamic& getDispatch() { return dispatch; };
         virtual inline vk::Device& getDevice() { return device; };
         virtual inline vk::DescriptorPool& getDescriptorPool() { return descriptorPool; };
@@ -264,7 +227,6 @@ namespace tom {
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory);
 
         // 
-        virtual inline const VmaAllocator& getAllocator() const { return allocator; };
         virtual inline const vk::DispatchLoaderDynamic& getDispatch() const { return dispatch; };
         virtual inline const vk::Device& getDevice() const { return device; };
         virtual inline const vk::DescriptorPool& getDescriptorPool() const { return descriptorPool; };
@@ -274,9 +236,93 @@ namespace tom {
         virtual inline const std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) const { return physical; };
         virtual std::shared_ptr<DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer) const;
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) const;
+
+        //
+        //virtual std::shared_ptr<MemoryAllocator>& createAllocator();
+        virtual std::shared_ptr<MemoryAllocatorVma> createAllocatorVma();
     };
 
+    //
+    class MemoryAllocator : public std::enable_shared_from_this<MemoryAllocator> { protected: // 
+        std::weak_ptr<Device> device = {};
+        void* allocator = nullptr;
 
+    public:
+        MemoryAllocator(const std::shared_ptr<Device>& device): device(device) {
+            this->constructor();
+        };
+
+        // 
+        virtual inline void constructor() { 
+
+        };
+
+        //
+        virtual std::shared_ptr<Device> getDevice() { return device.lock(); };
+        virtual inline void*& getAllocator() { return allocator; };
+
+        //
+        virtual std::shared_ptr<Device> getDevice() const { return device.lock(); };
+        virtual inline void* const& getAllocator() const { return allocator; };
+    };
+
+    //
+    class MemoryAllocatorVma : public MemoryAllocator { protected: // 
+    public:
+        MemoryAllocatorVma(const std::shared_ptr<Device>& device): device(device) {
+            this->constructor();
+        };
+
+        //
+        virtual inline void constructor() override { //
+            auto& instanceDispatch = this->device->getInstance()->getDispatch();
+            auto& deviceDispatch = this->device->getDispatch();
+
+            // redirect Vulkan API functions
+            VmaVulkanFunctions func = {};
+            func.vkAllocateMemory = deviceDispatch.vkAllocateMemory;
+            func.vkBindBufferMemory = deviceDispatch.vkBindBufferMemory;
+            func.vkBindBufferMemory2KHR = deviceDispatch.vkBindBufferMemory2;
+            func.vkBindImageMemory = deviceDispatch.vkBindImageMemory;
+            func.vkBindImageMemory2KHR = deviceDispatch.vkBindImageMemory2;
+            func.vkCmdCopyBuffer = deviceDispatch.vkCmdCopyBuffer;
+            func.vkCreateBuffer = deviceDispatch.vkCreateBuffer;
+            func.vkCreateImage = deviceDispatch.vkCreateImage;
+            func.vkDestroyBuffer = deviceDispatch.vkDestroyBuffer;
+            func.vkDestroyImage = deviceDispatch.vkDestroyImage;
+            func.vkFlushMappedMemoryRanges = deviceDispatch.vkFlushMappedMemoryRanges;
+            func.vkFreeMemory = deviceDispatch.vkFreeMemory;
+            func.vkGetBufferMemoryRequirements = deviceDispatch.vkGetBufferMemoryRequirements;
+            func.vkGetBufferMemoryRequirements2KHR = deviceDispatch.vkGetBufferMemoryRequirements2;
+            func.vkGetImageMemoryRequirements = deviceDispatch.vkGetImageMemoryRequirements;
+            func.vkGetImageMemoryRequirements2KHR = deviceDispatch.vkGetImageMemoryRequirements2;
+            func.vkGetPhysicalDeviceMemoryProperties = instanceDispatch.vkGetPhysicalDeviceMemoryProperties;
+            func.vkGetPhysicalDeviceMemoryProperties2KHR = instanceDispatch.vkGetPhysicalDeviceMemoryProperties2;
+            func.vkGetPhysicalDeviceProperties = instanceDispatch.vkGetPhysicalDeviceProperties;
+            func.vkInvalidateMappedMemoryRanges = deviceDispatch.vkInvalidateMappedMemoryRanges;
+            func.vkMapMemory = deviceDispatch.vkMapMemory;
+            func.vkUnmapMemory = deviceDispatch.vkUnmapMemory;
+
+            // 
+            VmaAllocatorCreateInfo vmaInfo = {};
+            vmaInfo.pVulkanFunctions = &func;
+            vmaInfo.device = this->device->getDevice();
+            vmaInfo.instance = this->device->getInstance()->getInstance();
+            vmaInfo.physicalDevice = this->device->getPhysicalDevice()->getPhysicalDevice();
+            vmaInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+
+            // 
+            vk::throwResultException(vk::Result(vmaCreateAllocator(&vmaInfo, &(VmaAllocator&)this->allocator)), "Failed to create VMA allocator...");
+        };
+    };
+
+    // 
+    std::shared_ptr<MemoryAllocatorVma> Device::createAllocatorVma() {
+        if (!this->allocator) {
+            this->allocator = std::pointer_dynamic_cast<MemoryAllocator>(std::make_shared<MemoryAllocatorVma>(shared_from_this()));
+        };
+        return std::pointer_dynamic_cast<MemoryAllocatorVma>(this->allocator);
+    };
 
     //
     vk::Fence Queue::submitCmds(const std::vector<vk::CommandBuffer>& commandBuffers, vk::SubmitInfo2KHR submitInfo) const {

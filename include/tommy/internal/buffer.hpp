@@ -44,7 +44,6 @@ namespace tom {
             this->bindMemory(memoryAllocation);
         };
 
-
         //
         virtual void allocateDedicated() {
             if (this->buffer) {
@@ -74,9 +73,9 @@ namespace tom {
         };
 
         // TODO: correct create info
-        virtual vk::Result allocateVma(const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
+        virtual void allocateVma(const std::shared_ptr<MemoryAllocatorVma>& allocator, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
             this->info = info;
-            
+
             //
             VmaAllocationCreateInfo allocCreateInfo = {};
             allocCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
@@ -85,11 +84,11 @@ namespace tom {
             };
 
             // 
-            vk::Result result = vk::Result(vmaCreateBuffer(this->device->getAllocator(), (const VkBufferCreateInfo*)&info, &allocCreateInfo, (VkBuffer*)&buffer, &((VmaAllocation&)this->allocation), nullptr));
+            vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getAllocator(), (const VkBufferCreateInfo*)&info, &allocCreateInfo, (VkBuffer*)&buffer, &((VmaAllocation&)this->allocation), nullptr)), "VMA buffer allocation failed...");
 
             // get allocation info
             VmaAllocationInfo allocInfo = {};
-            vmaGetAllocationInfo(this->device->getAllocator(), ((VmaAllocation&)this->allocation), &allocInfo);
+            vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)this->allocation), &allocInfo);
 
             // wrap device memory
             auto deviceMemory = this->device->getDeviceMemoryObject(allocInfo.deviceMemory);
@@ -99,9 +98,6 @@ namespace tom {
             deviceMemory->getMapped() = allocInfo.pMappedData;
 
             //deviceMemory->getAllocation() = allocation; // not sure...
-
-            //
-            return result;
         };
 
         // 
