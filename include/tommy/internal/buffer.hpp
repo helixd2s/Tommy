@@ -18,6 +18,9 @@ namespace tom {
         vk::Buffer buffer = {};
         void* allocation = nullptr;
 
+        //
+        vk::BufferCreateInfo info = {};
+
     public: // 
         DeviceBuffer(const std::shared_ptr<tom::Device>& device, const vk::Buffer& buffer = {}): device(device), buffer(buffer) {
             
@@ -42,8 +45,39 @@ namespace tom {
         };
 
 
+        //
+        virtual void allocateDedicated() {
+            if (this->buffer) {
+                auto memoryRequirements = vk::StructureChain<vk::MemoryRequirements2, vk::MemoryDedicatedRequirementsKHR>{ vk::MemoryRequirements2{  }, vk::MemoryDedicatedRequirementsKHR{} };
+                this->device->getDevice().getBufferMemoryRequirements2(vk::BufferMemoryRequirementsInfo2{ .buffer = this->buffer }, memoryRequirements);
+
+                // 
+                const auto& memReqs = memoryRequirements.get<vk::MemoryRequirements2>().memoryRequirements;
+
+                // TODO: use native allocation
+                auto deviceMemory = this->device->getDeviceMemoryObject(this->device->getDevice().allocateMemory(vk::StructureChain<vk::MemoryAllocateInfo, vk::MemoryDedicatedAllocateInfoKHR, vk::ExternalMemoryBufferCreateInfo>{
+                    vk::MemoryAllocateInfo{
+                        .allocationSize = memReqs.size,
+                        .memoryTypeIndex = this->device->getPhysicalDevice()->getMemoryType(memReqs.memoryTypeBits),
+                    },
+                    vk::MemoryDedicatedAllocateInfoKHR{ .buffer = this->buffer },
+                    vk::ExternalMemoryBufferCreateInfo{}
+                }.get<vk::MemoryAllocateInfo>()));
+
+                //
+                this->device->getDevice().bindBufferMemory2(vk::BindBufferMemoryInfo{
+                    .buffer = this->buffer,
+                    .memory = deviceMemory->getMemory(),
+                    .memoryOffset = 0ull
+                });
+            };
+        };
+
         // TODO: correct create info
-        virtual vk::Result vmaAllocate(const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
+        virtual vk::Result allocateVma(const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
+            this->info = info;
+            
+            //
             VmaAllocationCreateInfo allocCreateInfo = {};
             allocCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
             if (allocCreateInfo.usage != VMA_MEMORY_USAGE_GPU_ONLY) { 

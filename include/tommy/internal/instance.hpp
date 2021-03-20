@@ -209,6 +209,19 @@ namespace tom {
             return surfaceInfo;
         };
 
+        //
+        virtual uint32_t getMemoryType(const uint32_t& memoryTypeBitsRequirement, const vk::MemoryPropertyFlags& requiredProperties = vk::MemoryPropertyFlagBits::eDeviceLocal) const {
+            const uint32_t memoryCount = memoryProperties.memoryProperties.memoryTypeCount;
+            for (uint32_t memoryIndex = 0; memoryIndex < memoryCount; ++memoryIndex) {
+                const uint32_t memoryTypeBits = (1 << memoryIndex);
+                const bool isRequiredMemoryType = memoryTypeBitsRequirement & memoryTypeBits;
+                const auto properties = memoryProperties.memoryProperties.memoryTypes[memoryIndex].propertyFlags;
+                const bool hasRequiredProperties = (properties & requiredProperties) == requiredProperties;
+                if (isRequiredMemoryType && hasRequiredProperties) return static_cast<uint32_t>(memoryIndex);
+            };
+            return 0u;
+        };
+
         // 
         virtual std::shared_ptr<Instance> getInstance() { return instance.lock(); };
         virtual inline std::vector<vk::QueueFamilyProperties2>& getQueueFamilyProperties() { return queueFamilyProperties; };

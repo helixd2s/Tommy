@@ -25,12 +25,17 @@ namespace tom {
         };
 
         // 
+        virtual void allocate(const vk::MemoryAllocateInfo& info = {}) {
+            this->memory = this->device->getDevice().allocateMemory(info);
+        };
+
+        // 
         virtual inline std::shared_ptr<tom::Device>& getDevice() { return device; };
         virtual inline vk::DeviceMemory& getMemory() { return memory; };
         virtual inline void*& getMapped() { return mapped; };
         virtual inline void*& getAllocation() { return allocation; };
 
-        //
+        // 
         virtual inline const std::shared_ptr<tom::Device>& getDevice() const { return device; };
         virtual inline const vk::DeviceMemory& getMemory() const { return memory; };
         virtual inline void* const& getMapped() const { return mapped; };

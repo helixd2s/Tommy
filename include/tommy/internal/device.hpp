@@ -211,7 +211,7 @@ namespace tom {
         };
 
         //
-        virtual inline vk::Result createAllocator() { //
+        virtual inline vk::Result createAllocatorVma() { //
             auto& instanceDispatch = this->instance->getDispatch();
 
             //
@@ -259,6 +259,7 @@ namespace tom {
         virtual inline std::vector<uint32_t>& getQueueFamilyIndices() { return queueFamilyIndices; };
         virtual inline std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) { return queues.at(queueFamilyIndex)[index]; };
         virtual inline std::shared_ptr<Instance>& getInstance() { return instance; };
+        virtual inline std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) { return physical; };
         virtual std::shared_ptr<DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer);
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory);
 
@@ -270,6 +271,7 @@ namespace tom {
         virtual inline const std::vector<uint32_t>& getQueueFamilyIndices() const { return queueFamilyIndices; };
         virtual inline const std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) const { return queues.at(queueFamilyIndex)[index]; };
         virtual inline const std::shared_ptr<Instance>& getInstance() const { return instance; };
+        virtual inline const std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) const { return physical; };
         virtual std::shared_ptr<DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer) const;
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) const;
     };
