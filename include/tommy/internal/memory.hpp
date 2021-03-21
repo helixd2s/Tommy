@@ -19,14 +19,28 @@ namespace tom {
         void* allocation = nullptr;
         void* mapped = nullptr;
 
+        // 
+        std::function<void()> destructor = {};
+
     public: // 
         DeviceMemory(const std::shared_ptr<tom::Device>& device, const vk::DeviceMemory& memory = {}): device(device), memory(memory) {
             
         };
 
         // 
-        virtual void allocate(const vk::MemoryAllocateInfo& info = {}) {
+        ~DeviceMemory() {
+            if (this->destructor) { this->destructor(); };
+            if (this->memory) { this->memory = vk::DeviceMemory{}; };
+        };
+
+        // TODO: VMA allocation
+        virtual void allocate(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
             this->memory = this->device->getDevice().allocateMemory(info);
+            this->destructor = [this](){
+                auto& memory = this->getMemory();
+                if (memory) { this->device->getDevice().freeMemory(); };
+                memory = vk::DeviceMemory{};
+            };
         };
 
         // 

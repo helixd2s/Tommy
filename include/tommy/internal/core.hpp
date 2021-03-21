@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include <future>
+#include <iostream>
 
 // 
 namespace tom {
@@ -22,5 +23,8 @@ namespace tom {
     class DeviceMemory;
     class MemoryAllocation;
     class PhysicalDevice;
+    class MemoryAllocator;
+
+    class MemoryAllocatorVma;
 
 };

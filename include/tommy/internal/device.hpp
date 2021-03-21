@@ -63,10 +63,6 @@ namespace tom {
         virtual std::future<vk::Result> submitOnce(const std::function<void(const vk::CommandBuffer&)>& submitCommand, const vk::SubmitInfo2KHR& submitInfo = vk::SubmitInfo2KHR{}) const;
     };
 
-    //
-    class MemoryAllocator;
-    class MemoryAllocatorVma;
-
     // 
     class Device: public std::enable_shared_from_this<Device> {
     protected:  // 
@@ -211,7 +207,6 @@ namespace tom {
                 }
             ).get<vk::DescriptorPoolCreateInfo>());
 
-            
         };
 
 
@@ -257,6 +252,10 @@ namespace tom {
 
         };
 
+        // 
+        virtual void allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY);
+        virtual void allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY);
+
         //
         virtual std::shared_ptr<Device> getDevice() { return device.lock(); };
         virtual inline void*& getAllocator() { return allocator; };
@@ -269,14 +268,19 @@ namespace tom {
     //
     class MemoryAllocatorVma : public MemoryAllocator { protected: // 
     public:
-        MemoryAllocatorVma(const std::shared_ptr<Device>& device): device(device) {
-            this->constructor();
+        MemoryAllocatorVma(const std::shared_ptr<Device>& device): MemoryAllocator(device) {
+            //this->constructor();
         };
+
+        // 
+        virtual void allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) override;
+        virtual void allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) override;
 
         //
         virtual inline void constructor() override { //
-            auto& instanceDispatch = this->device->getInstance()->getDispatch();
-            auto& deviceDispatch = this->device->getDispatch();
+            auto device = this->device.lock();
+            auto& instanceDispatch = device->getInstance()->getDispatch();
+            auto& deviceDispatch = device->getDispatch();
 
             // redirect Vulkan API functions
             VmaVulkanFunctions func = {};
@@ -306,9 +310,9 @@ namespace tom {
             // 
             VmaAllocatorCreateInfo vmaInfo = {};
             vmaInfo.pVulkanFunctions = &func;
-            vmaInfo.device = this->device->getDevice();
-            vmaInfo.instance = this->device->getInstance()->getInstance();
-            vmaInfo.physicalDevice = this->device->getPhysicalDevice()->getPhysicalDevice();
+            vmaInfo.device = device->getDevice();
+            vmaInfo.instance = device->getInstance()->getInstance();
+            vmaInfo.physicalDevice = device->getPhysicalDevice()->getPhysicalDevice();
             vmaInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 
             // 
@@ -319,9 +323,9 @@ namespace tom {
     // 
     std::shared_ptr<MemoryAllocatorVma> Device::createAllocatorVma() {
         if (!this->allocator) {
-            this->allocator = std::pointer_dynamic_cast<MemoryAllocator>(std::make_shared<MemoryAllocatorVma>(shared_from_this()));
+            this->allocator = std::dynamic_pointer_cast<MemoryAllocator>(std::make_shared<MemoryAllocatorVma>(shared_from_this()));
         };
-        return std::pointer_dynamic_cast<MemoryAllocatorVma>(this->allocator);
+        return std::dynamic_pointer_cast<MemoryAllocatorVma>(this->allocator);
     };
 
     //

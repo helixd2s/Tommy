@@ -7,8 +7,8 @@
 namespace tom {
 
     //
-    using PhysicalDeviceFeaturesChain = vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceBufferDeviceAddressFeatures>;
-    using PhysicalDevicePropertiesChain = vk::StructureChain<vk::PhysicalDeviceProperties2>;
+    using PhysicalDeviceFeaturesChain = vk::StructureChain<vk::PhysicalDeviceFeatures2&, vk::PhysicalDeviceBufferDeviceAddressFeatures&>;
+    using PhysicalDevicePropertiesChain = vk::StructureChain<vk::PhysicalDeviceProperties2&>;
 
     //
     struct PhysicalDeviceFeatures {

@@ -10,35 +10,46 @@ namespace tom {
 
     // 
     class DeviceBuffer: public std::enable_shared_from_this<DeviceBuffer> {
-    protected:  // 
+    protected: friend MemoryAllocator; friend MemoryAllocatorVma; // 
         std::shared_ptr<tom::Device> device = {};
         std::shared_ptr<tom::MemoryAllocation> memoryAllocation = {};
 
         // 
         vk::Buffer buffer = {};
-        vk::DeviceAddress address = {};
+        vk::DeviceAddress address = 0ull;
         void* allocation = nullptr;
 
-        //
+        // 
         vk::BufferCreateInfo info = {};
+
+        // 
+        std::function<void()> destructor = {};
 
     public: // 
         DeviceBuffer(const std::shared_ptr<tom::Device>& device, const vk::Buffer& buffer = {}): device(device), buffer(buffer) {
             
         };
 
-        //
-        virtual vk::DeviceAddress& getDeviceAddress() {
-            return (address = this->device->getDevice().getBufferAddress(vk::BufferDeviceAddressInfo{
-                .buffer = this->buffer
-            }));
+        ~DeviceBuffer() {
+            if (this->destructor) { 
+                this->destructor();
+            };
+            if (this->buffer) {
+                this->device->getDevice().bindBufferMemory2(vk::BindBufferMemoryInfo{ .buffer = this->buffer, .memory = {}, .memoryOffset = 0ull });
+                this->device->getDevice().destroyBuffer(this->buffer);
+                this->buffer = vk::Buffer{};
+            };
+            this->destructor = {};
         };
 
-        //
+        // 
+        virtual vk::DeviceAddress& getDeviceAddress() {
+            return (address = this->device->getDevice().getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = this->buffer }));
+        };
+
+        // 
         virtual vk::DeviceAddress getDeviceAddress() const {
-            return this->device->getDevice().getBufferAddress(vk::BufferDeviceAddressInfo{
-                .buffer = this->buffer
-            });
+            return (address ? address : this->device->getDevice().getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = this->buffer }));
         };
 
         // 
@@ -59,62 +70,6 @@ namespace tom {
             this->bindMemory(memoryAllocation);
         };
 
-        //
-        virtual void allocateDedicated() {
-            if (this->buffer) {
-                auto memoryRequirements = vk::StructureChain<vk::MemoryRequirements2, vk::MemoryDedicatedRequirementsKHR>{ vk::MemoryRequirements2{  }, vk::MemoryDedicatedRequirementsKHR{} };
-                this->device->getDevice().getBufferMemoryRequirements2(vk::BufferMemoryRequirementsInfo2{ .buffer = this->buffer }, memoryRequirements);
-
-                // 
-                const auto& memReqs = memoryRequirements.get<vk::MemoryRequirements2>().memoryRequirements;
-
-                // TODO: use native allocation
-                auto deviceMemory = this->device->getDeviceMemoryObject(this->device->getDevice().allocateMemory(vk::StructureChain<vk::MemoryAllocateInfo, vk::MemoryDedicatedAllocateInfoKHR, vk::ExternalMemoryBufferCreateInfo>{
-                    vk::MemoryAllocateInfo{
-                        .allocationSize = memReqs.size,
-                        .memoryTypeIndex = this->device->getPhysicalDevice()->getMemoryType(memReqs.memoryTypeBits),
-                    },
-                    vk::MemoryDedicatedAllocateInfoKHR{ .buffer = this->buffer },
-                    vk::ExternalMemoryBufferCreateInfo{}
-                }.get<vk::MemoryAllocateInfo>()));
-
-                //
-                this->device->getDevice().bindBufferMemory2(vk::BindBufferMemoryInfo{
-                    .buffer = this->buffer,
-                    .memory = deviceMemory->getMemory(),
-                    .memoryOffset = 0ull
-                });
-            };
-        };
-
-        // TODO: correct create info
-        virtual void allocateVma(const std::shared_ptr<MemoryAllocatorVma>& allocator, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
-            this->info = info;
-
-            //
-            VmaAllocationCreateInfo allocCreateInfo = {};
-            allocCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-            if (allocCreateInfo.usage != VMA_MEMORY_USAGE_GPU_ONLY) { 
-                allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT; 
-            };
-
-            // 
-            vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getAllocator(), (const VkBufferCreateInfo*)&info, &allocCreateInfo, (VkBuffer*)&buffer, &((VmaAllocation&)this->allocation), nullptr)), "VMA buffer allocation failed...");
-
-            // get allocation info
-            VmaAllocationInfo allocInfo = {};
-            vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)this->allocation), &allocInfo);
-
-            // wrap device memory
-            auto deviceMemory = this->device->getDeviceMemoryObject(allocInfo.deviceMemory);
-            this->memoryAllocation = std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset);
-            this->memoryAllocation->getAllocation() = allocation;
-            //this->memoryAllocation->getMappedDefined() = allocInfo.pMappedData; // not sure...
-            deviceMemory->getMapped() = allocInfo.pMappedData;
-
-            //deviceMemory->getAllocation() = allocation; // not sure...
-        };
-
         // 
         virtual inline std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() { return memoryAllocation; };
         virtual inline std::shared_ptr<tom::Device>& getDevice() { return device; };
@@ -126,7 +81,115 @@ namespace tom {
         virtual inline const vk::Buffer& getBuffer() const { return buffer; };
     };
 
+
+
     // 
+    void MemoryAllocator::allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
+        auto self = buffer;
+        auto* allocator = this;
+        auto device = this->device.lock();
+
+        if (self->buffer) { // 
+            auto memoryRequirements = vk::StructureChain<vk::MemoryRequirements2, vk::MemoryDedicatedRequirementsKHR>{ vk::MemoryRequirements2{  }, vk::MemoryDedicatedRequirementsKHR{} };
+            device->getDevice().getBufferMemoryRequirements2(vk::BufferMemoryRequirementsInfo2{ .buffer = self->buffer }, memoryRequirements);
+
+            // 
+            const auto& memReqs = memoryRequirements.get<vk::MemoryRequirements2>().memoryRequirements;
+
+            // TODO: use native allocation
+            auto deviceMemory = device->getDeviceMemoryObject(device->getDevice().allocateMemory(vk::StructureChain<vk::MemoryAllocateInfo, vk::MemoryDedicatedAllocateInfoKHR, vk::ExternalMemoryBufferCreateInfo>{
+                vk::MemoryAllocateInfo{
+                    .allocationSize = memReqs.size,
+                    .memoryTypeIndex = device->getPhysicalDevice()->getMemoryType(memReqs.memoryTypeBits),
+                },
+                vk::MemoryDedicatedAllocateInfoKHR{ .buffer = self->buffer },
+                vk::ExternalMemoryBufferCreateInfo{}
+            }.get<vk::MemoryAllocateInfo>()));
+
+            // 
+            self->bindMemory(std::make_shared<tom::MemoryAllocation>(deviceMemory, 0ull));
+        };
+    };
+
+    //
+    void MemoryAllocator::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
+        buffer->create(info);
+        this->allocate(buffer, memUsage);
+    };
+
+
+
+    //
+    void MemoryAllocatorVma::allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
+        auto self = buffer;
+        auto* allocator = this;
+        auto device = this->device.lock();
+
+        if (self->buffer) { // 
+            VmaAllocationInfo allocInfo = {};
+            VmaAllocationCreateInfo allocCreateInfo = { .usage = memUsage };
+            if (allocCreateInfo.usage != VMA_MEMORY_USAGE_GPU_ONLY) { 
+                allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT; 
+            };
+
+            // 
+            vk::throwResultException(vk::Result(vmaAllocateMemoryForBuffer((const VmaAllocator&)allocator->getAllocator(), self->buffer, &allocCreateInfo, &((VmaAllocation&)self->allocation), &allocInfo)), "VMA buffer allocation failed...");
+
+            // TODO: use native allocation
+            auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory); // TODO: IMPORTANT!!!
+            self->bindMemory(std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset));
+            self->memoryAllocation->getAllocation() = self->allocation;
+            //self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData; // not sure...
+            deviceMemory->getMapped() = allocInfo.pMappedData;
+
+            //
+            self->destructor = [self, allocator](){
+                vmaFreeMemory((const VmaAllocator&)allocator->getAllocator(), (VmaAllocation&)self->getMemoryAllocation());
+            };
+        };
+    };
+
+    //
+    void MemoryAllocatorVma::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
+        auto self = buffer;
+        auto* allocator = this;
+        auto device = this->device.lock();
+
+        // 
+        self->info = info;
+
+        // 
+        VmaAllocationCreateInfo allocCreateInfo = { .usage = memUsage };
+        if (allocCreateInfo.usage != VMA_MEMORY_USAGE_GPU_ONLY) { 
+            allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT; 
+        };
+
+        // 
+        vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getAllocator(), (const VkBufferCreateInfo*)&info, &allocCreateInfo, (VkBuffer*)&self->buffer, &((VmaAllocation&)self->allocation), nullptr)), "VMA buffer allocation failed...");
+
+        // get allocation info
+        VmaAllocationInfo allocInfo = {};
+        vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)self->allocation), &allocInfo);
+
+        // wrap device memory
+        auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);
+        self->memoryAllocation = std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset);
+        self->memoryAllocation->getAllocation() = allocation;
+        //self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData; // not sure...
+        deviceMemory->getMapped() = allocInfo.pMappedData;
+
+        //deviceMemory->getAllocation() = allocation; // not sure...
+
+        self->destructor = [self, allocator](){
+            vmaDestroyBuffer((const VmaAllocator&)allocator->getAllocator(), self->getBuffer(), (VmaAllocation&)self->getMemoryAllocation());
+            self->getBuffer() = vk::Buffer{};
+            self->getMemoryAllocation() = nullptr;
+        };
+    };
+
+
+
+    // abscent class...
     class BufferAllocation: public std::enable_shared_from_this<BufferAllocation> {
     protected:  // 
         std::shared_ptr<tom::DeviceBuffer> deviceBuffer = {};
@@ -140,7 +203,7 @@ namespace tom {
             this->constructor(offset, range);
         };
 
-        //
+        // 
         virtual void constructor(const vk::DeviceSize& offset = 0ull, const vk::DeviceSize& range = VK_WHOLE_SIZE) {
             if (deviceBuffer) { bufferInfo.buffer = deviceBuffer->getBuffer(); };
             bufferInfo.offset = offset;
@@ -155,7 +218,7 @@ namespace tom {
         virtual inline vk::DeviceSize& getRange() { return bufferInfo.range; };
         virtual inline vk::DeviceAddress& getDeviceAddressDefined() { return address; };
 
-        //
+        // 
         virtual inline vk::DeviceAddress getDeviceAddress() const { return address ? address : (deviceBuffer->getDeviceAddress() + bufferInfo.offset); };
         virtual inline const std::shared_ptr<tom::DeviceBuffer>& getDeviceBuffer() const { return deviceBuffer; };
         virtual inline const vk::DescriptorBufferInfo& getBufferInfo() const { return bufferInfo; };
