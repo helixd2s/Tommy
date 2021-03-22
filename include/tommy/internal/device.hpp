@@ -43,8 +43,8 @@ namespace tom {
             this->constructor();
         };
 
-        //
-        virtual void constructor() {
+        // 
+        virtual std::shared_ptr<Queue> constructor() {
             this->commandPool = this->device.lock()->getDevice().createCommandPool(vk::CommandPoolCreateInfo{ .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = queueFamilyIndex });
         };
 
@@ -58,7 +58,7 @@ namespace tom {
         virtual inline vk::Queue& getQueue() { return queue; };
         virtual inline vk::CommandPool& getCommandPool() { return commandPool; };
 
-        //
+        // 
         virtual vk::Fence submitCmds(const std::vector<vk::CommandBuffer>& commandBuffers, vk::SubmitInfo2KHR submitInfo = vk::SubmitInfo2KHR{}) const;
         virtual std::future<vk::Result> submitOnce(const std::function<void(const vk::CommandBuffer&)>& submitCommand, const vk::SubmitInfo2KHR& submitInfo = vk::SubmitInfo2KHR{}) const;
     };
