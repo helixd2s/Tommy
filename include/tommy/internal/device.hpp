@@ -97,7 +97,7 @@ namespace tom {
         };
 
         // 
-        virtual void constructor() {
+        virtual std::shared_ptr<Device> constructor() {
             this->descriptions = std::make_shared<tom::DescriptorSetSource>();
             this->descriptorSets = std::make_shared<tom::DescriptorSet>();
             this->descriptorSetLayouts = std::make_shared<tom::DescriptorSetLayouts>();
@@ -207,6 +207,8 @@ namespace tom {
                 }
             ).get<vk::DescriptorPoolCreateInfo>());
 
+            //
+            return shared_from_this();
         };
 
 
@@ -220,6 +222,7 @@ namespace tom {
         virtual inline std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) { return physical; };
         virtual std::shared_ptr<DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer);
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory);
+        virtual std::shared_ptr<DeviceMemory> allocateMemoryObject(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
 
         // 
         virtual inline const vk::DispatchLoaderDynamic& getDispatch() const { return dispatch; };
@@ -234,7 +237,7 @@ namespace tom {
 
         //
         //virtual std::shared_ptr<MemoryAllocator>& createAllocator();
-        virtual std::shared_ptr<MemoryAllocatorVma> createAllocatorVma();
+        virtual std::shared_ptr<MemoryAllocator>& createAllocatorVma();
     };
 
     //
@@ -242,19 +245,19 @@ namespace tom {
         std::weak_ptr<Device> device = {};
         void* allocator = nullptr;
 
-    public:
+    public: // 
         MemoryAllocator(const std::shared_ptr<Device>& device): device(device) {
             this->constructor();
         };
 
         // 
-        virtual inline void constructor() { 
-
+        virtual std::shared_ptr<MemoryAllocator> constructor() { 
+            return shared_from_this();
         };
 
         // 
-        virtual void allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY);
-        virtual void allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY);
+        virtual std::shared_ptr<MemoryAllocator> allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY);
+        virtual std::shared_ptr<MemoryAllocator> allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY);
 
         //
         virtual std::shared_ptr<Device> getDevice() { return device.lock(); };
@@ -272,103 +275,14 @@ namespace tom {
             //this->constructor();
         };
 
-        // 
-        virtual void allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) override;
-        virtual void allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) override;
-
         //
-        virtual inline void constructor() override { //
-            auto device = this->device.lock();
-            auto& instanceDispatch = device->getInstance()->getDispatch();
-            auto& deviceDispatch = device->getDispatch();
-
-            // redirect Vulkan API functions
-            VmaVulkanFunctions func = {};
-            func.vkAllocateMemory = deviceDispatch.vkAllocateMemory;
-            func.vkBindBufferMemory = deviceDispatch.vkBindBufferMemory;
-            func.vkBindBufferMemory2KHR = deviceDispatch.vkBindBufferMemory2;
-            func.vkBindImageMemory = deviceDispatch.vkBindImageMemory;
-            func.vkBindImageMemory2KHR = deviceDispatch.vkBindImageMemory2;
-            func.vkCmdCopyBuffer = deviceDispatch.vkCmdCopyBuffer;
-            func.vkCreateBuffer = deviceDispatch.vkCreateBuffer;
-            func.vkCreateImage = deviceDispatch.vkCreateImage;
-            func.vkDestroyBuffer = deviceDispatch.vkDestroyBuffer;
-            func.vkDestroyImage = deviceDispatch.vkDestroyImage;
-            func.vkFlushMappedMemoryRanges = deviceDispatch.vkFlushMappedMemoryRanges;
-            func.vkFreeMemory = deviceDispatch.vkFreeMemory;
-            func.vkGetBufferMemoryRequirements = deviceDispatch.vkGetBufferMemoryRequirements;
-            func.vkGetBufferMemoryRequirements2KHR = deviceDispatch.vkGetBufferMemoryRequirements2;
-            func.vkGetImageMemoryRequirements = deviceDispatch.vkGetImageMemoryRequirements;
-            func.vkGetImageMemoryRequirements2KHR = deviceDispatch.vkGetImageMemoryRequirements2;
-            func.vkGetPhysicalDeviceMemoryProperties = instanceDispatch.vkGetPhysicalDeviceMemoryProperties;
-            func.vkGetPhysicalDeviceMemoryProperties2KHR = instanceDispatch.vkGetPhysicalDeviceMemoryProperties2;
-            func.vkGetPhysicalDeviceProperties = instanceDispatch.vkGetPhysicalDeviceProperties;
-            func.vkInvalidateMappedMemoryRanges = deviceDispatch.vkInvalidateMappedMemoryRanges;
-            func.vkMapMemory = deviceDispatch.vkMapMemory;
-            func.vkUnmapMemory = deviceDispatch.vkUnmapMemory;
-
-            // 
-            VmaAllocatorCreateInfo vmaInfo = {};
-            vmaInfo.pVulkanFunctions = &func;
-            vmaInfo.device = device->getDevice();
-            vmaInfo.instance = device->getInstance()->getInstance();
-            vmaInfo.physicalDevice = device->getPhysicalDevice()->getPhysicalDevice();
-            vmaInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
-
-            // 
-            vk::throwResultException(vk::Result(vmaCreateAllocator(&vmaInfo, &(VmaAllocator&)this->allocator)), "Failed to create VMA allocator...");
-        };
-    };
-
-    // 
-    std::shared_ptr<MemoryAllocatorVma> Device::createAllocatorVma() {
-        if (!this->allocator) {
-            this->allocator = std::dynamic_pointer_cast<MemoryAllocator>(std::make_shared<MemoryAllocatorVma>(shared_from_this()));
-        };
-        return std::dynamic_pointer_cast<MemoryAllocatorVma>(this->allocator);
-    };
-
-    //
-    vk::Fence Queue::submitCmds(const std::vector<vk::CommandBuffer>& commandBuffers, vk::SubmitInfo2KHR submitInfo) const {
-        if (commandBuffers.size() <= 0) return vk::Fence{};
+        virtual std::shared_ptr<MemoryAllocator> constructor() override;
 
         // 
-        vk::Fence fence = this->device.lock()->getDevice().createFence(vk::FenceCreateInfo{});
-
-        // 
-        std::vector<vk::CommandBufferSubmitInfoKHR> commandInfos = {};
-        for (auto& commandBuffer : commandBuffers) {
-            commandInfos.push_back(vk::CommandBufferSubmitInfoKHR{
-                .commandBuffer = commandBuffer,
-                .deviceMask = ~0x0u
-            });
-        };
-
-        // 
-        submitInfo.commandBufferInfoCount = commandInfos.size();
-        submitInfo.pCommandBufferInfos = commandInfos.data();
-
-        // 
-        this->queue.submit2KHR(submitInfo, fence);
-        return fence;
+        virtual std::shared_ptr<MemoryAllocator> allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) override;
+        virtual std::shared_ptr<MemoryAllocator> allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) override;
     };
 
-    //
-    std::future<vk::Result> Queue::submitOnce(const std::function<void(const vk::CommandBuffer&)>& cmdFn, const vk::SubmitInfo2KHR& submitInfo) const {
-        auto vkDevice = this->device.lock()->getDevice();
-        auto commandBuffers = vkDevice.allocateCommandBuffers(vk::CommandBufferAllocateInfo{
-            .commandPool = commandPool,
-            .level = vk::CommandBufferLevel::ePrimary,
-            .commandBufferCount = 1
-        });
-        cmdFn(commandBuffers[0]); // execute command constructor
-        auto fence = this->submitCmds(commandBuffers, submitInfo);
-        return std::async(std::launch::async | std::launch::deferred, [this, fence, commandBuffers, vkDevice](){
-            auto result = vkDevice.waitForFences({fence}, true, 30ull * 1000ull * 1000ull * 1000ull);
-            vkDevice.destroyFence(fence);
-            vkDevice.freeCommandBuffers(commandPool, commandBuffers);
-            return result;
-        });
-    };
+
 
 };
