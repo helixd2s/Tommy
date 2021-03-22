@@ -46,6 +46,7 @@ namespace tom {
         // 
         virtual std::shared_ptr<Queue> constructor() {
             this->commandPool = this->device.lock()->getDevice().createCommandPool(vk::CommandPoolCreateInfo{ .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = queueFamilyIndex });
+            return shared_from_this();
         };
 
         // 

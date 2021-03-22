@@ -64,7 +64,7 @@ namespace tom {
         Instance() { this->constructor(); };
 
         //
-        virtual void constructor() {
+        virtual std::shared_ptr<Instance> constructor() {
             vk::ApplicationInfo application_info = vk::ApplicationInfo{
                 .pApplicationName = "Tommy Based App",
                 .applicationVersion = VK_MAKE_VERSION(1,0,0),
@@ -123,6 +123,9 @@ namespace tom {
                 .enabledExtensionCount = static_cast<uint32_t>(preferedExtensions.size()),
                 .ppEnabledExtensionNames = preferedExtensions.data()
             }), vkGetInstanceProcAddr);
+
+            // 
+            return shared_from_this();
         };
 
         // 
@@ -176,7 +179,7 @@ namespace tom {
         };
 
         //
-        virtual void constructor() {
+        virtual std::shared_ptr<PhysicalDevice> constructor() {
             this->properties = PhysicalDeviceProperties{};
             this->features = PhysicalDeviceFeatures{};
 
@@ -193,6 +196,9 @@ namespace tom {
             this->queueFamilyProperties = physicalDevice.getQueueFamilyProperties2();
             this->extensionProperties = physicalDevice.enumerateDeviceExtensionProperties();
             this->layerProperties = physicalDevice.enumerateDeviceLayerProperties();
+
+            //
+            return shared_from_this();
         };
 
         //
