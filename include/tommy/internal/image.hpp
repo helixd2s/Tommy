@@ -11,7 +11,7 @@ namespace tom {
     // 
     class DeviceImage: public std::enable_shared_from_this<DeviceImage> {
     protected: friend MemoryAllocator; friend MemoryAllocatorVma; // 
-        std::shared_ptr<tom::Device> device = {};
+        std::weak_ptr<tom::Device> device = {};
         std::shared_ptr<tom::MemoryAllocation> memoryAllocation = {};
         std::function<void()> destructor = {};
 
@@ -32,7 +32,7 @@ namespace tom {
 
         // 
         ~DeviceImage() {
-            auto& device = this->device->getDevice();
+            auto& device = this->device.lock()->getDevice();
             if (this->destructor) { 
                 this->destructor();
             };
@@ -51,13 +51,13 @@ namespace tom {
         // 
         virtual inline std::vector<vk::ImageLayout>& getLayoutHistory() { return layoutHistory; };
         virtual inline std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() { return memoryAllocation; };
-        virtual inline std::shared_ptr<tom::Device>& getDevice() { return device; };
+        virtual inline std::shared_ptr<tom::Device> getDevice() { return device.lock(); };
         virtual inline vk::Image& getImage() { return image; };
 
         // 
         virtual inline const std::vector<vk::ImageLayout>& getLayoutHistory() const { return layoutHistory; };
         virtual inline const std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() const { return memoryAllocation; };
-        virtual inline const std::shared_ptr<tom::Device>& getDevice() const { return device; };
+        virtual inline std::shared_ptr<tom::Device> getDevice() const { return device.lock(); };
         virtual inline const vk::Image& getImage() const { return image; };
     };
 
@@ -67,11 +67,13 @@ namespace tom {
         std::shared_ptr<tom::DeviceImage> deviceImage = {};
 
         // 
-        vk::ImageView imageView = {};
-        vk::ImageViewCreateInfo info = {};
+        //vk::ImageView imageView = {};
+        vk::DescriptorImageInfo info = {};
+        vk::ImageViewCreateInfo imageViewInfo = {};
+        vk::SamplerCreateInfo samplerInfo = {};
 
     public: // 
-        ImageView(const std::shared_ptr<tom::DeviceImage>& deviceImage, const vk::ImageView& imageView = {}): deviceImage(deviceImage), imageView(imageView) {
+        ImageView(const std::shared_ptr<tom::DeviceImage>& deviceImage, const vk::DescriptorImageInfo& descriptorInfo = {}): deviceImage(deviceImage), descriptorInfo(descriptorInfo) {
             this->constructor();
         };
 
@@ -81,13 +83,16 @@ namespace tom {
         };
 
         // 
-        virtual std::shared_ptr<ImageView> create(const vk::ImageViewCreateInfo& info = {});
+        virtual std::shared_ptr<ImageView> createImageView(const vk::ImageViewCreateInfo& info = {});
+        virtual std::shared_ptr<ImageView> createSampler(const vk::SamplerCreateInfo& info = {});
 
         // 
         virtual inline std::shared_ptr<tom::DeviceImage>& getDeviceImage() { return deviceImage; };
+        virtual inline vk::DescriptorImageInfo& getInfo() { info.imageLayout = deviceImage->getLayoutHistory().back(); return info; };
 
         // 
         virtual inline const std::shared_ptr<tom::DeviceImage>& getDeviceImage() const { return deviceImage; };
+        virtual inline vk::DescriptorImageInfo getInfo() const { return vk::DescriptorImageInfo{ info.imageView, info.sampler, deviceImage->getLayoutHistory().back() }; };
     };
 
 };

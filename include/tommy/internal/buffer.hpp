@@ -11,7 +11,7 @@ namespace tom {
     // 
     class DeviceBuffer: public std::enable_shared_from_this<DeviceBuffer> {
     protected: friend MemoryAllocator; friend MemoryAllocatorVma; // 
-        std::shared_ptr<tom::Device> device = {};
+        std::weak_ptr<tom::Device> device = {};
         std::shared_ptr<tom::MemoryAllocation> memoryAllocation = {};
         std::function<void()> destructor = {};
 
@@ -31,13 +31,13 @@ namespace tom {
 
         // 
         ~DeviceBuffer() {
-            auto& device = this->device->getDevice();
+            auto device = this->getDevice();
             if (this->destructor) { 
                 this->destructor();
             };
             if (this->buffer) {
-                device.bindBufferMemory2(vk::BindBufferMemoryInfo{ .buffer = this->buffer, .memory = {}, .memoryOffset = 0ull });
-                device.destroyBuffer(this->buffer);
+                device->getDevice().bindBufferMemory2(vk::BindBufferMemoryInfo{ .buffer = this->buffer, .memory = {}, .memoryOffset = 0ull });
+                device->getDevice().destroyBuffer(this->buffer);
                 this->buffer = vk::Buffer{};
             };
             this->destructor = {};
@@ -53,12 +53,12 @@ namespace tom {
 
         // 
         virtual inline std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() { return memoryAllocation; };
-        virtual inline std::shared_ptr<tom::Device>& getDevice() { return device; };
+        virtual inline std::shared_ptr<tom::Device> getDevice() { return device.lock(); };
         virtual inline vk::Buffer& getBuffer() { return buffer; };
 
         // 
         virtual inline const std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() const { return memoryAllocation; };
-        virtual inline const std::shared_ptr<tom::Device>& getDevice() const { return device; };
+        virtual inline std::shared_ptr<tom::Device> getDevice() const { return device.lock(); };
         virtual inline const vk::Buffer& getBuffer() const { return buffer; };
     };
 
@@ -88,16 +88,16 @@ namespace tom {
 
         // 
         virtual inline vk::DeviceAddress getDeviceAddress() { return address ? address : (deviceBuffer->getDeviceAddress() + bufferInfo.offset); };
-        virtual inline std::shared_ptr<tom::DeviceBuffer>& getDeviceBuffer() { return deviceBuffer; };
         virtual inline vk::DescriptorBufferInfo& getBufferInfo() { if (deviceBuffer) { bufferInfo.buffer = deviceBuffer->getBuffer(); }; return bufferInfo; };
+        virtual inline std::shared_ptr<tom::DeviceBuffer>& getDeviceBuffer() { return deviceBuffer; };
         virtual inline vk::DeviceSize& getOffset() { return bufferInfo.offset; };
         virtual inline vk::DeviceSize& getRange() { return bufferInfo.range; };
-        virtual inline vk::DeviceAddress& getDeviceAddressDefined() { return address; };
+        virtual inline vk::DeviceAddress& getDeviceAddressDefined() { return (address = this->getDeviceAddress()); };
 
         // 
         virtual inline vk::DeviceAddress getDeviceAddress() const { return address ? address : (deviceBuffer->getDeviceAddress() + bufferInfo.offset); };
+        virtual inline vk::DescriptorBufferInfo getBufferInfo() const { return vk::DescriptorBufferInfo{ deviceBuffer->getBuffer(), bufferInfo.offset, bufferInfo.range }; };
         virtual inline const std::shared_ptr<tom::DeviceBuffer>& getDeviceBuffer() const { return deviceBuffer; };
-        virtual inline const vk::DescriptorBufferInfo& getBufferInfo() const { return bufferInfo; };
         virtual inline const vk::DeviceSize& getOffset() const { return bufferInfo.offset; };
         virtual inline const vk::DeviceSize& getRange() const { return bufferInfo.range; };
         virtual inline const vk::DeviceAddress& getDeviceAddressDefined() const { return address; };

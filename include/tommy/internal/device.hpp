@@ -25,16 +25,18 @@ namespace tom {
 
         // 
         virtual std::shared_ptr<Queue> constructor() {
-            this->commandPool = this->device.lock()->getDevice().createCommandPool(vk::CommandPoolCreateInfo{ .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = queueFamilyIndex });
+            this->commandPool = this->getDevice()->getDevice().createCommandPool(vk::CommandPoolCreateInfo{ .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = queueFamilyIndex });
             return shared_from_this();
         };
 
         // 
+        virtual inline std::shared_ptr<tom::Device> getDevice() const { return device.lock(); };
         virtual inline const uint32_t& getQueueFamilyIndex() const { return queueFamilyIndex; };
         virtual inline const vk::Queue& getQueue() const { return queue; };
         virtual inline const vk::CommandPool& getCommandPool() const { return commandPool; };
 
         // 
+        virtual inline std::shared_ptr<tom::Device> getDevice() { return device.lock(); };
         virtual inline uint32_t& getQueueFamilyIndex() { return queueFamilyIndex; };
         virtual inline vk::Queue& getQueue() { return queue; };
         virtual inline vk::CommandPool& getCommandPool() { return commandPool; };
@@ -47,7 +49,7 @@ namespace tom {
     // 
     class Device: public std::enable_shared_from_this<Device> {
     protected:  // 
-        std::shared_ptr<Instance> instance = {};
+        std::weak_ptr<Instance> instance = {};
         std::shared_ptr<PhysicalDevice> physical = {};
 
         // 
@@ -59,9 +61,9 @@ namespace tom {
         std::shared_ptr<MemoryAllocator> allocator = {};
 
         // 
-        std::unordered_map<uintptr_t, std::weak_ptr<Buffer>> bufferAllocations = {};
-        std::unordered_map<vk::Buffer, std::weak_ptr<DeviceBuffer>> buffers = {};
-        std::unordered_map<vk::DeviceMemory, std::weak_ptr<DeviceMemory>> memories = {};
+        std::unordered_map<uintptr_t, std::shared_ptr<Buffer>> bufferAllocations = {};
+        std::unordered_map<vk::Buffer, std::shared_ptr<DeviceBuffer>> buffers = {};
+        std::unordered_map<vk::DeviceMemory, std::shared_ptr<DeviceMemory>> memories = {};
 
         // 
         std::shared_ptr<tom::DescriptorSetSource> descriptions = {};
@@ -86,7 +88,7 @@ namespace tom {
         virtual inline vk::DescriptorPool& getDescriptorPool() { return descriptorPool; };
         virtual inline std::vector<uint32_t>& getQueueFamilyIndices() { return queueFamilyIndices; };
         virtual inline std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) { return queues.at(queueFamilyIndex)[index]; };
-        virtual inline std::shared_ptr<Instance>& getInstance() { return instance; };
+        virtual inline std::shared_ptr<Instance> getInstance() { return instance.lock(); };
         virtual inline std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) { return physical; };
         virtual std::shared_ptr<DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer);
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory);
@@ -98,7 +100,7 @@ namespace tom {
         virtual inline const vk::DescriptorPool& getDescriptorPool() const { return descriptorPool; };
         virtual inline const std::vector<uint32_t>& getQueueFamilyIndices() const { return queueFamilyIndices; };
         virtual inline const std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) const { return queues.at(queueFamilyIndex)[index]; };
-        virtual inline const std::shared_ptr<Instance>& getInstance() const { return instance; };
+        virtual inline std::shared_ptr<Instance> getInstance() const { return instance.lock(); };
         virtual inline const std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) const { return physical; };
         virtual std::shared_ptr<DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer) const;
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) const;

@@ -13,19 +13,19 @@ namespace tom {
 
     // 
     vk::DeviceAddress& DeviceBuffer::getDeviceAddress() {
-        return (address = address ? address : this->device->getDevice().getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = this->buffer }));
+        return (address = address ? address : this->getDevice()->getDevice().getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = this->buffer }));
     };
 
     // 
     vk::DeviceAddress DeviceBuffer::getDeviceAddress() const {
-        return (address ? address : this->device->getDevice().getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = this->buffer }));
+        return (address ? address : this->getDevice()->getDevice().getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = this->buffer }));
     };
 
     // 
     std::shared_ptr<DeviceBuffer> DeviceBuffer::bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
         if (memoryAllocation) {
             this->memoryAllocation = memoryAllocation;
-            this->device->getDevice().bindBufferMemory2(vk::BindBufferMemoryInfo{
+            this->getDevice()->getDevice().bindBufferMemory2(vk::BindBufferMemoryInfo{
                 .buffer = this->buffer,
                 .memory = this->memoryAllocation->getDeviceMemory()->getMemory(),
                 .memoryOffset = this->memoryAllocation->getOffset()
@@ -36,7 +36,7 @@ namespace tom {
 
     // 
     std::shared_ptr<DeviceBuffer> DeviceBuffer::create(const vk::BufferCreateInfo& info = {}, const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
-        this->buffer = this->device->getDevice().createBuffer( this->info = info.queueFamilyIndexCount ? vk::BufferCreateInfo(info) : vk::BufferCreateInfo(info).setQueueFamilyIndices(this->device->getQueueFamilyIndices()) );
+        this->buffer = this->getDevice()->getDevice().createBuffer( this->info = info.queueFamilyIndexCount ? vk::BufferCreateInfo(info) : vk::BufferCreateInfo(info).setQueueFamilyIndices(this->getDevice()->getQueueFamilyIndices()) );
         this->bindMemory(memoryAllocation);
         this->address = 0ull;
         return shared_from_this();

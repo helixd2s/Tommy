@@ -10,10 +10,11 @@ namespace tom {
 
     // TODO: VMA allocation
     std::shared_ptr<DeviceMemory> DeviceMemory::allocate(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
-        this->memory = this->device->getDevice().allocateMemory(info);
-        this->destructor = [this](){
+        auto device = this->getDevice();
+        this->memory = device->getDevice().allocateMemory(info);
+        this->destructor = [this, device](){
             auto& memory = this->getMemory();
-            if (memory) { this->device->getDevice().freeMemory(); };
+            if (memory) { device->getDevice().freeMemory(); };
             memory = vk::DeviceMemory{};
         };
         return shared_from_this();

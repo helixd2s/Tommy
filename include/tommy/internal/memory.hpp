@@ -12,7 +12,7 @@ namespace tom {
     //
     class DeviceMemory: public std::enable_shared_from_this<DeviceMemory> {
     protected: friend MemoryAllocator; friend MemoryAllocatorVma;
-        std::shared_ptr<tom::Device> device = {};
+        std::weak_ptr<tom::Device> device = {};
         std::function<void()> destructor = {};
 
         // 
@@ -35,13 +35,13 @@ namespace tom {
         std::shared_ptr<DeviceMemory> allocate(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
 
         // 
-        virtual inline std::shared_ptr<tom::Device>& getDevice() { return device; };
+        virtual inline std::shared_ptr<tom::Device> getDevice() { return device.lock(); };
         virtual inline vk::DeviceMemory& getMemory() { return memory; };
         virtual inline void*& getMapped() { return mapped; };
         virtual inline void*& getAllocation() { return allocation; };
 
         // 
-        virtual inline const std::shared_ptr<tom::Device>& getDevice() const { return device; };
+        virtual inline std::shared_ptr<tom::Device> getDevice() const { return device.lock(); };
         virtual inline const vk::DeviceMemory& getMemory() const { return memory; };
         virtual inline void* const& getMapped() const { return mapped; };
         virtual inline void* const& getAllocation() const { return allocation; };
