@@ -60,41 +60,52 @@ namespace tom {
     };
 
 
-    //
-    std::shared_ptr<MemoryAllocator> MemoryAllocatorVma::allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
-        auto self = buffer;
+    // MemoryAllocationInfo
+    std::shared_ptr<MemoryAllocation> MemoryAllocator::allocateMemory(const std::shared_ptr<MemoryAllocation>& allocation, const vk::MemoryRequirements2& memoryRequirements = {}, const MemoryAllocationInfo& memAllocInfo = {}) {
+        auto self = allocation;
         auto allocator = shared_from_this();
         auto device = this->device.lock();
 
-        if (self->buffer) { // 
+        // 
+        {
+            const auto& memReqs = memoryRequirements.memoryRequirements;
+
+            // 
             VmaAllocationInfo allocInfo = {};
-            VmaAllocationCreateInfo allocCreateInfo = { .usage = memUsage };
+            VmaAllocationCreateInfo allocCreateInfo = { .usage = reinterpret_cast<const VmaMemoryUsage&>(memAllocInfo.usage) };
             if (allocCreateInfo.usage != VMA_MEMORY_USAGE_GPU_ONLY) { 
-                allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT; 
+                allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
             };
 
             // 
-            vk::throwResultException(vk::Result(vmaAllocateMemoryForBuffer((const VmaAllocator&)allocator->getAllocator(), self->buffer, &allocCreateInfo, &((VmaAllocation&)self->allocation), &allocInfo)), "VMA buffer allocation failed...");
+            if (memAllocInfo.buffer) {
+                vk::throwResultException(vk::Result(vmaAllocateMemoryForBuffer((const VmaAllocator&)allocator->getAllocator(), memAllocInfo.buffer, &allocCreateInfo, &((VmaAllocation&)self->allocation), &allocInfo)), "VMA buffer allocation failed...");
+            } else 
+            if (memAllocInfo.image) {
+                vk::throwResultException(vk::Result(vmaAllocateMemoryForImage((const VmaAllocator&)allocator->getAllocator(), memAllocInfo.image, &allocCreateInfo, &((VmaAllocation&)self->allocation), &allocInfo)), "VMA image allocation failed...");
+            } else {
+                vk::throwResultException(vk::Result(vmaAllocateMemory((const VmaAllocator&)allocator->getAllocator(), (VkMemoryRequirements*)&memReqs, &allocCreateInfo, &((VmaAllocation&)self->allocation), &allocInfo)), "VMA memory allocation failed...");
+            };
 
-            // TODO: use native allocation
-            auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory); // TODO: IMPORTANT!!!
-            self->bindMemory(std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset));
-            self->memoryAllocation->getAllocation() = self->allocation;
-            self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData;
+            // 
+            self->getDeviceMemory() = device->getDeviceMemoryObject(allocInfo.deviceMemory);
+            self->getOffset() = allocInfo.offset;
+            self->getAllocation() = self->allocation;
+            self->getMappedDefined() = allocInfo.pMappedData;
             //deviceMemory->getMapped() = allocInfo.pMappedData; // not sure...
 
             //
             self->destructor = [self = std::weak_ptr(self), allocator](){
                 auto of = self.lock();
-                vmaFreeMemory((const VmaAllocator&)allocator->getAllocator(), (VmaAllocation&)of->getMemoryAllocation());
+                vmaFreeMemory((const VmaAllocator&)allocator->getAllocator(), (VmaAllocation&)of->getAllocation());
             };
         };
 
-        return shared_from_this();
+        return self;
     };
 
     //
-    std::shared_ptr<MemoryAllocator> MemoryAllocatorVma::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
+    std::shared_ptr<DeviceBuffer> MemoryAllocatorVma::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const MemoryAllocationInfo& memAllocInfo = {}) {
         auto self = buffer;
         auto allocator = shared_from_this();
         auto device = this->device.lock();
@@ -103,16 +114,14 @@ namespace tom {
         self->info = info;
 
         // 
-        VmaAllocationCreateInfo allocCreateInfo = { .usage = memUsage };
+        VmaAllocationInfo allocInfo = {};
+        VmaAllocationCreateInfo allocCreateInfo = { .usage = reinterpret_cast<const VmaMemoryUsage&>(memAllocInfo.usage) };
         if (allocCreateInfo.usage != VMA_MEMORY_USAGE_GPU_ONLY) { 
             allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT; 
         };
 
         // 
         vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getAllocator(), (const VkBufferCreateInfo*)&info, &allocCreateInfo, (VkBuffer*)&self->buffer, &((VmaAllocation&)self->allocation), nullptr)), "VMA buffer allocation failed...");
-
-        // get allocation info
-        VmaAllocationInfo allocInfo = {};
         vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)self->allocation), &allocInfo);
 
         // wrap device memory
@@ -120,9 +129,10 @@ namespace tom {
         self->memoryAllocation = std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset);
         self->memoryAllocation->getAllocation() = self->allocation;
         self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData;
-        //deviceMemory->getMapped() = allocInfo.pMappedData; // not sure...
 
-        //deviceMemory->getAllocation() = allocation; // not sure...
+        // not sure...
+        //deviceMemory->getMapped() = allocInfo.pMappedData;
+        //deviceMemory->getAllocation() = allocation;
 
         self->destructor = [self = std::weak_ptr(self), allocator](){
             auto of = self.lock();
@@ -131,45 +141,11 @@ namespace tom {
             of->getMemoryAllocation() = nullptr;
         };
 
-        return shared_from_this();
-    };
-
-
-    //
-    std::shared_ptr<MemoryAllocator> MemoryAllocatorVma::allocateImage(const std::shared_ptr<DeviceImage>& image, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
-        auto self = image;
-        auto allocator = shared_from_this();
-        auto device = this->device.lock();
-
-        if (self->image) { // 
-            VmaAllocationInfo allocInfo = {};
-            VmaAllocationCreateInfo allocCreateInfo = { .usage = memUsage };
-            if (allocCreateInfo.usage != VMA_MEMORY_USAGE_GPU_ONLY) { 
-                allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT; 
-            };
-
-            // 
-            vk::throwResultException(vk::Result(vmaAllocateMemoryForImage((const VmaAllocator&)allocator->getAllocator(), self->image, &allocCreateInfo, &((VmaAllocation&)self->allocation), &allocInfo)), "VMA image allocation failed...");
-
-            // TODO: use native allocation
-            auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory); // TODO: IMPORTANT!!!
-            self->bindMemory(std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset));
-            self->memoryAllocation->getAllocation() = self->allocation;
-            self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData;
-            //deviceMemory->getMapped() = allocInfo.pMappedData; // not sure...
-
-            //
-            self->destructor = [self = std::weak_ptr(self), allocator](){
-                auto of = self.lock();
-                vmaFreeMemory((const VmaAllocator&)allocator->getAllocator(), (VmaAllocation&)of->getMemoryAllocation());
-            };
-        };
-
-        return shared_from_this();
+        return self;
     };
 
     //
-    std::shared_ptr<MemoryAllocator> MemoryAllocatorVma::allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
+    std::shared_ptr<DeviceImage> MemoryAllocatorVma::allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const MemoryAllocationInfo& memAllocInfo = {}) {
         auto self = image;
         auto allocator = shared_from_this();
         auto device = this->device.lock();
@@ -178,30 +154,29 @@ namespace tom {
         self->info = info;
 
         // 
-        VmaAllocationCreateInfo allocCreateInfo = { .usage = memUsage };
+        VmaAllocationInfo allocInfo = {};
+        VmaAllocationCreateInfo allocCreateInfo = { .usage = reinterpret_cast<const VmaMemoryUsage&>(memAllocInfo.usage) };
         if (allocCreateInfo.usage != VMA_MEMORY_USAGE_GPU_ONLY) { 
             allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT; 
         };
 
         // 
         vk::throwResultException(vk::Result(vmaCreateImage((const VmaAllocator&)allocator->getAllocator(), (const VkImageCreateInfo*)&info, &allocCreateInfo, (VkImage*)&self->image, &((VmaAllocation&)self->allocation), nullptr)), "VMA image allocation failed...");
+        vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)self->allocation), &allocInfo);
 
         // 
         self->layoutHistory.clear();
         self->layoutHistory.push_back(info.initialLayout);
-
-        // get allocation info
-        VmaAllocationInfo allocInfo = {};
-        vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)self->allocation), &allocInfo);
 
         // wrap device memory
         auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);
         self->memoryAllocation = std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset);
         self->memoryAllocation->getAllocation() = self->allocation;
         self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData;
-        //deviceMemory->getMapped() = allocInfo.pMappedData; // not sure...
 
-        //deviceMemory->getAllocation() = allocation; // not sure...
+        // not sure...
+        //deviceMemory->getMapped() = allocInfo.pMappedData;
+        //deviceMemory->getAllocation() = allocation;
 
         self->destructor = [self = std::weak_ptr(self), allocator](){
             auto of = self.lock();
@@ -210,7 +185,7 @@ namespace tom {
             of->getMemoryAllocation() = nullptr;
         };
 
-        return shared_from_this();
+        return self;
     };
 
 };

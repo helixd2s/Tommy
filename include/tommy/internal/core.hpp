@@ -52,6 +52,27 @@ namespace tom {
     };
 
 
+    // 
+    struct MemoryAllocationInfo {
+        uint32_t sType = 0xFFA00001;
+        void* pNext = nullptr;
+        VmaMemoryUsage usage = VMA_MEMORY_USAGE_GPU_ONLY;
+        vk::Buffer buffer = {};
+        vk::Image image = {};
+
+        MemoryAllocationInfo withBuffer(const vk::Buffer& buffer = {}) {
+            auto info = MemoryAllocationInfo(*this);
+            info.buffer = buffer;
+            return info;
+        };
+
+        MemoryAllocationInfo withImage(const vk::Image& image = {}) {
+            auto info = MemoryAllocationInfo(*this);
+            info.image = image;
+            return info;
+        };
+    };
+
 
     //
     using PhysicalDeviceFeaturesChain = vk::StructureChain<vk::PhysicalDeviceFeatures2&, vk::PhysicalDeviceBufferDeviceAddressFeatures&>;

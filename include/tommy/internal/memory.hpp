@@ -51,6 +51,7 @@ namespace tom {
     class MemoryAllocation: public std::enable_shared_from_this<MemoryAllocation> {
     protected: friend MemoryAllocator; friend MemoryAllocatorVma;
         std::shared_ptr<tom::DeviceMemory> deviceMemory = {};
+        std::function<void()> destructor = {};
 
         // 
         vk::DeviceSize memoryOffset = 0ull;
@@ -60,6 +61,12 @@ namespace tom {
     public: 
         MemoryAllocation(const std::shared_ptr<tom::DeviceMemory>& deviceMemory = {}, const vk::DeviceSize& memoryOffset = 0ull): deviceMemory(deviceMemory), memoryOffset(memoryOffset) {
             
+        };
+
+        // 
+        ~MemoryAllocation() {
+            if (this->destructor) { this->destructor(); };
+            if (this->deviceMemory) { this->deviceMemory = {}; };
         };
 
         // 
