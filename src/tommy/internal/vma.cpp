@@ -13,6 +13,14 @@
 // 
 namespace tom {
 
+    // 
+    std::shared_ptr<MemoryAllocator>& Device::createAllocatorVma() {
+        if (!this->allocator) {
+            this->allocator = std::dynamic_pointer_cast<MemoryAllocator>(std::make_shared<MemoryAllocatorVma>(shared_from_this()));
+        };
+        return this->allocator;
+    };
+
     //
     std::shared_ptr<MemoryAllocator> MemoryAllocatorVma::constructor() { //
         auto device = this->device.lock();
@@ -58,7 +66,6 @@ namespace tom {
         //
         return shared_from_this();
     };
-
 
     // MemoryAllocationInfo
     std::shared_ptr<MemoryAllocation> MemoryAllocator::allocateMemory(const std::shared_ptr<MemoryAllocation>& allocation, const vk::MemoryRequirements2& memoryRequirements = {}, const MemoryAllocationInfo& memAllocInfo = {}) {
