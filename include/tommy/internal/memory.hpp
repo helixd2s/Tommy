@@ -13,14 +13,12 @@ namespace tom {
     class DeviceMemory: public std::enable_shared_from_this<DeviceMemory> {
     protected:
         std::shared_ptr<tom::Device> device = {};
+        std::function<void()> destructor = {};
 
         // 
         vk::DeviceMemory memory = {};
         void* allocation = nullptr;
         void* mapped = nullptr;
-
-        // 
-        std::function<void()> destructor = {};
 
     public: // 
         DeviceMemory(const std::shared_ptr<tom::Device>& device, const vk::DeviceMemory& memory = {}): device(device), memory(memory) {

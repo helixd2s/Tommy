@@ -7,29 +7,6 @@
 namespace tom {
 
     //
-    using PhysicalDeviceFeaturesChain = vk::StructureChain<vk::PhysicalDeviceFeatures2&, vk::PhysicalDeviceBufferDeviceAddressFeatures&>;
-    using PhysicalDevicePropertiesChain = vk::StructureChain<vk::PhysicalDeviceProperties2&>;
-
-    //
-    struct PhysicalDeviceFeatures {
-        vk::PhysicalDeviceFeatures2 features = {};
-        vk::PhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressFeatures = {};
-    };
-
-    //
-    struct PhysicalDeviceProperties {
-        vk::PhysicalDeviceProperties2 properties = {};
-    };
-
-    //
-    struct SurfaceProperties {
-        vk::Bool32 supported = false;
-        vk::SurfaceCapabilities2KHR capabilities = {};
-        std::vector<vk::PresentModeKHR> presentModes = {};
-        std::vector<vk::SurfaceFormat2KHR> formats = {};
-    };
-
-    //
     class Context: public std::enable_shared_from_this<Context> { public: 
         bool initialized = false;
         vk::DispatchLoaderDynamic dispatch = {};
@@ -64,69 +41,7 @@ namespace tom {
         Instance() { this->constructor(); };
 
         //
-        virtual std::shared_ptr<Instance> constructor() {
-            vk::ApplicationInfo application_info = vk::ApplicationInfo{
-                .pApplicationName = "Tommy Based App",
-                .applicationVersion = VK_MAKE_VERSION(1,0,0),
-                .pEngineName = "Tommy Library",
-                .engineVersion = VK_MAKE_VERSION(1,0,0),
-                .apiVersion = VK_MAKE_VERSION(1,2,0)
-            };
-
-            // 
-            std::vector<const char*> preferedLayers = {};
-            std::vector<const char*> preferedExtensions = { "VK_KHR_surface","VK_KHR_win32_surface" };
-
-            //
-            std::vector<const char*> excludedLayers = {};
-            std::vector<const char*> excludedExtensions = {};
-
-#ifdef NDEBUG
-            preferedLayers.push_back("VK_LAYER_LUNARG_standard_validation");
-            preferedExtensions.push_back("VK_EXT_debug_report");
-#endif
-
-            //
-            if (!context) { context = std::make_shared<Context>(); };
-
-            // 
-            for (uintptr_t i=0;i<preferedExtensions.size();i++) {
-                const auto& name = preferedExtensions[i];
-                bool found = false;
-                for (auto& prop : context->extensionProperties) {
-                    if (found = found || (strcmp(name, prop.extensionName) == 0)) break;
-                };
-                if (!found) {
-                    excludedExtensions.push_back(name);
-                    preferedExtensions.erase(preferedExtensions.begin()+i);
-                };
-            };
-
-            // 
-            for (uintptr_t i=0;i<preferedLayers.size();i++) {
-                const auto& name = preferedLayers[i];
-                bool found = false;
-                for (auto& prop : context->layerProperties) {
-                    if (found = found || (strcmp(name, prop.layerName) == 0)) break;
-                };
-                if (!found) {
-                    excludedLayers.push_back(name);
-                    preferedLayers.erase(preferedLayers.begin()+i);
-                };
-            };
-
-            // 
-            this->dispatch = vk::DispatchLoaderDynamic(this->instance = vk::createInstance(vk::InstanceCreateInfo{
-                .pApplicationInfo = &application_info,
-                .enabledLayerCount = static_cast<uint32_t>(preferedLayers.size()),
-                .ppEnabledLayerNames = preferedLayers.data(),
-                .enabledExtensionCount = static_cast<uint32_t>(preferedExtensions.size()),
-                .ppEnabledExtensionNames = preferedExtensions.data()
-            }), vkGetInstanceProcAddr);
-
-            // 
-            return shared_from_this();
-        };
+        virtual std::shared_ptr<Instance> constructor();
 
         // 
         virtual inline std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices();
@@ -179,54 +94,9 @@ namespace tom {
         };
 
         //
-        virtual std::shared_ptr<PhysicalDevice> constructor() {
-            this->properties = PhysicalDeviceProperties{};
-            this->features = PhysicalDeviceFeatures{};
-
-            // 
-            auto propertiesChain = PhysicalDevicePropertiesChain(this->properties.properties);
-            auto featuresChain = PhysicalDeviceFeaturesChain(this->features.features, this->features.bufferDeviceAddressFeatures);
-
-            // 
-            physicalDevice.getProperties2(this->propertiesChain = propertiesChain);
-            physicalDevice.getFeatures2(this->featuresChain = featuresChain);
-
-            // 
-            this->memoryProperties = physicalDevice.getMemoryProperties2();
-            this->queueFamilyProperties = physicalDevice.getQueueFamilyProperties2();
-            this->extensionProperties = physicalDevice.enumerateDeviceExtensionProperties();
-            this->layerProperties = physicalDevice.enumerateDeviceLayerProperties();
-
-            //
-            return shared_from_this();
-        };
-
-        //
-        virtual std::unordered_map<uint32_t, SurfaceProperties> getSurfaceInfo(const vk::SurfaceKHR& surface) const {
-            std::unordered_map<uint32_t, SurfaceProperties> surfaceInfo = {};
-            uint32_t I=0u; for (auto& property : queueFamilyProperties) { const uint32_t i = I++;
-                SurfaceProperties props = {};
-                props.supported = physicalDevice.getSurfaceSupportKHR(i, surface);
-                props.capabilities = physicalDevice.getSurfaceCapabilities2KHR(vk::PhysicalDeviceSurfaceInfo2KHR{ .surface = surface });
-                props.formats = physicalDevice.getSurfaceFormats2KHR(vk::PhysicalDeviceSurfaceInfo2KHR{ .surface = surface });
-                props.presentModes = physicalDevice.getSurfacePresentModesKHR(surface);
-                surfaceInfo[i] = props;
-            };
-            return surfaceInfo;
-        };
-
-        //
-        virtual uint32_t getMemoryType(const uint32_t& memoryTypeBitsRequirement, const vk::MemoryPropertyFlags& requiredProperties = vk::MemoryPropertyFlagBits::eDeviceLocal) const {
-            const uint32_t memoryCount = memoryProperties.memoryProperties.memoryTypeCount;
-            for (uint32_t memoryIndex = 0; memoryIndex < memoryCount; ++memoryIndex) {
-                const uint32_t memoryTypeBits = (1 << memoryIndex);
-                const bool isRequiredMemoryType = memoryTypeBitsRequirement & memoryTypeBits;
-                const auto properties = memoryProperties.memoryProperties.memoryTypes[memoryIndex].propertyFlags;
-                const bool hasRequiredProperties = (properties & requiredProperties) == requiredProperties;
-                if (isRequiredMemoryType && hasRequiredProperties) return static_cast<uint32_t>(memoryIndex);
-            };
-            return 0u;
-        };
+        virtual std::shared_ptr<PhysicalDevice> constructor();
+        virtual std::unordered_map<uint32_t, SurfaceProperties> getSurfaceInfo(const vk::SurfaceKHR& surface) const;
+        virtual uint32_t getMemoryType(const uint32_t& memoryTypeBitsRequirement, const vk::MemoryPropertyFlags& requiredProperties = vk::MemoryPropertyFlagBits::eDeviceLocal) const;
 
         // 
         virtual std::shared_ptr<Instance> getInstance() { return instance.lock(); };
@@ -254,21 +124,7 @@ namespace tom {
     };
 
 
-    //
-    std::vector<std::shared_ptr<PhysicalDevice>>& Instance::enumeratePhysicalDevices() {
-        if (physicalDevices.size() > 0) {
-            std::vector<vk::PhysicalDevice> devices = instance.enumeratePhysicalDevices();
-            for (auto& device : devices) {
-                physicalDevices.push_back(std::make_shared<PhysicalDevice>(shared_from_this(), device));
-            };
-        };
-        return physicalDevices;
-    };
-
-    //
-    const std::vector<std::shared_ptr<PhysicalDevice>>& Instance::enumeratePhysicalDevices() const {
-        return physicalDevices;
-    };
+    
 
 
 };

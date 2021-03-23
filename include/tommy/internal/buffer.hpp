@@ -13,6 +13,7 @@ namespace tom {
     protected: friend MemoryAllocator; friend MemoryAllocatorVma; // 
         std::shared_ptr<tom::Device> device = {};
         std::shared_ptr<tom::MemoryAllocation> memoryAllocation = {};
+        std::function<void()> destructor = {};
 
         // 
         vk::Buffer buffer = {};
@@ -21,9 +22,7 @@ namespace tom {
 
         // 
         vk::BufferCreateInfo info = {};
-
-        // 
-        std::function<void()> destructor = {};
+        
 
     public: // 
         DeviceBuffer(const std::shared_ptr<tom::Device>& device, const vk::Buffer& buffer = {}): device(device), buffer(buffer) {
@@ -45,34 +44,12 @@ namespace tom {
         };
 
         // 
-        virtual vk::DeviceAddress& getDeviceAddress() {
-            return (address = this->device->getDevice().getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = this->buffer }));
-        };
+        virtual vk::DeviceAddress& getDeviceAddress();
+        virtual vk::DeviceAddress getDeviceAddress() const;
 
         // 
-        virtual vk::DeviceAddress getDeviceAddress() const {
-            return (address ? address : this->device->getDevice().getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = this->buffer }));
-        };
-
-        // 
-        virtual std::shared_ptr<DeviceBuffer> bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
-            if (memoryAllocation) {
-                this->memoryAllocation = memoryAllocation;
-                this->device->getDevice().bindBufferMemory2(vk::BindBufferMemoryInfo{
-                    .buffer = this->buffer,
-                    .memory = this->memoryAllocation->getDeviceMemory()->getMemory(),
-                    .memoryOffset = this->memoryAllocation->getOffset()
-                });
-            };
-            return shared_from_this();
-        };
-
-        // 
-        virtual std::shared_ptr<DeviceBuffer> create(const vk::BufferCreateInfo& info = {}, const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
-            this->buffer = this->device->getDevice().createBuffer( this->info = info.queueFamilyIndexCount ? vk::BufferCreateInfo(info) : vk::BufferCreateInfo(info).setQueueFamilyIndices(this->device->getQueueFamilyIndices()) );
-            this->bindMemory(memoryAllocation);
-            return shared_from_this();
-        };
+        virtual std::shared_ptr<DeviceBuffer> bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {});
+        virtual std::shared_ptr<DeviceBuffer> create(const vk::BufferCreateInfo& info = {}, const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {});
 
         // 
         virtual inline std::shared_ptr<tom::MemoryAllocation>& getMemoryAllocation() { return memoryAllocation; };

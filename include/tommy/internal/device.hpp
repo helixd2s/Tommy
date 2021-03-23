@@ -8,26 +8,6 @@
 namespace tom {
 
     // 
-    class DescriptorSetSource: public std::enable_shared_from_this<DescriptorSetSource> { public:
-        std::vector<vk::DescriptorBufferInfo> buffers = {};
-        std::vector<vk::DescriptorImageInfo> textures2d = {};
-    };
-
-    // 
-    class DescriptorSetLayouts: public std::enable_shared_from_this<DescriptorSetLayouts> { public:
-        vk::DescriptorSetLayout buffers = {};
-        vk::DescriptorSetLayout textures = {};
-        vk::DescriptorSetLayout images = {};
-    };
-
-    // 
-    class DescriptorSet: public std::enable_shared_from_this<DescriptorSet> { public:
-        vk::DescriptorSet buffers = {};
-        vk::DescriptorSet textures = {};
-        vk::DescriptorSet images = {};
-    };
-
-    // 
     class Queue: public std::enable_shared_from_this<Queue> {
     protected:  //
         //std::shared_ptr<tom::Device> device = {};
@@ -148,6 +128,10 @@ namespace tom {
         virtual std::shared_ptr<MemoryAllocator> allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY);
 
         //
+        virtual std::shared_ptr<MemoryAllocator> allocateImage(const std::shared_ptr<DeviceImage>& image, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY);
+        virtual std::shared_ptr<MemoryAllocator> allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY);
+
+        //
         virtual std::shared_ptr<Device> getDevice() { return device.lock(); };
         virtual inline void*& getAllocator() { return allocator; };
 
@@ -169,6 +153,11 @@ namespace tom {
         // 
         virtual std::shared_ptr<MemoryAllocator> allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) override;
         virtual std::shared_ptr<MemoryAllocator> allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) override;
+
+        //
+        virtual std::shared_ptr<MemoryAllocator> allocateImage(const std::shared_ptr<DeviceImage>& image, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) override;
+        virtual std::shared_ptr<MemoryAllocator> allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) override;
+
     };
 
 
