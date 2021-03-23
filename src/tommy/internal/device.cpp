@@ -11,7 +11,7 @@
 // 
 namespace tom {
 
-    //
+    // 
     std::shared_ptr<Device> Device::constructor() {
         this->descriptions = std::make_shared<tom::DescriptorSetSource>();
         this->descriptorSets = std::make_shared<tom::DescriptorSet>();
@@ -77,7 +77,7 @@ namespace tom {
         };
 
         // 
-        this->dispatch = vk::DispatchLoaderDynamic( this->instance->getInstance(), vkGetInstanceProcAddr, this->device = this->physical->getPhysicalDevice().createDevice(vk::StructureChain<vk::DeviceCreateInfo, vk::PhysicalDeviceFeatures2>{
+        this->dispatch = vk::DispatchLoaderDynamic( this->getInstance()->getInstance(), vkGetInstanceProcAddr, this->device = this->physical->getPhysicalDevice().createDevice(vk::StructureChain<vk::DeviceCreateInfo, vk::PhysicalDeviceFeatures2>{
             vk::DeviceCreateInfo{
                 .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
                 .pQueueCreateInfos = queueCreateInfos.data(),
@@ -134,7 +134,7 @@ namespace tom {
         std::shared_ptr<DeviceBuffer> deviceBuffer = {};
 
         if (buffers.find(buffer) != buffers.end()) {
-            deviceBuffer = buffers.at(buffer).lock();
+            deviceBuffer = buffers.at(buffer);
         };
 
         return deviceBuffer;
@@ -145,7 +145,7 @@ namespace tom {
         std::shared_ptr<DeviceMemory> deviceMemoryObj = {};
 
         if (memories.find(deviceMemory) != memories.end()) {
-            deviceMemoryObj = memories.at(deviceMemory).lock();
+            deviceMemoryObj = memories.at(deviceMemory);
         };
 
         return deviceMemoryObj;
@@ -156,7 +156,7 @@ namespace tom {
         std::shared_ptr<DeviceBuffer> deviceBuffer = {};
 
         if (buffers.find(buffer) != buffers.end()) {
-            deviceBuffer = buffers.at(buffer).lock();
+            deviceBuffer = buffers.at(buffer);
         };
 
         if (!deviceBuffer) { 
@@ -172,7 +172,7 @@ namespace tom {
         std::shared_ptr<DeviceMemory> deviceMemoryObj = {};
 
         if (memories.find(deviceMemory) != memories.end()) {
-            deviceMemoryObj = memories.at(deviceMemory).lock();
+            deviceMemoryObj = memories.at(deviceMemory);
         };
 
         if (!deviceMemoryObj) { 

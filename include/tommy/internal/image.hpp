@@ -32,13 +32,13 @@ namespace tom {
 
         // 
         ~DeviceImage() {
-            auto& device = this->device.lock()->getDevice();
+            auto device = this->getDevice();
             if (this->destructor) { 
                 this->destructor();
             };
             if (this->image) {
-                device.bindImageMemory2(vk::BindImageMemoryInfo{ .image = this->image, .memory = {}, .memoryOffset = 0ull });
-                device.destroyImage(this->image);
+                device->getDevice().bindImageMemory2(vk::BindImageMemoryInfo{ .image = this->image, .memory = {}, .memoryOffset = 0ull });
+                device->getDevice().destroyImage(this->image);
                 this->image = vk::Image{};
             };
             this->destructor = {};

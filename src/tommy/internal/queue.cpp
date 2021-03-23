@@ -37,18 +37,18 @@ namespace tom {
 
     //
     std::future<vk::Result> Queue::submitOnce(const std::function<void(const vk::CommandBuffer&)>& cmdFn, const vk::SubmitInfo2KHR& submitInfo) const {
-        auto vkDevice = this->device.lock()->getDevice();
-        auto commandBuffers = vkDevice.allocateCommandBuffers(vk::CommandBufferAllocateInfo{
+        auto device = this->getDevice();
+        auto commandBuffers = device->getDevice().allocateCommandBuffers(vk::CommandBufferAllocateInfo{
             .commandPool = commandPool,
             .level = vk::CommandBufferLevel::ePrimary,
             .commandBufferCount = 1
         });
         cmdFn(commandBuffers[0]); // execute command constructor
         auto fence = this->submitCmds(commandBuffers, submitInfo);
-        return std::async(std::launch::async | std::launch::deferred, [this, fence, commandBuffers, vkDevice](){
-            auto result = vkDevice.waitForFences({fence}, true, 30ull * 1000ull * 1000ull * 1000ull);
-            vkDevice.destroyFence(fence);
-            vkDevice.freeCommandBuffers(commandPool, commandBuffers);
+        return std::async(std::launch::async | std::launch::deferred, [this, fence, commandBuffers, device](){
+            auto result = device->getDevice().waitForFences({fence}, true, 30ull * 1000ull * 1000ull * 1000ull);
+            device->getDevice().destroyFence(fence);
+            device->getDevice().freeCommandBuffers(commandPool, commandBuffers);
             return result;
         });
     };
