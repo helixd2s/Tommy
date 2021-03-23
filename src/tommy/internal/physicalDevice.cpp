@@ -1,12 +1,12 @@
 #pragma once
 
 //
+#include <tommy/internal/core.hpp>
 #include <tommy/internal/instance.hpp>
 #include <tommy/internal/device.hpp>
 
 // 
 namespace tom {
-
 
     //
     std::shared_ptr<PhysicalDevice> PhysicalDevice::constructor() {

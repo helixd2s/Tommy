@@ -1,6 +1,7 @@
 #pragma once
 
 //
+#include <tommy/internal/core.hpp>
 #include <tommy/internal/instance.hpp>
 #include <tommy/internal/device.hpp>
 
