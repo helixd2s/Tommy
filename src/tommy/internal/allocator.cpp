@@ -5,7 +5,7 @@
 #include <tommy/internal/device.hpp>
 #include <tommy/internal/memory.hpp>
 #include <tommy/internal/buffer.hpp>
-
+#include <tommy/internal/image.hpp>
 
 // 
 namespace tom {
@@ -49,6 +49,39 @@ namespace tom {
     //
     std::shared_ptr<MemoryAllocator> MemoryAllocator::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
         this->allocateBuffer(buffer->create(info), memUsage);
+        return shared_from_this();
+    };
+
+    // 
+    std::shared_ptr<MemoryAllocator> MemoryAllocator::allocateImage(const std::shared_ptr<DeviceImage>& image, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
+        auto self = image;
+        auto allocator = shared_from_this();
+        auto device = this->device.lock();
+
+        if (self->image) { // 
+            auto memoryRequirements = vk::StructureChain<vk::MemoryRequirements2, vk::MemoryDedicatedRequirementsKHR>{ vk::MemoryRequirements2{  }, vk::MemoryDedicatedRequirementsKHR{} };
+            device->getDevice().getImageMemoryRequirements2(vk::ImageMemoryRequirementsInfo2{ .image = self->image }, memoryRequirements);
+
+            // 
+            const auto& memReqs = memoryRequirements.get<vk::MemoryRequirements2>().memoryRequirements;
+
+            // 
+            self->bindMemory(std::make_shared<tom::MemoryAllocation>(device->allocateMemoryObject(allocator, vk::StructureChain<vk::MemoryAllocateInfo, vk::MemoryDedicatedAllocateInfoKHR, vk::ExternalMemoryImageCreateInfo>{
+                vk::MemoryAllocateInfo{
+                    .allocationSize = memReqs.size,
+                    .memoryTypeIndex = device->getPhysicalDevice()->getMemoryType(memReqs.memoryTypeBits),
+                },
+                vk::MemoryDedicatedAllocateInfoKHR{ .image = self->image },
+                vk::ExternalMemoryImageCreateInfo{}
+            }.get<vk::MemoryAllocateInfo>()), 0ull));
+        };
+
+        return shared_from_this();
+    };
+
+    //
+    std::shared_ptr<MemoryAllocator> MemoryAllocator::allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const VmaMemoryUsage& memUsage = VMA_MEMORY_USAGE_GPU_ONLY) {
+        this->allocateImage(image->create(info), memUsage);
         return shared_from_this();
     };
 

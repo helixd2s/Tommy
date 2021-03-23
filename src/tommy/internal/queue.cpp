@@ -45,10 +45,10 @@ namespace tom {
         });
         cmdFn(commandBuffers[0]); // execute command constructor
         auto fence = this->submitCmds(commandBuffers, submitInfo);
-        return std::async(std::launch::async | std::launch::deferred, [this, fence, commandBuffers, device](){
+        return std::async(std::launch::async | std::launch::deferred, [self = shared_from_this(), fence, commandBuffers, device](){
             auto result = device->getDevice().waitForFences({fence}, true, 30ull * 1000ull * 1000ull * 1000ull);
             device->getDevice().destroyFence(fence);
-            device->getDevice().freeCommandBuffers(commandPool, commandBuffers);
+            device->getDevice().freeCommandBuffers(self->commandPool, commandBuffers);
             return result;
         });
     };

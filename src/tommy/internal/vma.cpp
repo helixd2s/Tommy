@@ -80,12 +80,13 @@ namespace tom {
             auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory); // TODO: IMPORTANT!!!
             self->bindMemory(std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset));
             self->memoryAllocation->getAllocation() = self->allocation;
-            //self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData; // not sure...
-            deviceMemory->getMapped() = allocInfo.pMappedData;
+            self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData;
+            //deviceMemory->getMapped() = allocInfo.pMappedData; // not sure...
 
             //
-            self->destructor = [self, allocator](){
-                vmaFreeMemory((const VmaAllocator&)allocator->getAllocator(), (VmaAllocation&)self->getMemoryAllocation());
+            self->destructor = [self = std::weak_ptr(self), allocator](){
+                auto of = self.lock();
+                vmaFreeMemory((const VmaAllocator&)allocator->getAllocator(), (VmaAllocation&)of->getMemoryAllocation());
             };
         };
 
@@ -118,15 +119,16 @@ namespace tom {
         auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);
         self->memoryAllocation = std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset);
         self->memoryAllocation->getAllocation() = self->allocation;
-        //self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData; // not sure...
-        deviceMemory->getMapped() = allocInfo.pMappedData;
+        self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData;
+        //deviceMemory->getMapped() = allocInfo.pMappedData; // not sure...
 
         //deviceMemory->getAllocation() = allocation; // not sure...
 
-        self->destructor = [self, allocator](){
-            vmaDestroyBuffer((const VmaAllocator&)allocator->getAllocator(), self->getBuffer(), (VmaAllocation&)self->getMemoryAllocation());
-            self->getBuffer() = vk::Buffer{};
-            self->getMemoryAllocation() = nullptr;
+        self->destructor = [self = std::weak_ptr(self), allocator](){
+            auto of = self.lock();
+            vmaDestroyBuffer((const VmaAllocator&)allocator->getAllocator(), of->getBuffer(), (VmaAllocation&)of->getMemoryAllocation());
+            of->getBuffer() = vk::Buffer{};
+            of->getMemoryAllocation() = nullptr;
         };
 
         return shared_from_this();
@@ -153,12 +155,13 @@ namespace tom {
             auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory); // TODO: IMPORTANT!!!
             self->bindMemory(std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset));
             self->memoryAllocation->getAllocation() = self->allocation;
-            //self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData; // not sure...
-            deviceMemory->getMapped() = allocInfo.pMappedData;
+            self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData;
+            //deviceMemory->getMapped() = allocInfo.pMappedData; // not sure...
 
             //
-            self->destructor = [self, allocator](){
-                vmaFreeMemory((const VmaAllocator&)allocator->getAllocator(), (VmaAllocation&)self->getMemoryAllocation());
+            self->destructor = [self = std::weak_ptr(self), allocator](){
+                auto of = self.lock();
+                vmaFreeMemory((const VmaAllocator&)allocator->getAllocator(), (VmaAllocation&)of->getMemoryAllocation());
             };
         };
 
@@ -195,15 +198,16 @@ namespace tom {
         auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);
         self->memoryAllocation = std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset);
         self->memoryAllocation->getAllocation() = self->allocation;
-        //self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData; // not sure...
-        deviceMemory->getMapped() = allocInfo.pMappedData;
+        self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData;
+        //deviceMemory->getMapped() = allocInfo.pMappedData; // not sure...
 
         //deviceMemory->getAllocation() = allocation; // not sure...
 
-        self->destructor = [self, allocator](){
-            vmaDestroyImage((const VmaAllocator&)allocator->getAllocator(), self->getImage(), (VmaAllocation&)self->getMemoryAllocation());
-            self->getImage() = vk::Image{};
-            self->getMemoryAllocation() = nullptr;
+        self->destructor = [self = std::weak_ptr(self), allocator](){
+            auto of = self.lock();
+            vmaDestroyImage((const VmaAllocator&)allocator->getAllocator(), of->getImage(), (VmaAllocation&)of->getMemoryAllocation());
+            of->getImage() = vk::Image{};
+            of->getMemoryAllocation() = nullptr;
         };
 
         return shared_from_this();

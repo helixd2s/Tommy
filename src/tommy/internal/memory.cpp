@@ -12,8 +12,8 @@ namespace tom {
     std::shared_ptr<DeviceMemory> DeviceMemory::allocate(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
         auto device = this->getDevice();
         this->memory = device->getDevice().allocateMemory(info);
-        this->destructor = [this, device](){
-            auto& memory = this->getMemory();
+        this->destructor = [self = shared_from_this(), device](){
+            auto& memory = self->getMemory();
             if (memory) { device->getDevice().freeMemory(); };
             memory = vk::DeviceMemory{};
         };
