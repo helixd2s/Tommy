@@ -74,10 +74,7 @@ namespace tom {
         auto device = this->device.lock();
 
         // 
-        {
-            const auto& memReqs = memoryRequirements.memoryRequirements;
-
-            // 
+        {   // 
             VmaAllocationInfo allocInfo = {};
             VmaAllocationCreateInfo allocCreateInfo = { .usage = reinterpret_cast<const VmaMemoryUsage&>(memAllocInfo.usage) };
             if (allocCreateInfo.usage != VMA_MEMORY_USAGE_GPU_ONLY) { 
@@ -91,7 +88,7 @@ namespace tom {
             if (memAllocInfo.image) {
                 vk::throwResultException(vk::Result(vmaAllocateMemoryForImage((const VmaAllocator&)allocator->getAllocator(), memAllocInfo.image, &allocCreateInfo, &((VmaAllocation&)self->allocation), &allocInfo)), "VMA image allocation failed...");
             } else {
-                vk::throwResultException(vk::Result(vmaAllocateMemory((const VmaAllocator&)allocator->getAllocator(), (VkMemoryRequirements*)&memReqs, &allocCreateInfo, &((VmaAllocation&)self->allocation), &allocInfo)), "VMA memory allocation failed...");
+                vk::throwResultException(vk::Result(vmaAllocateMemory((const VmaAllocator&)allocator->getAllocator(), (VkMemoryRequirements*)&memoryRequirements.memoryRequirements, &allocCreateInfo, &((VmaAllocation&)self->allocation), &allocInfo)), "VMA memory allocation failed...");
             };
 
             // 
