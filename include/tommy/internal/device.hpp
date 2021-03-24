@@ -109,9 +109,8 @@ namespace tom {
         virtual std::shared_ptr<MemoryAllocator>& createAllocator();
         virtual std::shared_ptr<MemoryAllocator>& createAllocatorVma();
     };
-    
-    //
-    
+
+
 
     //
     class MemoryAllocator : public std::enable_shared_from_this<MemoryAllocator> { protected: // 

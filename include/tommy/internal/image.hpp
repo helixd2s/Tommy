@@ -73,7 +73,7 @@ namespace tom {
         vk::SamplerCreateInfo samplerInfo = {};
 
     public: // 
-        ImageView(const std::shared_ptr<tom::DeviceImage>& deviceImage, const vk::DescriptorImageInfo& descriptorInfo = {}): deviceImage(deviceImage), descriptorInfo(descriptorInfo) {
+        ImageView(const std::shared_ptr<tom::DeviceImage>& deviceImage, const vk::DescriptorImageInfo& info = {}): deviceImage(deviceImage), info(info) {
             this->constructor();
         };
 
@@ -92,7 +92,7 @@ namespace tom {
 
         // 
         virtual inline const std::shared_ptr<tom::DeviceImage>& getDeviceImage() const { return deviceImage; };
-        virtual inline vk::DescriptorImageInfo getInfo() const { return vk::DescriptorImageInfo{ info.imageView, info.sampler, deviceImage->getLayoutHistory().back() }; };
+        virtual inline vk::DescriptorImageInfo getInfo() const { return vk::DescriptorImageInfo{ info.sampler, info.imageView, deviceImage->getLayoutHistory().back() }; };
     };
 
 };

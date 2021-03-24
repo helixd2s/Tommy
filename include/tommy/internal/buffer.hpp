@@ -22,7 +22,7 @@ namespace tom {
 
         // 
         vk::BufferCreateInfo info = {};
-        
+
 
     public: // 
         DeviceBuffer(const std::shared_ptr<tom::Device>& device, const vk::Buffer& buffer = {}): device(device), buffer(buffer) {

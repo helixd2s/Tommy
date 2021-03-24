@@ -3,7 +3,7 @@
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 
 #include <vulkan/vulkan.hpp>
-#include <vulkan/vk_mem_alloc.h>
+//#include <vulkan/vk_mem_alloc.h>
 #include <glm/glm.hpp>
 #include <memory>
 #include <vector>
@@ -52,20 +52,33 @@ namespace tom {
     };
 
 
+    //
+    enum class MemoryUsage : uint32_t {
+        eUnknown = 0u,
+        eGPUOnly = 1u,
+        eCPUOnly = 2u,
+        eCPUtoGPU = 3u,
+        eGPUtoCPU = 4u,
+        eCPUCopy = 5u,
+        eGPULazilyAllocated = 6u
+    };
+
     // 
     struct MemoryAllocationInfo {
         uint32_t sType = 0xFFA00001;
         void* pNext = nullptr;
-        VmaMemoryUsage usage = VMA_MEMORY_USAGE_GPU_ONLY;
+        MemoryUsage usage = MemoryUsage::eGPUOnly;
         vk::Buffer buffer = {};
         vk::Image image = {};
 
+        // 
         MemoryAllocationInfo withBuffer(const vk::Buffer& buffer = {}) {
             auto info = MemoryAllocationInfo(*this);
             info.buffer = buffer;
             return info;
         };
 
+        // 
         MemoryAllocationInfo withImage(const vk::Image& image = {}) {
             auto info = MemoryAllocationInfo(*this);
             info.image = image;
