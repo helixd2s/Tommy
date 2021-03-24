@@ -24,24 +24,16 @@ namespace tom {
         auto allocator = shared_from_this();
         auto device = this->device.lock();
 
-        // 
-        {
-            const auto& memReqs = memoryRequirements.memoryRequirements;
-
-            // 
-            auto memInfoExt = vk::StructureChain<vk::MemoryDedicatedAllocateInfoKHR, vk::ExternalMemoryBufferCreateInfo>{
-                vk::MemoryDedicatedAllocateInfoKHR{ .image = allocInfo.image, .buffer = allocInfo.buffer },
-                vk::ExternalMemoryBufferCreateInfo{}
-            };
-
-            // TODO: smart allocation 
-            self->getOffset() = 0ull;
-            self->getDeviceMemory() = device->allocateMemoryObject(allocator, vk::MemoryAllocateInfo{
-                .pNext = &memInfoExt.get<vk::MemoryDedicatedAllocateInfoKHR>(),
-                .allocationSize = memReqs.size,
-                .memoryTypeIndex = device->getPhysicalDevice()->getMemoryType(memReqs.memoryTypeBits),
-            });
-        };
+        // TODO: smart allocation 
+        self->getOffset() = 0ull;
+        self->getDeviceMemory() = device->allocateMemoryObject(allocator, vk::StructureChain<vk::MemoryAllocateInfo, vk::MemoryDedicatedAllocateInfoKHR, vk::ExternalMemoryBufferCreateInfo>{
+            vk::MemoryAllocateInfo{
+                .allocationSize = memoryRequirements.memoryRequirements.size,
+                .memoryTypeIndex = device->getPhysicalDevice()->getMemoryType(memoryRequirements.memoryRequirements.memoryTypeBits),
+            },
+            vk::MemoryDedicatedAllocateInfoKHR{ .image = allocInfo.image, .buffer = allocInfo.buffer },
+            vk::ExternalMemoryBufferCreateInfo{}
+        }.get<vk::MemoryAllocateInfo>());
 
         return self;
     };
