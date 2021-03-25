@@ -200,7 +200,7 @@ namespace tom {
     // 
     vk::Buffer Device::setDeviceBufferObject(const std::shared_ptr<DeviceBuffer>& deviceBuffer = {}) {
         vk::Buffer buffer = deviceBuffer->getBuffer(); // determine key
-        if (this->buffers.find(buffer) != this->buffers.end()) {
+        if (this->buffers.find(buffer) == this->buffers.end()) {
             this->buffers[buffer] = deviceBuffer;
         };
         return buffer;
