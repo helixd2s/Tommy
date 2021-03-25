@@ -16,7 +16,7 @@ namespace tom {
 
     class Device;
     class Instance;
-    class Buffer;
+    class BufferAllocation;
     class Queue;
 
     class ImageView;
@@ -108,6 +108,13 @@ namespace tom {
         vk::SurfaceCapabilities2KHR capabilities = {};
         std::vector<vk::PresentModeKHR> presentModes = {};
         std::vector<vk::SurfaceFormat2KHR> formats = {};
+    };
+
+
+    //
+    struct ImageViewKey {
+        uint32_t type = 0u;
+        uint32_t binding = 0u;
     };
 
 };

@@ -36,7 +36,9 @@ namespace tom {
 
     // 
     std::shared_ptr<DeviceBuffer> DeviceBuffer::create(const vk::BufferCreateInfo& info = {}, const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
-        this->buffer = this->getDevice()->getDevice().createBuffer( this->info = info.queueFamilyIndexCount ? vk::BufferCreateInfo(info) : vk::BufferCreateInfo(info).setQueueFamilyIndices(this->getDevice()->getQueueFamilyIndices()) );
+        auto device = this->getDevice();
+        this->buffer = device->getDevice().createBuffer( this->info = info.queueFamilyIndexCount ? vk::BufferCreateInfo(info) : vk::BufferCreateInfo(info).setQueueFamilyIndices(this->getDevice()->getQueueFamilyIndices()) );
+        device->setDeviceBufferObject(shared_from_this());
         this->bindMemory(memoryAllocation);
         this->address = 0ull;
         return shared_from_this();

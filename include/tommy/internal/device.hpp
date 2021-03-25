@@ -61,9 +61,10 @@ namespace tom {
         std::shared_ptr<MemoryAllocator> allocator = {};
 
         // 
-        std::unordered_map<uintptr_t, std::shared_ptr<Buffer>> bufferAllocations = {};
+        std::unordered_map<vk::DeviceAddress, std::shared_ptr<BufferAllocation>> bufferAllocations = {};
         std::unordered_map<vk::Buffer, std::shared_ptr<DeviceBuffer>> buffers = {};
         std::unordered_map<vk::DeviceMemory, std::shared_ptr<DeviceMemory>> memories = {};
+        std::unordered_map<ImageViewKey, std::shared_ptr<ImageView>> imageViews = {};
 
         // 
         std::shared_ptr<tom::DescriptorSetSource> descriptions = {};
@@ -93,6 +94,12 @@ namespace tom {
         virtual std::shared_ptr<DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer);
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory);
         virtual std::shared_ptr<DeviceMemory> allocateMemoryObject(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
+        virtual std::shared_ptr<BufferAllocation> getBufferAllocationObject(const vk::DeviceAddress& deviceAddress = 0ull);
+
+        // 
+        virtual vk::Buffer setDeviceBufferObject(const std::shared_ptr<DeviceBuffer>& deviceBuffer = {});
+        virtual vk::DeviceMemory setDeviceMemoryObject(const std::shared_ptr<DeviceMemory>& deviceMemoryObj = {});
+        virtual vk::DeviceAddress setBufferAllocationObject(const std::shared_ptr<BufferAllocation>& allocation = {});
 
         // 
         virtual inline const vk::DispatchLoaderDynamic& getDispatch() const { return dispatch; };
@@ -104,6 +111,8 @@ namespace tom {
         virtual inline const std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) const { return physical; };
         virtual std::shared_ptr<DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer) const;
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) const;
+        virtual std::shared_ptr<BufferAllocation> getBufferAllocationObject(const vk::DeviceAddress& deviceAddress = 0ull) const;
+        //virtual vk::DeviceAddress setBufferAllocationObject(const vk::DeviceAddress& deviceAddress = 0ull, const std::shared_ptr<BufferAllocation>& allocation = {}) const;
 
         //
         virtual std::shared_ptr<MemoryAllocator>& createAllocator();

@@ -12,17 +12,18 @@
 namespace tom {
 
     // 
+    const std::vector<const char*> defaultLayers = {};
+    const std::vector<const char*> defaultExtensions = { "VK_KHR_swapchain", "VK_KHR_buffer_device_address" };
+
+    // 
     std::shared_ptr<Device> Device::constructor() {
         this->descriptions = std::make_shared<tom::DescriptorSetSource>();
         this->descriptorSets = std::make_shared<tom::DescriptorSet>();
         this->descriptorSetLayouts = std::make_shared<tom::DescriptorSetLayouts>();
 
         // 
-        std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos = {};
-
-        // 
-        std::vector<const char*> preferedLayers = {};
-        std::vector<const char*> preferedExtensions = { "VK_KHR_swapchain", "VK_KHR_buffer_device_address" };
+        std::vector<const char*> preferedLayers = defaultLayers;
+        std::vector<const char*> preferedExtensions = defaultExtensions;
 
         //
         std::vector<const char*> excludedLayers = {};
@@ -60,6 +61,9 @@ namespace tom {
                 preferedLayers.erase(preferedLayers.begin()+i);
             };
         };
+
+        // 
+        std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos = {};
 
         // 
         auto& queueFamilyProperties = physical->getQueueFamilyProperties();
@@ -127,41 +131,34 @@ namespace tom {
     };
 
 
-
-
     // 
     std::shared_ptr<DeviceBuffer> Device::getDeviceBufferObject(const vk::Buffer& buffer) const {
-        std::shared_ptr<DeviceBuffer> deviceBuffer = {};
-
-        if (buffers.find(buffer) != buffers.end()) {
-            deviceBuffer = buffers.at(buffer);
-        };
-
-        return deviceBuffer;
+        return (this->buffers.find(buffer) != this->buffers.end()) ? this->buffers.at(buffer) : std::shared_ptr<DeviceBuffer>{};
     };
 
     // 
     std::shared_ptr<DeviceMemory> Device::getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) const {
-        std::shared_ptr<DeviceMemory> deviceMemoryObj = {};
-
-        if (memories.find(deviceMemory) != memories.end()) {
-            deviceMemoryObj = memories.at(deviceMemory);
-        };
-
-        return deviceMemoryObj;
+        return (this->memories.find(deviceMemory) != this->memories.end()) ? this->memories.at(deviceMemory) : std::shared_ptr<DeviceMemory>{};
     };
+
+    // 
+    std::shared_ptr<DeviceMemory> Device::allocateMemoryObject(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
+        auto deviceMemoryObj = std::make_shared<DeviceMemory>(shared_from_this())->allocate(allocator, info);
+        auto deviceMemory = deviceMemoryObj->getMemory(); // determine a key
+        return (this->memories[deviceMemory] = deviceMemoryObj);
+    };
+
 
     // 
     std::shared_ptr<DeviceBuffer> Device::getDeviceBufferObject(const vk::Buffer& buffer) {
         std::shared_ptr<DeviceBuffer> deviceBuffer = {};
 
-        if (buffers.find(buffer) != buffers.end()) {
-            deviceBuffer = buffers.at(buffer);
+        if (this->buffers.find(buffer) != this->buffers.end()) {
+            deviceBuffer = this->buffers.at(buffer);
         };
 
         if (!deviceBuffer) { 
-            deviceBuffer = std::make_shared<DeviceBuffer>(shared_from_this(), buffer);
-            buffers.insert(std::make_pair<vk::Buffer, std::weak_ptr<DeviceBuffer>>(vk::Buffer(buffer), std::weak_ptr<DeviceBuffer>(deviceBuffer)));
+            this->buffers[buffer] = (deviceBuffer = std::make_shared<DeviceBuffer>(shared_from_this(), buffer));
         };
 
         return deviceBuffer;
@@ -171,28 +168,60 @@ namespace tom {
     std::shared_ptr<DeviceMemory> Device::getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) {
         std::shared_ptr<DeviceMemory> deviceMemoryObj = {};
 
-        if (memories.find(deviceMemory) != memories.end()) {
-            deviceMemoryObj = memories.at(deviceMemory);
+        if (this->memories.find(deviceMemory) != this->memories.end()) {
+            deviceMemoryObj = this->memories.at(deviceMemory);
         };
 
         if (!deviceMemoryObj) { 
-            deviceMemoryObj = std::make_shared<DeviceMemory>(shared_from_this(), deviceMemory);
-            memories.insert(std::make_pair<vk::DeviceMemory, std::weak_ptr<DeviceMemory>>(vk::DeviceMemory(deviceMemory), std::weak_ptr<DeviceMemory>(deviceMemoryObj)));
+            this->memories[deviceMemory] = (deviceMemoryObj = std::make_shared<DeviceMemory>(shared_from_this(), deviceMemory));
         };
 
         return deviceMemoryObj;
     };
 
-    // 
-    std::shared_ptr<DeviceMemory> Device::allocateMemoryObject(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
-        std::shared_ptr<DeviceMemory> deviceMemoryObj = std::make_shared<DeviceMemory>(shared_from_this());
+    //
+    std::shared_ptr<BufferAllocation> Device::getBufferAllocationObject(const vk::DeviceAddress& deviceAddress = 0ull) {
+        std::shared_ptr<BufferAllocation> bufferAllocation = {};
 
-        if (!deviceMemoryObj) {
-            deviceMemoryObj->allocate(allocator, info);
-            memories.insert(std::make_pair<vk::DeviceMemory, std::weak_ptr<DeviceMemory>>(vk::DeviceMemory(deviceMemoryObj->getMemory()), std::weak_ptr<DeviceMemory>(deviceMemoryObj)));
+        if (this->bufferAllocations.find(deviceAddress) != this->bufferAllocations.end()) {
+            bufferAllocation = this->bufferAllocations.at(deviceAddress);
         };
 
-        return deviceMemoryObj;
+        if (!bufferAllocation) {
+            this->bufferAllocations[deviceAddress] = (bufferAllocation = std::make_shared<BufferAllocation>());
+            bufferAllocation->getDeviceAddressDefined() = deviceAddress;
+        };
+
+        return bufferAllocation;
+    };
+
+
+
+    // 
+    vk::Buffer Device::setDeviceBufferObject(const std::shared_ptr<DeviceBuffer>& deviceBuffer = {}) {
+        vk::Buffer buffer = deviceBuffer->getBuffer(); // determine key
+        if (this->buffers.find(buffer) != this->buffers.end()) {
+            this->buffers[buffer] = deviceBuffer;
+        };
+        return buffer;
+    };
+
+    // 
+    vk::DeviceMemory Device::setDeviceMemoryObject(const std::shared_ptr<DeviceMemory>& deviceMemoryObj = {}) {
+        vk::DeviceMemory deviceMemory = deviceMemoryObj->getMemory(); // determine key
+        if (this->memories.find(deviceMemory) == this->memories.end()) { 
+            this->memories[deviceMemory] = deviceMemoryObj;
+        };
+        return deviceMemory;
+    };
+
+    //
+    vk::DeviceAddress Device::setBufferAllocationObject(const std::shared_ptr<BufferAllocation>& bufferAllocation = {}) {
+        vk::DeviceAddress deviceAddress = bufferAllocation->getDeviceAddressDefined(); // determine key
+        if (this->bufferAllocations.find(deviceAddress) == this->bufferAllocations.end()) {
+            this->bufferAllocations[deviceAddress] = bufferAllocation;
+        };
+        return deviceAddress;
     };
 
 };

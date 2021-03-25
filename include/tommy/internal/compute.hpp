@@ -16,7 +16,7 @@ namespace tom {
         public: 
         Compute() {
             
-        }
+        };
     };
 
 };

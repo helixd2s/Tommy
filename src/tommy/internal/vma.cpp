@@ -127,6 +127,7 @@ namespace tom {
         // 
         vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getAllocator(), (const VkBufferCreateInfo*)&info, &allocCreateInfo, (VkBuffer*)&self->buffer, &((VmaAllocation&)self->allocation), nullptr)), "VMA buffer allocation failed...");
         vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)self->allocation), &allocInfo);
+        device->setDeviceBufferObject(self);
 
         // wrap device memory
         auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);

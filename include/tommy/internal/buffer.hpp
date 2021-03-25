@@ -87,12 +87,12 @@ namespace tom {
         };
 
         // 
-        virtual inline vk::DeviceAddress getDeviceAddress() { return address ? address : (deviceBuffer->getDeviceAddress() + bufferInfo.offset); };
+        virtual inline vk::DeviceAddress getDeviceAddress() { address = (address ? address : (deviceBuffer->getDeviceAddress() + bufferInfo.offset)); return deviceBuffer->getDevice()->setBufferAllocationObject(shared_from_this()); };
         virtual inline vk::DescriptorBufferInfo& getBufferInfo() { if (deviceBuffer) { bufferInfo.buffer = deviceBuffer->getBuffer(); }; return bufferInfo; };
         virtual inline std::shared_ptr<tom::DeviceBuffer>& getDeviceBuffer() { return deviceBuffer; };
         virtual inline vk::DeviceSize& getOffset() { return bufferInfo.offset; };
         virtual inline vk::DeviceSize& getRange() { return bufferInfo.range; };
-        virtual inline vk::DeviceAddress& getDeviceAddressDefined() { return (address = this->getDeviceAddress()); };
+        virtual inline vk::DeviceAddress& getDeviceAddressDefined() { return (address = address ? address : this->getDeviceAddress()); };
 
         // 
         virtual inline vk::DeviceAddress getDeviceAddress() const { return address ? address : (deviceBuffer->getDeviceAddress() + bufferInfo.offset); };

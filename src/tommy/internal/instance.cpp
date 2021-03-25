@@ -9,6 +9,10 @@
 namespace tom {
 
     // 
+    const std::vector<const char*> defaultExtensions = { "VK_KHR_surface","VK_KHR_win32_surface" };
+    const std::vector<const char*> defaultLayers = {  };
+
+    // 
     std::shared_ptr<Instance> Instance::constructor() {
         vk::ApplicationInfo application_info = vk::ApplicationInfo{
             .pApplicationName = "Tommy Based App",
@@ -19,8 +23,8 @@ namespace tom {
         };
 
         // 
-        std::vector<const char*> preferedLayers = {};
-        std::vector<const char*> preferedExtensions = { "VK_KHR_surface","VK_KHR_win32_surface" };
+        std::vector<const char*> preferedLayers = defaultLayers;
+        std::vector<const char*> preferedExtensions = defaultExtensions;
 
         //
         std::vector<const char*> excludedLayers = {};
