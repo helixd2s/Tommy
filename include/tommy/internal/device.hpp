@@ -95,11 +95,13 @@ namespace tom {
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory);
         virtual std::shared_ptr<DeviceMemory> allocateMemoryObject(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
         virtual std::shared_ptr<BufferAllocation> getBufferAllocationObject(const vk::DeviceAddress& deviceAddress = 0ull);
+        virtual std::shared_ptr<ImageView> getImageViewObject(const ImageViewKey& imageViewKey);
 
         // 
         virtual vk::Buffer setDeviceBufferObject(const std::shared_ptr<DeviceBuffer>& deviceBuffer = {});
         virtual vk::DeviceMemory setDeviceMemoryObject(const std::shared_ptr<DeviceMemory>& deviceMemoryObj = {});
         virtual vk::DeviceAddress setBufferAllocationObject(const std::shared_ptr<BufferAllocation>& allocation = {});
+        virtual ImageViewKey setImageViewObject(const std::shared_ptr<ImageView>& imageViewObj = {});
 
         // 
         virtual inline const vk::DispatchLoaderDynamic& getDispatch() const { return dispatch; };
@@ -111,6 +113,7 @@ namespace tom {
         virtual inline const std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) const { return physical; };
         virtual std::shared_ptr<DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer) const;
         virtual std::shared_ptr<DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) const;
+        virtual std::shared_ptr<ImageView> getImageViewObject(const ImageViewKey& imageViewKey) const;
         virtual std::shared_ptr<BufferAllocation> getBufferAllocationObject(const vk::DeviceAddress& deviceAddress = 0ull) const;
         //virtual vk::DeviceAddress setBufferAllocationObject(const vk::DeviceAddress& deviceAddress = 0ull, const std::shared_ptr<BufferAllocation>& allocation = {}) const;
 

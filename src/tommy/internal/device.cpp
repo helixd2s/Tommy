@@ -127,6 +127,11 @@ namespace tom {
         ).get<vk::DescriptorPoolCreateInfo>());
 
         //
+        for (int i=0;i<7;i++) {
+            this->descriptions->typedImageViews.push_back({});
+        };
+
+        //
         return shared_from_this();
     };
 
@@ -142,12 +147,32 @@ namespace tom {
     };
 
     // 
+    std::shared_ptr<ImageView> Device::getImageViewObject(const ImageViewKey& imageViewKey) const {
+        return (this->imageViews.find(imageViewKey) != this->imageViews.end()) ? this->imageViews.at(imageViewKey) : std::shared_ptr<ImageView>{};
+    };
+
+    // 
     std::shared_ptr<DeviceMemory> Device::allocateMemoryObject(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
         auto deviceMemoryObj = std::make_shared<DeviceMemory>(shared_from_this())->allocate(allocator, info);
         auto deviceMemory = deviceMemoryObj->getMemory(); // determine a key
         return (this->memories[deviceMemory] = deviceMemoryObj);
     };
 
+
+    // 
+    std::shared_ptr<ImageView> Device::getImageViewObject(const ImageViewKey& imageViewKey) {
+        std::shared_ptr<ImageView> imageView = {};
+
+        if (this->imageViews.find(imageViewKey) != this->imageViews.end()) {
+            imageView = this->imageViews.at(imageViewKey);
+        };
+
+        if (!imageView) { 
+            this->imageViews[imageViewKey] = (imageView = std::make_shared<ImageView>(shared_from_this(), imageView));
+        };
+
+        return imageView;
+    };
 
     // 
     std::shared_ptr<DeviceBuffer> Device::getDeviceBufferObject(const vk::Buffer& buffer) {
@@ -213,6 +238,15 @@ namespace tom {
             this->memories[deviceMemory] = deviceMemoryObj;
         };
         return deviceMemory;
+    };
+
+    // 
+    ImageViewKey Device::setImageViewObject(const std::shared_ptr<ImageView>& imageViewObj = {}) {
+        ImageViewKey imageViewKey = {}; // determine key
+        if (this->imageViews.find(imageViewKey) == this->imageViews.end()) { 
+            this->imageViews[imageViewKey] = imageViewObj;
+        };
+        return imageViewKey;
     };
 
     //

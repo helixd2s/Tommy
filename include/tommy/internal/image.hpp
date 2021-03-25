@@ -72,6 +72,9 @@ namespace tom {
         vk::ImageViewCreateInfo imageViewInfo = {};
         vk::SamplerCreateInfo samplerInfo = {};
 
+        //
+        ImageViewKey key = {};
+
     public: // 
         ImageView(const std::shared_ptr<tom::DeviceImage>& deviceImage, const vk::DescriptorImageInfo& info = {}): deviceImage(deviceImage), info(info) {
             this->constructor();
@@ -89,10 +92,12 @@ namespace tom {
         // 
         virtual inline std::shared_ptr<tom::DeviceImage>& getDeviceImage() { return deviceImage; };
         virtual inline vk::DescriptorImageInfo& getInfo() { info.imageLayout = deviceImage->getLayoutHistory().back(); return info; };
+        virtual inline ImageViewKey& getKey() { return key; };
 
         // 
         virtual inline const std::shared_ptr<tom::DeviceImage>& getDeviceImage() const { return deviceImage; };
         virtual inline vk::DescriptorImageInfo getInfo() const { return vk::DescriptorImageInfo{ info.sampler, info.imageView, deviceImage->getLayoutHistory().back() }; };
+        virtual inline const ImageViewKey& getKey() const { return key; };
     };
 
 };

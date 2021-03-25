@@ -30,11 +30,24 @@ namespace tom {
     class MemoryAllocatorVma;
 
 
+    //
+    enum class ImageViewType : uint32_t {
+        eSampler = 0,
+        eTexture1d = 1,
+        eTexture2d = 2,
+        eTexture3d = 3,
+        eImage1d = 4,
+        eImage2d = 5,
+        eImage3d = 6,
+        eTextureSampler1d = 7,
+        eTextureSampler2d = 8,
+        eTextureSampler3d = 9,
+    };
+
 
     // 
-    class DescriptorSetSource: public std::enable_shared_from_this<DescriptorSetSource> { public:
-        std::vector<vk::DescriptorBufferInfo> buffers = {};
-        std::vector<vk::DescriptorImageInfo> textures2d = {};
+    class DescriptorSetSource: public std::enable_shared_from_this<DescriptorSetSource> { public: 
+        std::vector<std::vector<std::shared_ptr<ImageView>>> typedImageViews = {};
     };
 
     // 
@@ -113,8 +126,13 @@ namespace tom {
 
     //
     struct ImageViewKey {
-        uint32_t type = 0u;
-        uint32_t binding = 0u;
+        ImageViewType type = ImageViewType::eSampler;
+        uint32_t index = 0u;
+
+        // 
+        operator uint64_t&() { return reinterpret_cast<uint64_t&>(*this); };
+        operator const uint64_t&() const { return reinterpret_cast<const uint64_t&>(*this); };
+        uint64_t& operator=(const uint64_t& a) { return (reinterpret_cast<uint64_t&>(*this) = a); };
     };
 
 };
