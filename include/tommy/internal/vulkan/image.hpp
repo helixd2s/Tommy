@@ -52,7 +52,7 @@ namespace tom {
                 this->destructor = {};
 
                 if (this->data) {
-                    auto device = this->getDeviceMemory()->getDevice()->getData();
+                    auto device = this->getDevice()->getData();
                     if (api->image) {
                         device->device.bindImageMemory2(vk::BindImageMemoryInfo{ .image = api->image, .memory = {}, .memoryOffset = 0ull });
                         device->device.destroyImage(api->image);

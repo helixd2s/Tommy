@@ -52,7 +52,7 @@ namespace tom {
                 this->destructor = {};
 
                 if (this->data) {
-                    auto device = this->getDeviceMemory()->getDevice()->getData();
+                    auto device = this->getDevice()->getData();
                     if (api->buffer) {
                         device->device.bindBufferMemory2(vk::BindBufferMemoryInfo{ .buffer = api->buffer, .memory = {}, .memoryOffset = 0ull });
                         device->device.destroyBuffer(api->buffer);
@@ -103,7 +103,7 @@ namespace tom {
             };
 
             // 
-            virtual inline vk::DeviceAddress getDeviceAddress() { data->address = (data->address ? data->address : (deviceBuffer->getDeviceAddress() + data->bufferInfo.offset)); return deviceBuffer->getDeviceMemory()->getDevice()->setBufferAllocationObject(shared_from_this()); };
+            virtual inline vk::DeviceAddress getDeviceAddress() { data->address = (data->address ? data->address : (deviceBuffer->getDeviceAddress() + data->bufferInfo.offset)); return deviceBuffer->getDevice()->setBufferAllocationObject(shared_from_this()); };
             virtual inline vk::DescriptorBufferInfo& getBufferInfo() { if (deviceBuffer) { data->bufferInfo.buffer = deviceBuffer->getApi()->buffer; }; return data->bufferInfo; };
             virtual inline std::shared_ptr<DeviceBuffer>& getDeviceBuffer() { return deviceBuffer; };
             virtual inline vk::DeviceSize& getOffset() { return data->bufferInfo.offset; };
