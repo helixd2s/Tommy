@@ -26,8 +26,7 @@ namespace tom {
             vk::DescriptorPool descriptorPool = {};
             vk::DispatchLoaderDynamic dispatch = {};
 
-            // 
-            std::shared_ptr<MemoryAllocator> allocator = {};
+            
 
             // 
             std::unordered_map<vk::DeviceAddress, std::shared_ptr<BufferAllocation>> bufferAllocations = {};
@@ -86,6 +85,7 @@ namespace tom {
             std::weak_ptr<Instance> instance = {};
             std::shared_ptr<PhysicalDevice> physical = {};
             std::shared_ptr<DeviceData> data = {};
+            std::shared_ptr<MemoryAllocator> allocator = {};
 
             // 
             std::unordered_map<uint32_t, std::vector<std::shared_ptr<Queue>>> queues = {};
@@ -161,15 +161,15 @@ namespace tom {
             };
 
             // 
-            virtual std::shared_ptr<DeviceBuffer> allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const MemoryAllocationInfo& allocInfo = {});
-            virtual std::shared_ptr<DeviceBuffer> allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const MemoryAllocationInfo& allocInfo = {});
+            virtual std::shared_ptr<DeviceBuffer> allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const tom::MemoryAllocationInfo& allocInfo = {});
+            virtual std::shared_ptr<DeviceBuffer> allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const tom::MemoryAllocationInfo& allocInfo = {});
 
             // 
-            virtual std::shared_ptr<DeviceImage> allocateImage(const std::shared_ptr<DeviceImage>& image, const MemoryAllocationInfo& allocInfo = {});
-            virtual std::shared_ptr<DeviceImage> allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const MemoryAllocationInfo& allocInfo = {});
+            virtual std::shared_ptr<DeviceImage> allocateImage(const std::shared_ptr<DeviceImage>& image, const tom::MemoryAllocationInfo& allocInfo = {});
+            virtual std::shared_ptr<DeviceImage> allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const tom::MemoryAllocationInfo& allocInfo = {});
 
             // 
-            virtual std::shared_ptr<MemoryAllocation> allocateMemory(const std::shared_ptr<MemoryAllocation>& allocation, const vk::MemoryRequirements2& requirements = {}, const MemoryAllocationInfo& allocInfo = {});
+            virtual std::shared_ptr<MemoryAllocation> allocateMemory(const std::shared_ptr<MemoryAllocation>& allocation, const tom::MemoryAllocationInfo& allocInfo = {});
 
             // 
             virtual std::shared_ptr<Device> getDevice() { return device.lock(); };
@@ -192,14 +192,14 @@ namespace tom {
 
             // 
             //virtual std::shared_ptr<DeviceBuffer> allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const MemoryAllocationInfo& allocInfo = {}) override;
-            virtual std::shared_ptr<DeviceBuffer> allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const MemoryAllocationInfo& allocInfo = {}) override;
+            virtual std::shared_ptr<DeviceBuffer> allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const tom::MemoryAllocationInfo& allocInfo = {}) override;
 
             //
             //virtual std::shared_ptr<DeviceImage> allocateImage(const std::shared_ptr<DeviceImage>& image, const MemoryAllocationInfo& allocInfo = {}) override;
-            virtual std::shared_ptr<DeviceImage> allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const MemoryAllocationInfo& allocInfo = {}) override;
+            virtual std::shared_ptr<DeviceImage> allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const tom::MemoryAllocationInfo& allocInfo = {}) override;
 
             // 
-            virtual std::shared_ptr<MemoryAllocation> allocateMemory(const std::shared_ptr<MemoryAllocation>& allocation, const vk::MemoryRequirements2& requirements = {}, const MemoryAllocationInfo& allocInfo = {}) override;
+            virtual std::shared_ptr<MemoryAllocation> allocateMemory(const std::shared_ptr<MemoryAllocation>& allocation, const tom::MemoryAllocationInfo& allocInfo = {}) override;
 
         };
 

@@ -123,6 +123,7 @@ namespace tom {
             
             vk::Buffer buffer = {};
             vk::Image image = {};
+            vk::MemoryRequirements2 requirements = {};
 
             // 
             MemoryAllocationInfo withBuffer(const vk::Buffer& buffer = {}) {
@@ -147,6 +148,13 @@ namespace tom {
         //vktm::MemoryAllocationInfo* vkInfo = nullptr;
         //d12tm::MemoryAllocationInfo* d12Info = nullptr;
         void* apiInfo = nullptr;
+
+        // 
+        MemoryAllocationInfo withVulkan(const vktm::MemoryAllocationInfo& vinfo = {}) {
+            auto info = MemoryAllocationInfo(*this);
+            info.apiInfo = (void*)&vinfo;
+            return info;
+        };
     };
 
     //
@@ -222,6 +230,11 @@ namespace tom {
 
     // 
     class DeviceBufferBase: public std::enable_shared_from_this<DeviceBufferBase> {
+        public:
+    };
+
+    // 
+    class DeviceMemoryBase: public std::enable_shared_from_this<DeviceMemoryBase> {
         public:
     };
 

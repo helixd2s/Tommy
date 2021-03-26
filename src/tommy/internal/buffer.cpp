@@ -29,8 +29,8 @@ namespace tom {
                 this->memoryAllocation = memoryAllocation;
                 this->getDevice()->getData()->device.bindBufferMemory2(vk::BindBufferMemoryInfo{
                     .buffer = data->buffer,
-                    .memory = this->memoryAllocation->getDeviceMemory()->getMemory(),
-                    .memoryOffset = this->memoryAllocation->getOffset()
+                    .memory = this->memoryAllocation->getDeviceMemory()->getData()->memory,
+                    .memoryOffset = this->memoryAllocation->getData()->memoryOffset
                 });
             };
             return shared_from_this();

@@ -19,19 +19,23 @@ namespace tom {
         };
 
         // MemoryAllocationInfo
-        std::shared_ptr<MemoryAllocation> MemoryAllocator::allocateMemory(const std::shared_ptr<MemoryAllocation>& allocation, const vk::MemoryRequirements2& memoryRequirements = {}, const MemoryAllocationInfo& allocInfo = {}) {
+        std::shared_ptr<MemoryAllocation> MemoryAllocator::allocateMemory(const std::shared_ptr<MemoryAllocation>& allocation, const tom::MemoryAllocationInfo& allocInfo = {}) {
             auto self = allocation;
             auto allocator = shared_from_this();
             auto device = this->device.lock();
+            auto data = self->getData();
+
+            //
+            auto* vkInfo = (tom::vktm::MemoryAllocationInfo*)(allocInfo.apiInfo);
 
             // TODO: smart allocation 
-            self->getOffset() = 0ull;
-            self->getDeviceMemory() = device->allocateMemoryObject(allocator, vk::StructureChain<vk::MemoryAllocateInfo, vk::MemoryDedicatedAllocateInfoKHR, vk::ExternalMemoryBufferCreateInfo>{
+            data->memoryOffset = 0ull;
+            self->deviceMemory = device->allocateMemoryObject(allocator, vk::StructureChain<vk::MemoryAllocateInfo, vk::MemoryDedicatedAllocateInfoKHR, vk::ExternalMemoryBufferCreateInfo>{
                 vk::MemoryAllocateInfo{
-                    .allocationSize = memoryRequirements.memoryRequirements.size,
-                    .memoryTypeIndex = device->getPhysicalDevice()->getMemoryType(memoryRequirements.memoryRequirements.memoryTypeBits),
+                    .allocationSize = vkInfo->requirements.memoryRequirements.size,
+                    .memoryTypeIndex = device->getPhysicalDevice()->getMemoryType(vkInfo->requirements.memoryRequirements.memoryTypeBits),
                 },
-                vk::MemoryDedicatedAllocateInfoKHR{ .image = allocInfo.image, .buffer = allocInfo.buffer },
+                vk::MemoryDedicatedAllocateInfoKHR{ .image = vkInfo->image, .buffer = vkInfo->buffer },
                 vk::ExternalMemoryBufferCreateInfo{
     #ifdef _WIN32
                     .handleTypes = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueWin32
@@ -46,42 +50,44 @@ namespace tom {
         };
 
         // 
-        std::shared_ptr<DeviceBuffer> MemoryAllocator::allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const MemoryAllocationInfo& allocInfo = {}) {
+        std::shared_ptr<DeviceBuffer> MemoryAllocator::allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const tom::MemoryAllocationInfo& allocInfo = {}) {
             auto self = buffer;
             auto allocator = shared_from_this();
             auto device = this->device.lock();
+            auto data = self->getData();
 
-            if (self->buffer) { // 
+            if (data->buffer) { // 
                 auto memoryRequirements = vk::StructureChain<vk::MemoryRequirements2, vk::MemoryDedicatedRequirementsKHR>{ vk::MemoryRequirements2{  }, vk::MemoryDedicatedRequirementsKHR{} };
-                device->getDevice().getBufferMemoryRequirements2(vk::BufferMemoryRequirementsInfo2{ .buffer = self->buffer }, memoryRequirements);
-                self->bindMemory(allocator->allocateMemory(std::make_shared<tom::MemoryAllocation>(device), memoryRequirements.get<vk::MemoryRequirements2>(), MemoryAllocationInfo(allocInfo).withBuffer(self->buffer)));
+                device->getData()->device.getBufferMemoryRequirements2(vk::BufferMemoryRequirementsInfo2{ .buffer = data->buffer }, memoryRequirements);
+                self->bindMemory(allocator->allocateMemory(std::make_shared<MemoryAllocation>(device), tom::MemoryAllocationInfo(allocInfo).withVulkan(MemoryAllocationInfo{.buffer = data->buffer, .requirements = memoryRequirements.get<vk::MemoryRequirements2>()})));
             };
 
             return self;
         };
 
         // 
-        std::shared_ptr<DeviceImage> MemoryAllocator::allocateImage(const std::shared_ptr<DeviceImage>& image, const MemoryAllocationInfo& allocInfo = {}) {
+        std::shared_ptr<DeviceImage> MemoryAllocator::allocateImage(const std::shared_ptr<DeviceImage>& image, const tom::MemoryAllocationInfo& allocInfo = {}) {
             auto self = image;
             auto allocator = shared_from_this();
             auto device = this->device.lock();
+            auto data = self->getData();
 
-            if (self->image) { // 
+            if (data->image) { // 
                 auto memoryRequirements = vk::StructureChain<vk::MemoryRequirements2, vk::MemoryDedicatedRequirementsKHR>{ vk::MemoryRequirements2{  }, vk::MemoryDedicatedRequirementsKHR{} };
-                device->getDevice().getImageMemoryRequirements2(vk::ImageMemoryRequirementsInfo2{ .image = self->image }, memoryRequirements);
-                self->bindMemory(allocator->allocateMemory(std::make_shared<tom::MemoryAllocation>(device), memoryRequirements.get<vk::MemoryRequirements2>(), MemoryAllocationInfo(allocInfo).withImage(self->image)));
+                device->getData()->device.getImageMemoryRequirements2(vk::ImageMemoryRequirementsInfo2{ .image = data->image }, memoryRequirements);
+                self->bindMemory(allocator->allocateMemory(std::make_shared<MemoryAllocation>(device), tom::MemoryAllocationInfo(allocInfo).withVulkan(MemoryAllocationInfo{.image = data->image, .requirements = memoryRequirements.get<vk::MemoryRequirements2>()})));
             };
 
             return self;
         };
 
         // 
-        std::shared_ptr<DeviceBuffer> MemoryAllocator::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const MemoryAllocationInfo& allocInfo = {}) {
+        std::shared_ptr<DeviceBuffer> MemoryAllocator::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const tom::MemoryAllocationInfo& allocInfo = {}) {
             return this->allocateBuffer(buffer->create(info), allocInfo);
         };
 
         // 
-        std::shared_ptr<DeviceImage> MemoryAllocator::allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const MemoryAllocationInfo& allocInfo = {}) {
+        std::shared_ptr<DeviceImage> MemoryAllocator::allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const tom::MemoryAllocationInfo& allocInfo = {}) {
             return this->allocateImage(image->create(info), allocInfo);
         };
     };

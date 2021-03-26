@@ -16,8 +16,8 @@ namespace tom {
                 this->memoryAllocation = memoryAllocation;
                 this->getDevice()->getData()->device.bindImageMemory2(vk::BindImageMemoryInfo{
                     .image = data->image,
-                    .memory = this->memoryAllocation->getDeviceMemory()->getMemory(),
-                    .memoryOffset = this->memoryAllocation->getOffset()
+                    .memory = this->memoryAllocation->getDeviceMemory()->getData()->memory,
+                    .memoryOffset = this->memoryAllocation->getData()->memoryOffset
                 });
             };
             return shared_from_this();

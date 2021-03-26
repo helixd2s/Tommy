@@ -154,7 +154,7 @@ namespace tom {
         // 
         std::shared_ptr<DeviceMemory> Device::allocateMemoryObject(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
             auto deviceMemoryObj = std::make_shared<DeviceMemory>(shared_from_this())->allocate(allocator, info);
-            auto deviceMemory = deviceMemoryObj->getMemory(); // determine a key
+            auto deviceMemory = deviceMemoryObj->getData()->memory; // determine a key
             return (data->memories[deviceMemory] = deviceMemoryObj);
         };
 
@@ -233,7 +233,7 @@ namespace tom {
 
         // 
         vk::DeviceMemory Device::setDeviceMemoryObject(const std::shared_ptr<DeviceMemory>& deviceMemoryObj = {}) {
-            vk::DeviceMemory deviceMemory = deviceMemoryObj->getMemory(); // determine key
+            vk::DeviceMemory deviceMemory = deviceMemoryObj->getData()->memory; // determine key
             if (data->memories.find(deviceMemory) == data->memories.end()) { 
                 data->memories[deviceMemory] = deviceMemoryObj;
             };
