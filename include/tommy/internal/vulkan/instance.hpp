@@ -44,7 +44,7 @@ namespace tom {
 
             // 
             std::unordered_map<uintptr_t, std::weak_ptr<Device>> deviceMap = {};
-            std::vector<std::shared_ptr<PhysicalDevice>> physicalDevices = {};
+            
         };
 
         //
@@ -71,12 +71,19 @@ namespace tom {
         protected:  //
             static std::shared_ptr<Context> context;
 
+            virtual inline std::shared_ptr<InstanceData> getDataTyped() { return std::dynamic_pointer_cast<InstanceData>(this->data); };
+            virtual inline std::shared_ptr<InstanceData> getDataTyped() const { return std::dynamic_pointer_cast<InstanceData>(this->data); };
+
         public: 
             // legacy
             Instance() : tom::Instance() {};
 
-            //
+            // 
             virtual std::shared_ptr<tom::Instance> constructor() override;
+
+            // 
+            virtual inline std::vector<std::shared_ptr<tom::PhysicalDevice>>& enumeratePhysicalDevices() override;
+            virtual inline const std::vector<std::shared_ptr<tom::PhysicalDevice>>& enumeratePhysicalDevices() const override;
         };
 
         //

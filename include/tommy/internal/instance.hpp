@@ -10,6 +10,7 @@ namespace tom {
     class Instance: public std::enable_shared_from_this<Instance> {
     protected:  // 
         std::shared_ptr<InstanceBase> data = {};
+        std::vector<std::shared_ptr<PhysicalDevice>> physicalDevices = {};
 
     public: // 
         Instance() { this->constructor(); };

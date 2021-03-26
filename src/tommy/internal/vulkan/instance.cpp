@@ -14,7 +14,10 @@ namespace tom {
         const std::vector<const char*> defaultLayers = {  };
 
         // 
-        std::shared_ptr<Instance> Instance::constructor() {
+        std::shared_ptr<tom::Instance> Instance::constructor() {
+            auto data = this->getDataTyped();
+
+            // 
             vk::ApplicationInfo application_info = vk::ApplicationInfo{
                 .pApplicationName = "Tommy Based App",
                 .applicationVersion = VK_MAKE_VERSION(1,0,0),
@@ -79,19 +82,21 @@ namespace tom {
         };
 
         //
-        std::vector<std::shared_ptr<PhysicalDevice>>& Instance::enumeratePhysicalDevices() {
-            if (data->physicalDevices.size() > 0) {
+        std::vector<std::shared_ptr<tom::PhysicalDevice>>& Instance::enumeratePhysicalDevices() {
+            auto data = this->getDataTyped();
+            if (this->physicalDevices.size() > 0) {
                 std::vector<vk::PhysicalDevice> devices = data->instance.enumeratePhysicalDevices();
                 for (auto& device : devices) {
-                    data->physicalDevices.push_back(std::make_shared<PhysicalDevice>(shared_from_this(), device));
+                    this->physicalDevices.push_back(std::make_shared<PhysicalDevice>(shared_from_this(), device));
                 };
             };
-            return data->physicalDevices;
+            return this->physicalDevices;
         };
 
         //
-        const std::vector<std::shared_ptr<PhysicalDevice>>& Instance::enumeratePhysicalDevices() const {
-            return data->physicalDevices;
+        const std::vector<std::shared_ptr<tom::PhysicalDevice>>& Instance::enumeratePhysicalDevices() const {
+            auto data = this->getDataTyped();
+            return this->physicalDevices;
         };
 
     };

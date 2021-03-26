@@ -10,7 +10,10 @@ namespace tom {
 
     namespace vulkan {
         //
-        std::shared_ptr<PhysicalDevice> PhysicalDevice::constructor() {
+        std::shared_ptr<tom::PhysicalDevice> PhysicalDevice::constructor() {
+            auto data = this->getDataTyped();
+
+            // 
             data->properties = PhysicalDeviceProperties{};
             data->features = PhysicalDeviceFeatures{};
 
@@ -34,6 +37,7 @@ namespace tom {
 
         //
         std::unordered_map<uint32_t, SurfaceProperties> PhysicalDevice::getSurfaceInfo(const vk::SurfaceKHR& surface) const {
+            auto data = this->getDataTyped();
             std::unordered_map<uint32_t, SurfaceProperties> surfaceInfo = {};
             uint32_t I=0u; for (auto& property : data->queueFamilyProperties) { const uint32_t i = I++;
                 SurfaceProperties props = {};
@@ -48,6 +52,7 @@ namespace tom {
 
         //
         uint32_t PhysicalDevice::getMemoryType(const uint32_t& memoryTypeBitsRequirement, const vk::MemoryPropertyFlags& requiredProperties = vk::MemoryPropertyFlagBits::eDeviceLocal) const {
+            auto data = this->getDataTyped();
             const uint32_t memoryCount = data->memoryProperties.memoryProperties.memoryTypeCount;
             for (uint32_t memoryIndex = 0; memoryIndex < memoryCount; ++memoryIndex) {
                 const uint32_t memoryTypeBits = (1 << memoryIndex);

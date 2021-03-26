@@ -11,21 +11,21 @@
 namespace tom {
     namespace vulkan {
         // 
-        std::shared_ptr<MemoryAllocator>& Device::createAllocator() {
+        std::shared_ptr<tom::MemoryAllocator>& Device::createAllocatorVk() {
             if (!this->allocator) {
                 this->allocator = std::make_shared<MemoryAllocator>(shared_from_this());
             };
             return this->allocator;
         };
 
-        // MemoryAllocationInfo
-        std::shared_ptr<MemoryAllocation> MemoryAllocator::allocateMemory(const std::shared_ptr<MemoryAllocation>& allocation, const tom::MemoryAllocationInfo& allocInfo = {}) {
-            auto self = allocation;
-            auto allocator = shared_from_this();
-            auto device = this->getDevice();
-            auto data = self->getData();
+        // 
+        std::shared_ptr<tom::MemoryAllocation> MemoryAllocator::allocateMemory(const std::shared_ptr<tom::MemoryAllocation>& allocation, const tom::MemoryAllocationInfo& allocInfo = {}) {
+            auto self = std::dynamic_pointer_cast<MemoryAllocation>(allocation);
+            auto allocator = std::dynamic_pointer_cast<MemoryAllocator>(shared_from_this());
+            auto device = std::dynamic_pointer_cast<Device>(this->getDevice());
+            auto data = std::dynamic_pointer_cast<MemoryAllocationData>(self->getData());
 
-            //
+            // 
             auto* vkInfo = (tom::vulkan::MemoryAllocationInfo*)(allocInfo.apiInfo);
 
             // TODO: smart allocation 
@@ -33,7 +33,7 @@ namespace tom {
             self->deviceMemory = device->allocateMemoryObject(allocator, vk::StructureChain<vk::MemoryAllocateInfo, vk::MemoryDedicatedAllocateInfoKHR, vk::ExternalMemoryBufferCreateInfo>{
                 vk::MemoryAllocateInfo{
                     .allocationSize = vkInfo->requirements.memoryRequirements.size,
-                    .memoryTypeIndex = device->getPhysicalDevice()->getMemoryType(vkInfo->requirements.memoryRequirements.memoryTypeBits),
+                    .memoryTypeIndex = std::dynamic_pointer_cast<PhysicalDevice>(device->getPhysicalDevice())->getMemoryType(vkInfo->requirements.memoryRequirements.memoryTypeBits),
                 },
                 vk::MemoryDedicatedAllocateInfoKHR{ .image = vkInfo->image, .buffer = vkInfo->buffer },
                 vk::ExternalMemoryBufferCreateInfo{
@@ -50,16 +50,16 @@ namespace tom {
         };
 
         // 
-        std::shared_ptr<DeviceBuffer> MemoryAllocator::allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const tom::MemoryAllocationInfo& allocInfo = {}) {
-            auto self = buffer;
-            auto allocator = shared_from_this();
-            auto device = this->getDevice();
-            auto data = self->getData();
-            auto api = self->getApi();
+        std::shared_ptr<tom::DeviceBuffer> MemoryAllocator::allocateBuffer(const std::shared_ptr<tom::DeviceBuffer>& buffer, const tom::MemoryAllocationInfo& allocInfo = {}) {
+            auto self = std::dynamic_pointer_cast<DeviceBuffer>(buffer);
+            auto allocator = std::dynamic_pointer_cast<MemoryAllocator>(shared_from_this());
+            auto device = std::dynamic_pointer_cast<Device>(this->getDevice());
+            auto data = std::dynamic_pointer_cast<MemoryAllocationData>(self->getData());
+            auto api = std::dynamic_pointer_cast<DeviceBufferData>(self->getApi());
 
             if (api->buffer) { // 
                 auto memoryRequirements = vk::StructureChain<vk::MemoryRequirements2, vk::MemoryDedicatedRequirementsKHR>{ vk::MemoryRequirements2{  }, vk::MemoryDedicatedRequirementsKHR{} };
-                device->getData()->device.getBufferMemoryRequirements2(vk::BufferMemoryRequirementsInfo2{ .buffer = api->buffer }, memoryRequirements);
+                std::dynamic_pointer_cast<DeviceData>(device->getData())->device.getBufferMemoryRequirements2(vk::BufferMemoryRequirementsInfo2{ .buffer = api->buffer }, memoryRequirements);
                 allocator->allocateMemory(self, tom::MemoryAllocationInfo(allocInfo).withVulkan(MemoryAllocationInfo{.buffer = api->buffer, .requirements = memoryRequirements.get<vk::MemoryRequirements2>()}));
             };
 
@@ -67,16 +67,16 @@ namespace tom {
         };
 
         // 
-        std::shared_ptr<DeviceImage> MemoryAllocator::allocateImage(const std::shared_ptr<DeviceImage>& image, const tom::MemoryAllocationInfo& allocInfo = {}) {
-            auto self = image;
-            auto allocator = shared_from_this();
-            auto device = this->getDevice();
-            auto data = self->getData();
-            auto api = self->getApi();
+        std::shared_ptr<tom::DeviceImage> MemoryAllocator::allocateImage(const std::shared_ptr<tom::DeviceImage>& image, const tom::MemoryAllocationInfo& allocInfo = {}) {
+            auto self = std::dynamic_pointer_cast<DeviceImage>(image);
+            auto allocator = std::dynamic_pointer_cast<MemoryAllocator>(shared_from_this());
+            auto device = std::dynamic_pointer_cast<Device>(this->getDevice());
+            auto data = std::dynamic_pointer_cast<MemoryAllocationData>(self->getData());
+            auto api = std::dynamic_pointer_cast<DeviceImageData>(self->getApi());
 
             if (api->image) { // 
                 auto memoryRequirements = vk::StructureChain<vk::MemoryRequirements2, vk::MemoryDedicatedRequirementsKHR>{ vk::MemoryRequirements2{  }, vk::MemoryDedicatedRequirementsKHR{} };
-                device->getData()->device.getImageMemoryRequirements2(vk::ImageMemoryRequirementsInfo2{ .image = api->image }, memoryRequirements);
+                std::dynamic_pointer_cast<DeviceData>(device->getData())->device.getImageMemoryRequirements2(vk::ImageMemoryRequirementsInfo2{ .image = api->image }, memoryRequirements);
                 allocator->allocateMemory(self, tom::MemoryAllocationInfo(allocInfo).withVulkan(MemoryAllocationInfo{.image = api->image, .requirements = memoryRequirements.get<vk::MemoryRequirements2>()}));
             };
 
@@ -84,13 +84,13 @@ namespace tom {
         };
 
         // 
-        std::shared_ptr<DeviceBuffer> MemoryAllocator::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const tom::MemoryAllocationInfo& allocInfo = {}) {
-            return this->allocateBuffer(buffer->create(), allocInfo);
+        std::shared_ptr<tom::DeviceBuffer> MemoryAllocator::allocateAndCreateBuffer(const std::shared_ptr<tom::DeviceBuffer>& buffer, const tom::MemoryAllocationInfo& allocInfo = {}) {
+            return this->allocateBuffer(std::dynamic_pointer_cast<tom::DeviceBuffer>(buffer->create()), allocInfo);
         };
 
         // 
-        std::shared_ptr<DeviceImage> MemoryAllocator::allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const tom::MemoryAllocationInfo& allocInfo = {}) {
-            return this->allocateImage(image->create(), allocInfo);
+        std::shared_ptr<tom::DeviceImage> MemoryAllocator::allocateAndCreateImage(const std::shared_ptr<tom::DeviceImage>& image, const tom::MemoryAllocationInfo& allocInfo = {}) {
+            return this->allocateImage(std::dynamic_pointer_cast<tom::DeviceImage>(image->create()), allocInfo);
         };
     };
 

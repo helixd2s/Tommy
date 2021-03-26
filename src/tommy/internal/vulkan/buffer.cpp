@@ -15,7 +15,8 @@ namespace tom {
     namespace vulkan {
         
         // 
-        std::shared_ptr<DeviceBuffer> DeviceBuffer::bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) {
+        std::shared_ptr<tom::MemoryAllocation> DeviceBuffer::bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
+            auto api = this->getApiTyped();
             if (memoryAllocation) {
                 this->data = memoryAllocation->getData();
                 this->memoryOffset = memoryAllocation->getMemoryOffset();
@@ -23,21 +24,22 @@ namespace tom {
                 this->allocation = memoryAllocation->getAllocation();
             };
             if (this->data) {
-                this->getDevice()->getData()->device.bindBufferMemory2(vk::BindBufferMemoryInfo{
+                std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData())->device.bindBufferMemory2(vk::BindBufferMemoryInfo{
                     .buffer = api->buffer,
-                    .memory = deviceMemory->getData()->memory,
+                    .memory = std::dynamic_pointer_cast<DeviceMemoryData>(deviceMemory->getData())->memory,
                     .memoryOffset = this->memoryOffset
                 });
             };
-            return std::dynamic_pointer_cast<DeviceBuffer>(shared_from_this());
+            return std::dynamic_pointer_cast<tom::MemoryAllocation>(shared_from_this());
         };
 
         // auto api = self->getApi();
-        std::shared_ptr<DeviceBuffer> DeviceBuffer::create(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) {
+        std::shared_ptr<tom::MemoryAllocation> DeviceBuffer::create(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
+            auto api = this->getApiTyped();
             auto self = std::dynamic_pointer_cast<DeviceBuffer>(shared_from_this());
             auto device = this->getDevice();
-            api->buffer = device->getData()->device.createBuffer( api->info.queueFamilyIndexCount ? api->info : vk::BufferCreateInfo(api->info).setQueueFamilyIndices(device->getQueueFamilyIndices()) );
-            device->setDeviceBufferObject(self);
+            api->buffer = std::dynamic_pointer_cast<DeviceData>(device->getData())->device.createBuffer( api->info.queueFamilyIndexCount ? api->info : vk::BufferCreateInfo(api->info).setQueueFamilyIndices(device->getQueueFamilyIndices()) );
+            std::dynamic_pointer_cast<Device>(device)->setDeviceBufferObject(std::dynamic_pointer_cast<tom::DeviceBuffer>(shared_from_this()));
             this->bindMemory(memoryAllocation);
             api->address = 0ull;
             return self;
@@ -45,12 +47,14 @@ namespace tom {
 
         // 
         vk::DeviceAddress& DeviceBuffer::getDeviceAddress() {
-            return (api->address = api->address ? api->address : this->getDevice()->getData()->device.getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = api->buffer }));
+            auto api = this->getApiTyped();
+            return (api->address = api->address ? api->address : std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData())->device.getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = api->buffer }));
         };
 
         // 
         vk::DeviceAddress DeviceBuffer::getDeviceAddress() const {
-            return (api->address ? api->address : this->getDevice()->getData()->device.getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = api->buffer }));
+            auto api = this->getApiTyped();
+            return (api->address ? api->address : std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData())->device.getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = api->buffer }));
         };
 
     };

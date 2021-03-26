@@ -16,7 +16,7 @@ namespace tom {
             if (commandBuffers.size() <= 0) return vk::Fence{};
 
             // 
-            vk::Fence fence = this->getDevice()->getData()->device.createFence(vk::FenceCreateInfo{});
+            vk::Fence fence = std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData())->device.createFence(vk::FenceCreateInfo{});
 
             // 
             std::vector<vk::CommandBufferSubmitInfoKHR> commandInfos = {};
@@ -32,13 +32,14 @@ namespace tom {
             submitInfo.pCommandBufferInfos = commandInfos.data();
 
             // 
-            data->queue.submit2KHR(submitInfo, fence);
+            this->getDataTyped()->queue.submit2KHR(submitInfo, fence);
             return fence;
         };
 
         //
         std::future<vk::Result> Queue::submitOnce(const std::function<void(const vk::CommandBuffer&)>& cmdFn, const vk::SubmitInfo2KHR& submitInfo) const {
-            auto device = this->getDevice()->getData()->device;
+            auto device = std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData())->device;
+            auto data = this->getDataTyped();
             auto commandBuffers = device.allocateCommandBuffers(vk::CommandBufferAllocateInfo{
                 .commandPool = data->commandPool,
                 .level = vk::CommandBufferLevel::ePrimary,

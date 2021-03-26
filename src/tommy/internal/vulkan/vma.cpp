@@ -15,7 +15,7 @@ namespace tom {
 
     namespace vulkan {
         // 
-        std::shared_ptr<MemoryAllocator>& Device::createAllocatorVma() {
+        std::shared_ptr<tom::MemoryAllocator>& Device::createAllocatorVma() {
             if (!this->allocator) {
                 this->allocator = std::dynamic_pointer_cast<MemoryAllocator>(std::make_shared<MemoryAllocatorVma>(shared_from_this()));
             };
@@ -23,10 +23,10 @@ namespace tom {
         };
 
         //
-        std::shared_ptr<MemoryAllocator> MemoryAllocatorVma::constructor() { //
+        std::shared_ptr<tom::MemoryAllocator> MemoryAllocatorVma::constructor() { //
             auto device = this->getDevice();
-            auto& instanceDispatch = device->getInstance()->getData()->dispatch;
-            auto& deviceDispatch = device->getData()->dispatch;
+            auto& instanceDispatch = std::dynamic_pointer_cast<InstanceData>(device->getInstance()->getData())->dispatch;
+            auto& deviceDispatch = std::dynamic_pointer_cast<DeviceData>(device->getData())->dispatch;
 
             // redirect Vulkan API functions
             VmaVulkanFunctions func = {};
@@ -56,9 +56,9 @@ namespace tom {
             // 
             VmaAllocatorCreateInfo vmaInfo = {};
             vmaInfo.pVulkanFunctions = &func;
-            vmaInfo.device = device->getData()->device;
-            vmaInfo.instance = device->getInstance()->getData()->instance;
-            vmaInfo.physicalDevice = device->getPhysicalDevice()->getData()->physicalDevice;
+            vmaInfo.device = std::dynamic_pointer_cast<DeviceData>(device->getData())->device;
+            vmaInfo.instance = std::dynamic_pointer_cast<InstanceData>(device->getInstance()->getData())->instance;
+            vmaInfo.physicalDevice = std::dynamic_pointer_cast<PhysicalDeviceData>(device->getPhysicalDevice()->getData())->physicalDevice;
             vmaInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 
             // 
@@ -69,11 +69,11 @@ namespace tom {
         };
 
         // MemoryAllocationInfo
-        std::shared_ptr<MemoryAllocation> MemoryAllocator::allocateMemory(const std::shared_ptr<MemoryAllocation>& allocation, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
-            auto self = allocation;
-            auto allocator = shared_from_this();
-            auto device = this->getDevice();
-            auto data = self->getData();
+        std::shared_ptr<tom::MemoryAllocation> MemoryAllocator::allocateMemory(const std::shared_ptr<tom::MemoryAllocation>& allocation, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
+            auto self = std::dynamic_pointer_cast<MemoryAllocation>(allocation);
+            auto allocator = std::dynamic_pointer_cast<MemoryAllocator>(shared_from_this());
+            auto device = std::dynamic_pointer_cast<Device>(this->getDevice());
+            auto data = std::dynamic_pointer_cast<MemoryAllocationData>(self->getData());
 
             //
             auto* vkInfo = (tom::vulkan::MemoryAllocationInfo*)(memAllocInfo.apiInfo);
@@ -114,12 +114,12 @@ namespace tom {
         };
 
         //
-        std::shared_ptr<DeviceBuffer> MemoryAllocatorVma::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
-            auto self = buffer;
-            auto allocator = shared_from_this();
-            auto device = this->getDevice();
-            auto data = self->getData();
-            auto api = self->getApi();
+        std::shared_ptr<tom::DeviceBuffer> MemoryAllocatorVma::allocateAndCreateBuffer(const std::shared_ptr<tom::DeviceBuffer>& buffer, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
+            auto self = std::dynamic_pointer_cast<DeviceBuffer>(buffer);
+            auto allocator = std::dynamic_pointer_cast<MemoryAllocator>(shared_from_this());
+            auto device = std::dynamic_pointer_cast<Device>(this->getDevice());
+            auto data = std::dynamic_pointer_cast<MemoryAllocationData>(self->getData());
+            auto api = std::dynamic_pointer_cast<DeviceBufferData>(self->getApi());
 
             // 
             VmaAllocationInfo allocInfo = {};
@@ -152,12 +152,12 @@ namespace tom {
         };
 
         //
-        std::shared_ptr<DeviceImage> MemoryAllocatorVma::allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
-            auto self = image;
-            auto allocator = shared_from_this();
-            auto device = this->getDevice();
-            auto data = self->getData();
-            auto api = self->getApi();
+        std::shared_ptr<tom::DeviceImage> MemoryAllocatorVma::allocateAndCreateImage(const std::shared_ptr<tom::DeviceImage>& image, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
+            auto self = std::dynamic_pointer_cast<DeviceImage>(image);
+            auto allocator = std::dynamic_pointer_cast<MemoryAllocator>(shared_from_this());
+            auto device = std::dynamic_pointer_cast<Device>(this->getDevice());
+            auto data = std::dynamic_pointer_cast<MemoryAllocationData>(self->getData());
+            auto api = std::dynamic_pointer_cast<DeviceImageData>(self->getApi());
 
             // 
             VmaAllocationInfo allocInfo = {};

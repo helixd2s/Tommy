@@ -10,12 +10,13 @@ namespace tom {
 
     namespace vulkan { 
         // TODO: VMA allocation
-        std::shared_ptr<DeviceMemory> DeviceMemory::allocate(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
-            auto device = this->getDevice()->getData()->device;
+        std::shared_ptr<tom::DeviceMemory> DeviceMemory::allocate(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
+            auto device = std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData())->device;
+            auto data = this->getDataTyped();
             data->info = info;
             data->memory = device.allocateMemory(info);
-            this->destructor = [self = shared_from_this(), device](){
-                auto& memory = self->getData()->memory;
+            this->destructor = [data, device](){
+                auto& memory = data->memory;
                 if (memory) { device.freeMemory(); };
                 memory = vk::DeviceMemory{};
             };

@@ -14,18 +14,18 @@ namespace tom {
     // 
     namespace vulkan {
 
-        //
+        // 
         class DeviceMemoryData: public DeviceMemoryBase { public: 
             vk::DeviceMemory memory = {};
             vk::MemoryAllocateInfo info = {};
         };
 
-        //
+        // 
         class MemoryAllocationData: public MemoryAllocationBase { public: 
             
         };
 
-        //
+        // 
         class DeviceMemory: public tom::DeviceMemory {
         protected: friend MemoryAllocator; friend MemoryAllocatorVma;
             virtual inline std::shared_ptr<DeviceMemoryData> getDataTyped() { return std::dynamic_pointer_cast<DeviceMemoryData>(data); };
@@ -46,7 +46,7 @@ namespace tom {
             };
 
             // 
-            std::shared_ptr<DeviceMemory> allocate(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
+            std::shared_ptr<tom::DeviceMemory> allocate(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
 
             // 
             virtual inline void*& getAllocation() { return allocation; };
@@ -62,8 +62,7 @@ namespace tom {
         protected: friend MemoryAllocator; friend MemoryAllocatorVma; friend DeviceMemory; friend MemoryAllocation;
 
         public: // 
-            MemoryAllocation(const std::shared_ptr<tom::DeviceMemory>& deviceMemory = {}, const vk::DeviceSize& memoryOffset = 0ull): tom::MemoryAllocation(deviceMemory, memoryOffset) {
-                data = std::make_shared<MemoryAllocationData>();
+            MemoryAllocation(const std::shared_ptr<tom::DeviceMemory>& deviceMemory = {}, const vk::DeviceSize& memoryOffset = 0ull): tom::MemoryAllocation(deviceMemory, memoryOffset, std::make_shared<MemoryAllocationData>()) {
             };
 
             // 

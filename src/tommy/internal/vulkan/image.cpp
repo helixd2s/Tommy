@@ -12,7 +12,8 @@ namespace tom {
     namespace vulkan {
 
         // 
-        std::shared_ptr<DeviceImage> DeviceImage::bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) {
+        std::shared_ptr<tom::MemoryAllocation> DeviceImage::bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
+            auto api = this->getApiTyped();
             if (memoryAllocation) {
                 this->data = memoryAllocation->getData();
                 this->memoryOffset = memoryAllocation->getMemoryOffset();
@@ -20,39 +21,42 @@ namespace tom {
                 this->allocation = memoryAllocation->getAllocation();
             };
             if (this->data) {
-                this->getDevice()->getData()->device.bindImageMemory2(vk::BindImageMemoryInfo{
+                std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData())->device.bindImageMemory2(vk::BindImageMemoryInfo{
                     .image = api->image,
-                    .memory = deviceMemory->getData()->memory,
+                    .memory = std::dynamic_pointer_cast<DeviceMemoryData>(deviceMemory->getData())->memory,
                     .memoryOffset = this->memoryOffset
                 });
             };
-            return std::dynamic_pointer_cast<DeviceImage>(shared_from_this());
+            return std::dynamic_pointer_cast<tom::MemoryAllocation>(shared_from_this());
         };
 
         // 
-        std::shared_ptr<DeviceImage> DeviceImage::create(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) {
+        std::shared_ptr<tom::MemoryAllocation> DeviceImage::create(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
             auto self = std::dynamic_pointer_cast<DeviceImage>(shared_from_this());
             auto device = this->getDevice();
-            api->image = device->getData()->device.createImage( api->info.queueFamilyIndexCount ? api->info : vk::ImageCreateInfo(api->info).setQueueFamilyIndices(device->getQueueFamilyIndices()) );
+            auto api = this->getApiTyped();
+            api->image = std::dynamic_pointer_cast<DeviceData>(device->getData())->device.createImage( api->info.queueFamilyIndexCount ? api->info : vk::ImageCreateInfo(api->info).setQueueFamilyIndices(device->getQueueFamilyIndices()) );
             this->bindMemory(memoryAllocation);
             //this->layoutHistory.clear();
             //this->layoutHistory.push_back(info.initialLayout);
-            return self;
+            return std::dynamic_pointer_cast<tom::MemoryAllocation>(shared_from_this());
         };
 
 
         // 
-        std::shared_ptr<ImageView> ImageView::createImageView(const vk::ImageViewCreateInfo& info = {}) {
-            data->info.imageView = this->deviceImage->getDevice()->getData()->device.createImageView((data->imageViewInfo = info).setImage(this->deviceImage->getApi()->image));
+        std::shared_ptr<tom::ImageView> ImageView::createImageView(const vk::ImageViewCreateInfo& info = {}) {
+            auto data = this->getDataTyped();
+            data->info.imageView = std::dynamic_pointer_cast<DeviceData>(this->deviceImage->getDevice()->getData())->device.createImageView((data->imageViewInfo = info).setImage(std::dynamic_pointer_cast<DeviceImageData>(this->deviceImage->getApi())->image));
             data->layoutHistory.clear();
-            data->layoutHistory.push_back(this->deviceImage->getApi()->info.initialLayout);
-            return shared_from_this();
+            data->layoutHistory.push_back(std::dynamic_pointer_cast<DeviceImageData>(this->deviceImage->getApi())->info.initialLayout);
+            return std::dynamic_pointer_cast<tom::ImageView>(shared_from_this());
         };
 
         // 
-        std::shared_ptr<ImageView> ImageView::createSampler(const vk::SamplerCreateInfo& info = {}) {
-            data->info.sampler = this->deviceImage->getDevice()->getData()->device.createSampler(data->samplerInfo = info);
-            return shared_from_this();
+        std::shared_ptr<tom::ImageView> ImageView::createSampler(const vk::SamplerCreateInfo& info = {}) {
+            auto data = this->getDataTyped();
+            data->info.sampler = std::dynamic_pointer_cast<DeviceData>(this->deviceImage->getDevice()->getData())->device.createSampler(data->samplerInfo = info);
+            return std::dynamic_pointer_cast<tom::ImageView>(shared_from_this());
         };
 
     };

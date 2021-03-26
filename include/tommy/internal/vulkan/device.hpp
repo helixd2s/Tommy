@@ -108,6 +108,7 @@ namespace tom {
             virtual vk::DeviceMemory setDeviceMemoryObject(const std::shared_ptr<tom::DeviceMemory>& deviceMemoryObj = {});
             virtual vk::DeviceAddress setBufferAllocationObject(const std::shared_ptr<tom::BufferAllocation>& allocation = {});
             virtual tom::ImageViewKey setImageViewObject(const std::shared_ptr<tom::ImageView>& imageViewObj = {}) override;
+            virtual std::shared_ptr<tom::DeviceMemory> allocateMemoryObject(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
 
             // 
             //virtual inline const vk::DispatchLoaderDynamic& getDispatch() const { return dispatch; };
@@ -121,8 +122,8 @@ namespace tom {
             //virtual vk::DeviceAddress setBufferAllocationObject(const vk::DeviceAddress& deviceAddress = 0ull, const std::shared_ptr<BufferAllocation>& allocation = {}) const;
 
             //
-            virtual std::shared_ptr<MemoryAllocator>& createAllocatorVk();
-            virtual std::shared_ptr<MemoryAllocator>& createAllocatorVma();
+            virtual std::shared_ptr<tom::MemoryAllocator>& createAllocatorVk();
+            virtual std::shared_ptr<tom::MemoryAllocator>& createAllocatorVma();
         };
 
 
