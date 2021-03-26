@@ -39,7 +39,7 @@ namespace tom {
             };
         };
 
-        //
+        // 
         class InstanceData: public InstanceBase { public: 
             vk::Instance instance = {};
             vk::DispatchLoaderDynamic dispatch = {};
@@ -49,7 +49,7 @@ namespace tom {
             
         };
 
-        //
+        // 
         class Context: public std::enable_shared_from_this<Context> { public: 
             bool initialized = false;
             vk::DispatchLoaderDynamic dispatch = {};
@@ -88,7 +88,7 @@ namespace tom {
             virtual inline const std::vector<std::shared_ptr<tom::PhysicalDevice>>& enumeratePhysicalDevices() const override;
         };
 
-        //
+        // 
         void Context::initialize() {
             auto& data = *this;
             if (!data.initialized) {
