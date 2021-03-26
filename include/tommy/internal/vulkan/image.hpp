@@ -24,7 +24,7 @@ namespace tom {
             std::vector<vk::ImageLayout> layoutHistory = {};
         };
 
-        // 
+        // BASED ON ALLOCATION!!!
         class DeviceImage: public std::enable_shared_from_this<DeviceImage> {
         protected: friend MemoryAllocator; friend MemoryAllocatorVma; friend ImageView;// 
             std::weak_ptr<Device> device = {};

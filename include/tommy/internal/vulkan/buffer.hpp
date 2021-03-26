@@ -24,7 +24,7 @@ namespace tom {
 
 
 
-        // 
+        // BASED ON ALLOCATION!!!
         class DeviceBuffer: public std::enable_shared_from_this<DeviceBuffer> {
         protected: friend MemoryAllocator; friend MemoryAllocatorVma; friend BufferAllocation; // 
             std::weak_ptr<Device> device = {};
