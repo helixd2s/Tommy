@@ -84,13 +84,13 @@ namespace tom {
         };
 
         // 
-        std::shared_ptr<DeviceBuffer> MemoryAllocator::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const tom::MemoryAllocationInfo& allocInfo = {}) {
-            return this->allocateBuffer(buffer->create(info), allocInfo);
+        std::shared_ptr<DeviceBuffer> MemoryAllocator::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const tom::MemoryAllocationInfo& allocInfo = {}) {
+            return this->allocateBuffer(buffer->create(), allocInfo);
         };
 
         // 
-        std::shared_ptr<DeviceImage> MemoryAllocator::allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const tom::MemoryAllocationInfo& allocInfo = {}) {
-            return this->allocateImage(image->create(info), allocInfo);
+        std::shared_ptr<DeviceImage> MemoryAllocator::allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const tom::MemoryAllocationInfo& allocInfo = {}) {
+            return this->allocateImage(image->create(), allocInfo);
         };
     };
 

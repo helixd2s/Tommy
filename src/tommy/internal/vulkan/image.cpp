@@ -30,10 +30,10 @@ namespace tom {
         };
 
         // 
-        std::shared_ptr<DeviceImage> DeviceImage::create(const vk::ImageCreateInfo& info = {}, const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) {
+        std::shared_ptr<DeviceImage> DeviceImage::create(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) {
             auto self = std::dynamic_pointer_cast<DeviceImage>(shared_from_this());
             auto device = this->getDevice();
-            api->image = device->getData()->device.createImage( api->info = info.queueFamilyIndexCount ? vk::ImageCreateInfo(info) : vk::ImageCreateInfo(info).setQueueFamilyIndices(device->getQueueFamilyIndices()) );
+            api->image = device->getData()->device.createImage( api->info.queueFamilyIndexCount ? api->info : vk::ImageCreateInfo(api->info).setQueueFamilyIndices(device->getQueueFamilyIndices()) );
             this->bindMemory(memoryAllocation);
             //this->layoutHistory.clear();
             //this->layoutHistory.push_back(info.initialLayout);

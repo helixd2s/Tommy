@@ -33,10 +33,10 @@ namespace tom {
         };
 
         // auto api = self->getApi();
-        std::shared_ptr<DeviceBuffer> DeviceBuffer::create(const vk::BufferCreateInfo& info = {}, const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) {
+        std::shared_ptr<DeviceBuffer> DeviceBuffer::create(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) {
             auto self = std::dynamic_pointer_cast<DeviceBuffer>(shared_from_this());
             auto device = this->getDevice();
-            api->buffer = device->getData()->device.createBuffer( api->info = info.queueFamilyIndexCount ? vk::BufferCreateInfo(info) : vk::BufferCreateInfo(info).setQueueFamilyIndices(device->getQueueFamilyIndices()) );
+            api->buffer = device->getData()->device.createBuffer( api->info.queueFamilyIndexCount ? api->info : vk::BufferCreateInfo(api->info).setQueueFamilyIndices(device->getQueueFamilyIndices()) );
             device->setDeviceBufferObject(self);
             this->bindMemory(memoryAllocation);
             api->address = 0ull;

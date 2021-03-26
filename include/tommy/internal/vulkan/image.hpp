@@ -39,7 +39,7 @@ namespace tom {
             };
 
             // legacy
-            DeviceImage(const vk::Image& image = {}) {
+            DeviceImage(const std::shared_ptr<Device>& device, const vk::Image& image = {}) : MemoryAllocation(device) {
                 api = std::make_shared<DeviceImageData>();
                 api->image = image;
             };
@@ -63,7 +63,7 @@ namespace tom {
 
             // 
             virtual std::shared_ptr<DeviceImage> bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {});
-            virtual std::shared_ptr<DeviceImage> create(const vk::ImageCreateInfo& info = {}, const std::shared_ptr<MemoryAllocation>& memoryAllocation = {});
+            virtual std::shared_ptr<DeviceImage> create(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {});
 
             // 
             virtual inline std::shared_ptr<MemoryAllocation> getMemoryAllocation() { return shared_from_this(); };

@@ -114,15 +114,12 @@ namespace tom {
         };
 
         //
-        std::shared_ptr<DeviceBuffer> MemoryAllocatorVma::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
+        std::shared_ptr<DeviceBuffer> MemoryAllocatorVma::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
             auto self = buffer;
             auto allocator = shared_from_this();
             auto device = this->getDevice();
             auto data = self->getData();
             auto api = self->getApi();
-
-            // 
-            api->info = info;
 
             // 
             VmaAllocationInfo allocInfo = {};
@@ -132,7 +129,7 @@ namespace tom {
             };
 
             // 
-            vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getAllocator(), (const VkBufferCreateInfo*)&info, &allocCreateInfo, (VkBuffer*)&api->buffer, &((VmaAllocation&)self->allocation), nullptr)), "VMA buffer allocation failed...");
+            vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getAllocator(), (const VkBufferCreateInfo*)&api->info, &allocCreateInfo, (VkBuffer*)&api->buffer, &((VmaAllocation&)self->allocation), nullptr)), "VMA buffer allocation failed...");
             vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)self->allocation), &allocInfo);
             device->setDeviceBufferObject(self);
 
@@ -155,15 +152,12 @@ namespace tom {
         };
 
         //
-        std::shared_ptr<DeviceImage> MemoryAllocatorVma::allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
+        std::shared_ptr<DeviceImage> MemoryAllocatorVma::allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
             auto self = image;
             auto allocator = shared_from_this();
             auto device = this->getDevice();
             auto data = self->getData();
             auto api = self->getApi();
-
-            // 
-            api->info = info;
 
             // 
             VmaAllocationInfo allocInfo = {};
@@ -173,7 +167,7 @@ namespace tom {
             };
 
             // 
-            vk::throwResultException(vk::Result(vmaCreateImage((const VmaAllocator&)allocator->getAllocator(), (const VkImageCreateInfo*)&info, &allocCreateInfo, (VkImage*)&api->image, &((VmaAllocation&)self->allocation), nullptr)), "VMA image allocation failed...");
+            vk::throwResultException(vk::Result(vmaCreateImage((const VmaAllocator&)allocator->getAllocator(), (const VkImageCreateInfo*)&api->info, &allocCreateInfo, (VkImage*)&api->image, &((VmaAllocation&)self->allocation), nullptr)), "VMA image allocation failed...");
             vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)self->allocation), &allocInfo);
 
             // 
