@@ -21,11 +21,11 @@
 // 
 namespace tom {
 
+    // 
     class Device;
     class Instance;
     class BufferAllocation;
     class Queue;
-
     class ImageView;
     class DeviceImage;
     class DeviceBuffer;
@@ -34,8 +34,37 @@ namespace tom {
     class PhysicalDevice;
     class MemoryAllocator;
 
-    class MemoryAllocatorVma;
+    // 
+    namespace vktm {
+        class Device;
+        class Instance;
+        class BufferAllocation;
+        class Queue;
+        class ImageView;
+        class DeviceImage;
+        class DeviceBuffer;
+        class DeviceMemory;
+        class MemoryAllocation;
+        class PhysicalDevice;
+        class MemoryAllocator;
+        class MemoryAllocatorVma;
+    };
 
+    // 
+    namespace d12tm {
+        class Device;
+        class Instance;
+        class BufferAllocation;
+        class Queue;
+        class ImageView;
+        class DeviceImage;
+        class DeviceBuffer;
+        class DeviceMemory;
+        class MemoryAllocation;
+        class PhysicalDevice;
+        class MemoryAllocator;
+        class MemoryAllocatorVma;
+    };
 
     //
     enum class ImageViewType : uint32_t {
@@ -51,27 +80,6 @@ namespace tom {
         eTextureSampler3d = 9,
     };
 
-
-    // 
-    class DescriptorSetSource: public std::enable_shared_from_this<DescriptorSetSource> { public: 
-        std::vector<std::vector<std::shared_ptr<ImageView>>> typedImageViews = {};
-    };
-
-    // 
-    class DescriptorSetLayouts: public std::enable_shared_from_this<DescriptorSetLayouts> { public:
-        vk::DescriptorSetLayout buffers = {};
-        vk::DescriptorSetLayout textures = {};
-        vk::DescriptorSetLayout images = {};
-    };
-
-    // 
-    class DescriptorSet: public std::enable_shared_from_this<DescriptorSet> { public:
-        vk::DescriptorSet buffers = {};
-        vk::DescriptorSet textures = {};
-        vk::DescriptorSet images = {};
-    };
-
-
     //
     enum class MemoryUsage : uint32_t {
         eUnknown = 0u,
@@ -83,29 +91,63 @@ namespace tom {
         eGPULazilyAllocated = 6u
     };
 
-    // 
-    struct MemoryAllocationInfo {
-        uint32_t sType = 0xFFA00001;
-        void* pNext = nullptr;
-        MemoryUsage usage = MemoryUsage::eGPUOnly;
-        vk::Buffer buffer = {};
-        vk::Image image = {};
-
-        // 
-        MemoryAllocationInfo withBuffer(const vk::Buffer& buffer = {}) {
-            auto info = MemoryAllocationInfo(*this);
-            info.buffer = buffer;
-            return info;
-        };
-
-        // 
-        MemoryAllocationInfo withImage(const vk::Image& image = {}) {
-            auto info = MemoryAllocationInfo(*this);
-            info.image = image;
-            return info;
+    namespace d12tm {
+        struct MemoryAllocationInfo {
+            
         };
     };
 
+    // 
+    namespace vktm {
+        // 
+        class DescriptorSetSource: public std::enable_shared_from_this<DescriptorSetSource> { public: 
+            std::vector<std::vector<std::shared_ptr<ImageView>>> typedImageViews = {};
+        };
+
+        // 
+        class DescriptorSetLayouts: public std::enable_shared_from_this<DescriptorSetLayouts> { public:
+            vk::DescriptorSetLayout buffers = {};
+            vk::DescriptorSetLayout textures = {};
+            vk::DescriptorSetLayout images = {};
+        };
+
+        // 
+        class DescriptorSet: public std::enable_shared_from_this<DescriptorSet> { public:
+            vk::DescriptorSet buffers = {};
+            vk::DescriptorSet textures = {};
+            vk::DescriptorSet images = {};
+        };
+
+        // 
+        struct MemoryAllocationInfo {
+            
+            vk::Buffer buffer = {};
+            vk::Image image = {};
+
+            // 
+            MemoryAllocationInfo withBuffer(const vk::Buffer& buffer = {}) {
+                auto info = MemoryAllocationInfo(*this);
+                info.buffer = buffer;
+                return info;
+            };
+
+            // 
+            MemoryAllocationInfo withImage(const vk::Image& image = {}) {
+                auto info = MemoryAllocationInfo(*this);
+                info.image = image;
+                return info;
+            };
+        };
+
+    };
+
+    // 
+    struct MemoryAllocationInfo {
+        MemoryUsage usage = MemoryUsage::eGPUOnly;
+        //vktm::MemoryAllocationInfo* vkInfo = nullptr;
+        //d12tm::MemoryAllocationInfo* d12Info = nullptr;
+        void* apiInfo = nullptr;
+    };
 
     //
     using PhysicalDeviceFeaturesChain = vk::StructureChain<vk::PhysicalDeviceFeatures2&, vk::PhysicalDeviceBufferDeviceAddressFeatures&>;
@@ -140,6 +182,31 @@ namespace tom {
         operator uint64_t&() { return reinterpret_cast<uint64_t&>(*this); };
         operator const uint64_t&() const { return reinterpret_cast<const uint64_t&>(*this); };
         uint64_t& operator=(const uint64_t& a) { return (reinterpret_cast<uint64_t&>(*this) = a); };
+    };
+
+
+
+
+
+
+    // 
+    class QueueBase: public std::enable_shared_from_this<QueueBase> {
+        public:
+    };
+
+    // 
+    class DeviceBase: public std::enable_shared_from_this<DeviceBase> {
+        public:
+    };
+
+    // 
+    class PhysicalDeviceBase: public std::enable_shared_from_this<PhysicalDeviceBase> {
+        public:
+    };
+
+    // 
+    class InstanceBase: public std::enable_shared_from_this<InstanceBase> {
+        public:
     };
 
 };
