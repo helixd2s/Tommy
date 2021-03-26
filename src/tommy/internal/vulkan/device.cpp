@@ -168,7 +168,7 @@ namespace tom {
             };
 
             if (!imageView) { 
-                data->imageViews[imageViewKey] = (imageView = std::make_shared<ImageView>(shared_from_this(), imageView));
+                //data->imageViews[imageViewKey] = (imageView = std::make_shared<ImageView>());
             };
 
             return imageView;
@@ -183,7 +183,7 @@ namespace tom {
             };
 
             if (!deviceBuffer) { 
-                data->buffers[buffer] = (deviceBuffer = std::make_shared<DeviceBuffer>(shared_from_this(), buffer));
+                //data->buffers[buffer] = (deviceBuffer = std::make_shared<DeviceBuffer>());
             };
 
             return deviceBuffer;
@@ -224,7 +224,7 @@ namespace tom {
 
         // 
         vk::Buffer Device::setDeviceBufferObject(const std::shared_ptr<DeviceBuffer>& deviceBuffer = {}) {
-            vk::Buffer buffer = deviceBuffer->getData()->buffer; // determine key
+            vk::Buffer buffer = deviceBuffer->getApi()->buffer; // determine key
             if (data->buffers.find(buffer) == data->buffers.end()) {
                 data->buffers[buffer] = deviceBuffer;
             };

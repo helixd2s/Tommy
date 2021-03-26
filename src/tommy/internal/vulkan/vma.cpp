@@ -24,7 +24,7 @@ namespace tom {
 
         //
         std::shared_ptr<MemoryAllocator> MemoryAllocatorVma::constructor() { //
-            auto device = this->device.lock();
+            auto device = this->getDevice();
             auto& instanceDispatch = device->getInstance()->getData()->dispatch;
             auto& deviceDispatch = device->getData()->dispatch;
 
@@ -72,7 +72,7 @@ namespace tom {
         std::shared_ptr<MemoryAllocation> MemoryAllocator::allocateMemory(const std::shared_ptr<MemoryAllocation>& allocation, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
             auto self = allocation;
             auto allocator = shared_from_this();
-            auto device = this->device.lock();
+            auto device = this->getDevice();
             auto data = self->getData();
 
             //
@@ -106,7 +106,7 @@ namespace tom {
 
                 //
                 self->destructor = [allocator, allocation = self->getAllocation()](){
-                    vmaFreeMemory((const VmaAllocator&)allocator->getAllocator(), (VmaAllocation&)allocation);
+                    vmaFreeMemory((VmaAllocator&)allocator->getAllocator(), (VmaAllocation&)allocation);
                 };
             };
 
@@ -117,11 +117,12 @@ namespace tom {
         std::shared_ptr<DeviceBuffer> MemoryAllocatorVma::allocateAndCreateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const vk::BufferCreateInfo& info = {}, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
             auto self = buffer;
             auto allocator = shared_from_this();
-            auto device = this->device.lock();
+            auto device = this->getDevice();
             auto data = self->getData();
+            auto api = self->getApi();
 
             // 
-            data->info = info;
+            api->info = info;
 
             // 
             VmaAllocationInfo allocInfo = {};
@@ -131,23 +132,23 @@ namespace tom {
             };
 
             // 
-            vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getAllocator(), (const VkBufferCreateInfo*)&info, &allocCreateInfo, (VkBuffer*)&data->buffer, &((VmaAllocation&)self->allocation), nullptr)), "VMA buffer allocation failed...");
+            vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getAllocator(), (const VkBufferCreateInfo*)&info, &allocCreateInfo, (VkBuffer*)&api->buffer, &((VmaAllocation&)self->allocation), nullptr)), "VMA buffer allocation failed...");
             vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)self->allocation), &allocInfo);
             device->setDeviceBufferObject(self);
 
             // wrap device memory
-            auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);
-            self->memoryAllocation = std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset);
-            self->memoryAllocation->getAllocation() = self->allocation;
-            self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData;
+            self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);;
+            data->memoryOffset = allocInfo.offset;
+            self->allocation = self->allocation;
+            self->mapped = allocInfo.pMappedData;
 
             // not sure...
             //deviceMemory->getMapped() = allocInfo.pMappedData;
             //deviceMemory->getAllocation() = allocation;
 
-            self->destructor = [data, allocator = allocator->getAllocator(), allocation = self->getMemoryAllocation()](){
-                vmaDestroyBuffer((VmaAllocator&)allocator, data->buffer, (VmaAllocation&)allocation);
-                data->buffer = vk::Buffer{};
+            self->destructor = [data, api, allocator = allocator->getAllocator(), allocation = self->getMemoryAllocation()](){
+                vmaDestroyBuffer((VmaAllocator&)allocator, api->buffer, (VmaAllocation&)allocation);
+                api->buffer = vk::Buffer{};
             };
 
             return self;
@@ -157,11 +158,12 @@ namespace tom {
         std::shared_ptr<DeviceImage> MemoryAllocatorVma::allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const vk::ImageCreateInfo& info = {}, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
             auto self = image;
             auto allocator = shared_from_this();
-            auto device = this->device.lock();
+            auto device = this->getDevice();
             auto data = self->getData();
+            auto api = self->getApi();
 
             // 
-            data->info = info;
+            api->info = info;
 
             // 
             VmaAllocationInfo allocInfo = {};
@@ -171,7 +173,7 @@ namespace tom {
             };
 
             // 
-            vk::throwResultException(vk::Result(vmaCreateImage((const VmaAllocator&)allocator->getAllocator(), (const VkImageCreateInfo*)&info, &allocCreateInfo, (VkImage*)&data->image, &((VmaAllocation&)self->allocation), nullptr)), "VMA image allocation failed...");
+            vk::throwResultException(vk::Result(vmaCreateImage((const VmaAllocator&)allocator->getAllocator(), (const VkImageCreateInfo*)&info, &allocCreateInfo, (VkImage*)&api->image, &((VmaAllocation&)self->allocation), nullptr)), "VMA image allocation failed...");
             vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)self->allocation), &allocInfo);
 
             // 
@@ -179,18 +181,18 @@ namespace tom {
             //self->layoutHistory.push_back(info.initialLayout);
 
             // wrap device memory
-            auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);
-            self->memoryAllocation = std::make_shared<tom::MemoryAllocation>(deviceMemory, allocInfo.offset);
-            self->memoryAllocation->getAllocation() = self->allocation;
-            self->memoryAllocation->getMappedDefined() = allocInfo.pMappedData;
+            self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);;
+            data->memoryOffset = allocInfo.offset;
+            self->allocation = self->allocation;
+            self->mapped = allocInfo.pMappedData;
 
             // not sure...
             //deviceMemory->getMapped() = allocInfo.pMappedData;
             //deviceMemory->getAllocation() = allocation;
 
-            self->destructor = [data, allocator = allocator->getAllocator(), allocation = self->getMemoryAllocation()](){
-                vmaDestroyImage((VmaAllocator&)allocator, data->image, (VmaAllocation&)allocation);
-                data->image = vk::Image{};
+            self->destructor = [data, api, allocator = allocator->getAllocator(), allocation = self->getMemoryAllocation()](){
+                vmaDestroyImage((VmaAllocator&)allocator, api->image, (VmaAllocation&)allocation);
+                api->image = vk::Image{};
             };
 
             return self;

@@ -15,35 +15,38 @@ namespace tom {
     namespace vulkan {
         // 
         vk::DeviceAddress& DeviceBuffer::getDeviceAddress() {
-            return (data->address = data->address ? data->address : this->getDevice()->getData()->device.getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = data->buffer }));
+            return (api->address = api->address ? api->address : this->getDeviceMemory()->getDevice()->getData()->device.getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = api->buffer }));
         };
 
         // 
         vk::DeviceAddress DeviceBuffer::getDeviceAddress() const {
-            return (data->address ? data->address : this->getDevice()->getData()->device.getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = data->buffer }));
+            return (api->address ? api->address : this->getDeviceMemory()->getDevice()->getData()->device.getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = api->buffer }));
         };
 
         // 
         std::shared_ptr<DeviceBuffer> DeviceBuffer::bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) {
             if (memoryAllocation) {
-                this->memoryAllocation = memoryAllocation;
-                this->getDevice()->getData()->device.bindBufferMemory2(vk::BindBufferMemoryInfo{
-                    .buffer = data->buffer,
-                    .memory = this->memoryAllocation->getDeviceMemory()->getData()->memory,
-                    .memoryOffset = this->memoryAllocation->getData()->memoryOffset
+                this->data = memoryAllocation->getData();
+            };
+            if (this->data) {
+                this->getDeviceMemory()->getDevice()->getData()->device.bindBufferMemory2(vk::BindBufferMemoryInfo{
+                    .buffer = api->buffer,
+                    .memory = deviceMemory->getData()->memory,
+                    .memoryOffset = data->memoryOffset
                 });
             };
-            return shared_from_this();
+            return std::dynamic_pointer_cast<DeviceBuffer>(shared_from_this());
         };
 
-        // 
+        // auto api = self->getApi();
         std::shared_ptr<DeviceBuffer> DeviceBuffer::create(const vk::BufferCreateInfo& info = {}, const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) {
-            auto device = this->getDevice();
-            data->buffer = device->getData()->device.createBuffer( data->info = info.queueFamilyIndexCount ? vk::BufferCreateInfo(info) : vk::BufferCreateInfo(info).setQueueFamilyIndices(this->getDevice()->getQueueFamilyIndices()) );
-            device->setDeviceBufferObject(shared_from_this());
+            auto self = std::dynamic_pointer_cast<DeviceBuffer>(shared_from_this());
+            auto device = memoryAllocation ? memoryAllocation->getDeviceMemory()->getDevice() : this->getDeviceMemory()->getDevice();
+            api->buffer = device->getData()->device.createBuffer( api->info = info.queueFamilyIndexCount ? vk::BufferCreateInfo(info) : vk::BufferCreateInfo(info).setQueueFamilyIndices(device->getQueueFamilyIndices()) );
+            device->setDeviceBufferObject(self);
             this->bindMemory(memoryAllocation);
-            data->address = 0ull;
-            return shared_from_this();
+            api->address = 0ull;
+            return self;
         };
     };
 

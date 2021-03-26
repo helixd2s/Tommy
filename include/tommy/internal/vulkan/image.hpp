@@ -25,35 +25,40 @@ namespace tom {
         };
 
         // BASED ON ALLOCATION!!!
-        class DeviceImage: public std::enable_shared_from_this<DeviceImage> {
+        class DeviceImage: public MemoryAllocation {
         protected: friend MemoryAllocator; friend MemoryAllocatorVma; friend ImageView;// 
-            std::weak_ptr<Device> device = {};
-            std::shared_ptr<MemoryAllocation> memoryAllocation = {};
-            std::shared_ptr<DeviceImageData> data = {};
+            std::shared_ptr<DeviceImageData> api = {};
             std::function<void()> destructor = {};
             void* allocation = nullptr;
 
-            
-
         public: // 
             // legacy
-            DeviceImage(const std::shared_ptr<Device>& device, const vk::Image& image = {}): device(device) {
-                data = std::make_shared<DeviceImageData>();
-                data->image = image;
+            DeviceImage(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const vk::DeviceSize& memoryOffset = 0ull, const vk::Image& image = {}): MemoryAllocation(deviceMemory, memoryOffset) {
+                api = std::make_shared<DeviceImageData>();
+                api->image = image;
+            };
+
+            // legacy
+            DeviceImage(const vk::Image& image = {}) {
+                api = std::make_shared<DeviceImageData>();
+                api->image = image;
             };
 
             // 
             ~DeviceImage() {
-                auto device = this->getDevice()->getData();
                 if (this->destructor) { 
                     this->destructor();
                 };
-                if (data->image) {
-                    device->device.bindImageMemory2(vk::BindImageMemoryInfo{ .image = data->image, .memory = {}, .memoryOffset = 0ull });
-                    device->device.destroyImage(data->image);
-                    data->image = vk::Image{};
-                };
                 this->destructor = {};
+
+                if (this->data) {
+                    auto device = this->getDeviceMemory()->getDevice()->getData();
+                    if (api->image) {
+                        device->device.bindImageMemory2(vk::BindImageMemoryInfo{ .image = api->image, .memory = {}, .memoryOffset = 0ull });
+                        device->device.destroyImage(api->image);
+                        api->image = vk::Image{};
+                    };
+                };
             };
 
             // 
@@ -61,14 +66,11 @@ namespace tom {
             virtual std::shared_ptr<DeviceImage> create(const vk::ImageCreateInfo& info = {}, const std::shared_ptr<MemoryAllocation>& memoryAllocation = {});
 
             // 
-            virtual inline std::shared_ptr<MemoryAllocation>& getMemoryAllocation() { return memoryAllocation; };
-            virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
-            virtual inline std::shared_ptr<DeviceImageData> getData() { return data; };
+            virtual inline std::shared_ptr<MemoryAllocation> getMemoryAllocation() { return shared_from_this(); };
+            virtual inline std::shared_ptr<DeviceImageData> getApi() { return api; };
 
             // 
-            virtual inline const std::shared_ptr<MemoryAllocation>& getMemoryAllocation() const { return memoryAllocation; };
-            virtual inline std::shared_ptr<Device> getDevice() const { return device.lock(); };
-            virtual inline std::shared_ptr<DeviceImageData> getData() const { return data; };
+            virtual inline std::shared_ptr<DeviceImageData> getApi() const { return api; };
         };
 
         //

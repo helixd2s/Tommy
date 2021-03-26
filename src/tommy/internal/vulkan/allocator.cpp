@@ -22,7 +22,7 @@ namespace tom {
         std::shared_ptr<MemoryAllocation> MemoryAllocator::allocateMemory(const std::shared_ptr<MemoryAllocation>& allocation, const tom::MemoryAllocationInfo& allocInfo = {}) {
             auto self = allocation;
             auto allocator = shared_from_this();
-            auto device = this->device.lock();
+            auto device = this->getDevice();
             auto data = self->getData();
 
             //
@@ -53,13 +53,14 @@ namespace tom {
         std::shared_ptr<DeviceBuffer> MemoryAllocator::allocateBuffer(const std::shared_ptr<DeviceBuffer>& buffer, const tom::MemoryAllocationInfo& allocInfo = {}) {
             auto self = buffer;
             auto allocator = shared_from_this();
-            auto device = this->device.lock();
+            auto device = this->getDevice();
             auto data = self->getData();
+            auto api = self->getApi();
 
-            if (data->buffer) { // 
+            if (api->buffer) { // 
                 auto memoryRequirements = vk::StructureChain<vk::MemoryRequirements2, vk::MemoryDedicatedRequirementsKHR>{ vk::MemoryRequirements2{  }, vk::MemoryDedicatedRequirementsKHR{} };
-                device->getData()->device.getBufferMemoryRequirements2(vk::BufferMemoryRequirementsInfo2{ .buffer = data->buffer }, memoryRequirements);
-                self->bindMemory(allocator->allocateMemory(std::make_shared<MemoryAllocation>(device), tom::MemoryAllocationInfo(allocInfo).withVulkan(MemoryAllocationInfo{.buffer = data->buffer, .requirements = memoryRequirements.get<vk::MemoryRequirements2>()})));
+                device->getData()->device.getBufferMemoryRequirements2(vk::BufferMemoryRequirementsInfo2{ .buffer = api->buffer }, memoryRequirements);
+                allocator->allocateMemory(self, tom::MemoryAllocationInfo(allocInfo).withVulkan(MemoryAllocationInfo{.buffer = api->buffer, .requirements = memoryRequirements.get<vk::MemoryRequirements2>()}));
             };
 
             return self;
@@ -69,13 +70,14 @@ namespace tom {
         std::shared_ptr<DeviceImage> MemoryAllocator::allocateImage(const std::shared_ptr<DeviceImage>& image, const tom::MemoryAllocationInfo& allocInfo = {}) {
             auto self = image;
             auto allocator = shared_from_this();
-            auto device = this->device.lock();
+            auto device = this->getDevice();
             auto data = self->getData();
+            auto api = self->getApi();
 
-            if (data->image) { // 
+            if (api->image) { // 
                 auto memoryRequirements = vk::StructureChain<vk::MemoryRequirements2, vk::MemoryDedicatedRequirementsKHR>{ vk::MemoryRequirements2{  }, vk::MemoryDedicatedRequirementsKHR{} };
-                device->getData()->device.getImageMemoryRequirements2(vk::ImageMemoryRequirementsInfo2{ .image = data->image }, memoryRequirements);
-                self->bindMemory(allocator->allocateMemory(std::make_shared<MemoryAllocation>(device), tom::MemoryAllocationInfo(allocInfo).withVulkan(MemoryAllocationInfo{.image = data->image, .requirements = memoryRequirements.get<vk::MemoryRequirements2>()})));
+                device->getData()->device.getImageMemoryRequirements2(vk::ImageMemoryRequirementsInfo2{ .image = api->image }, memoryRequirements);
+                allocator->allocateMemory(self, tom::MemoryAllocationInfo(allocInfo).withVulkan(MemoryAllocationInfo{.image = api->image, .requirements = memoryRequirements.get<vk::MemoryRequirements2>()}));
             };
 
             return self;
