@@ -16,10 +16,18 @@ namespace tom {
         void* allocation = nullptr;
 
     public: // 
+        DeviceImage(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const vk::DeviceSize& memoryOffset = 0ull, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceImageBase>& api = {}): MemoryAllocation(deviceMemory, memoryOffset, data), api(api) {
+        };
+
+        DeviceImage(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceImageBase>& api = {}): MemoryAllocation(deviceMemory, data), api(api) {
+        };
+
+        DeviceImage(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceImageBase>& api = {}) : MemoryAllocation(device, data), api(api) {
+        };
 
         // 
-        virtual std::shared_ptr<DeviceImage> bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {});
-        virtual std::shared_ptr<DeviceImage> create(const vk::ImageCreateInfo& info = {}, const std::shared_ptr<MemoryAllocation>& memoryAllocation = {});
+        virtual std::shared_ptr<MemoryAllocation> bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) override;
+        virtual std::shared_ptr<MemoryAllocation> create(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) override;
 
         // 
         virtual inline std::shared_ptr<MemoryAllocation> getMemoryAllocation() { return shared_from_this(); };
@@ -29,7 +37,7 @@ namespace tom {
         virtual inline std::shared_ptr<DeviceImageBase> getApi() const { return api; };
     };
 
-    //
+    // 
     class ImageView : public std::enable_shared_from_this<ImageView> { protected: 
     protected:
         friend DeviceImage;
@@ -38,7 +46,7 @@ namespace tom {
         ImageViewKey key = {};
 
     public: // 
-        ImageView(const std::shared_ptr<DeviceImage>& deviceImage): deviceImage(deviceImage) {
+        ImageView(const std::shared_ptr<DeviceImage>& deviceImage, const std::shared_ptr<ImageViewBase>& data): deviceImage(deviceImage), data(data) {
             this->constructor();
         };
 

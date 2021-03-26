@@ -37,13 +37,15 @@ namespace tom {
         std::shared_ptr<PhysicalDeviceBase> data = {};
 
     public: // 
-        PhysicalDevice(const std::shared_ptr<Instance>& instance): instance(instance) {
+        PhysicalDevice(const std::shared_ptr<Instance>& instance, const std::shared_ptr<PhysicalDeviceBase> data = {}): instance(instance), data(data) {
             this->constructor();
         };
 
         //
         virtual std::shared_ptr<PhysicalDevice> constructor();
         //virtual std::unordered_map<uint32_t, SurfaceProperties> getSurfaceInfo(const vk::SurfaceKHR& surface) const;
+
+        
 
         // 
         virtual std::shared_ptr<Instance> getInstance() { return instance.lock(); };

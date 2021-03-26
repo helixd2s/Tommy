@@ -2,6 +2,7 @@
 
 //#include <tommy/core.hpp>
 #include "../core.hpp"
+#include "../instance.hpp"
 
 // 
 namespace tom {
@@ -27,6 +28,13 @@ namespace tom {
             std::vector<vk::QueueFamilyProperties2> queueFamilyProperties = {};
             std::vector<vk::ExtensionProperties> extensionProperties = {};
             std::vector<vk::LayerProperties> layerProperties = {};
+
+            // 
+            static std::shared_ptr<PhysicalDeviceData> makeShared(const vk::PhysicalDevice& physicalDevice = {}) {
+                std::shared_ptr<PhysicalDeviceData> data = {};
+                data->physicalDevice = physicalDevice;
+                return data;
+            };
         };
 
         //
@@ -59,30 +67,16 @@ namespace tom {
 
 
         // 
-        class Instance: public std::enable_shared_from_this<Instance> {
-        protected:  // 
-            std::shared_ptr<InstanceData> data = {};
-
-            //
+        class Instance: public tom::Instance {
+        protected:  //
             static std::shared_ptr<Context> context;
 
-        public: // 
-            Instance() { this->constructor(); };
+        public: 
+            // legacy
+            Instance() : tom::Instance() {};
 
             //
-            virtual std::shared_ptr<Instance> constructor();
-
-            // 
-            virtual inline std::shared_ptr<InstanceData> getData() { return data; };
-            virtual inline std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices();
-            //virtual inline vk::Instance& getInstance() { return instance; };
-            //virtual inline vk::DispatchLoaderDynamic& getDispatch() { return dispatch; };
-
-            // 
-            virtual inline const std::shared_ptr<InstanceData> getData() const { return data; };
-            virtual inline const std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices() const;
-            //virtual inline const vk::Instance& getInstance() const { return instance; };
-            //virtual inline const vk::DispatchLoaderDynamic& getDispatch() const { return dispatch; };
+            virtual std::shared_ptr<tom::Instance> constructor() override;
         };
 
         //
@@ -98,30 +92,20 @@ namespace tom {
         };
 
         // 
-        class PhysicalDevice: public std::enable_shared_from_this<PhysicalDevice> {
+        class PhysicalDevice: public tom::PhysicalDevice {
         protected:  // 
-            std::weak_ptr<Instance> instance = {};
-            std::shared_ptr<PhysicalDeviceData> data = {};
+            virtual inline std::shared_ptr<PhysicalDeviceData> getDataTyped() { return std::dynamic_pointer_cast<PhysicalDeviceData>(this->data); };
+            virtual inline std::shared_ptr<PhysicalDeviceData> getDataTyped() const { return std::dynamic_pointer_cast<PhysicalDeviceData>(this->data); };
 
-        public: // 
-            PhysicalDevice(const std::shared_ptr<Instance>& instance, const vk::PhysicalDevice& physicalDevice): instance(instance) {
-                data = std::make_shared<PhysicalDeviceData>();
-                data->physicalDevice = physicalDevice;
-                this->constructor();
-            };
+        public: 
+            // legacy
+            PhysicalDevice(const std::shared_ptr<tom::Instance>& instance, const vk::PhysicalDevice& physicalDevice): tom::PhysicalDevice(instance, PhysicalDeviceData::makeShared(physicalDevice)) 
+            {};
 
             //
-            virtual std::shared_ptr<PhysicalDevice> constructor();
+            virtual std::shared_ptr<tom::PhysicalDevice> constructor() override;
             virtual std::unordered_map<uint32_t, SurfaceProperties> getSurfaceInfo(const vk::SurfaceKHR& surface) const;
             virtual uint32_t getMemoryType(const uint32_t& memoryTypeBitsRequirement, const vk::MemoryPropertyFlags& requiredProperties = vk::MemoryPropertyFlagBits::eDeviceLocal) const;
-
-            // 
-            virtual std::shared_ptr<Instance> getInstance() { return instance.lock(); };
-            virtual std::shared_ptr<PhysicalDeviceData> getData() { return data; };
-
-            // 
-            virtual std::shared_ptr<Instance> getInstance() const { return instance.lock(); };
-            virtual std::shared_ptr<PhysicalDeviceData> getData() const { return data; };
         };
 
     };

@@ -10,13 +10,12 @@ namespace tom {
     // 
     class Queue: public std::enable_shared_from_this<Queue> {
     protected:  //
-        //std::shared_ptr<tom::Device> device = {};
         std::weak_ptr<Device> device = {};
         std::shared_ptr<QueueBase> data = {};
 
     public: 
         // legacy
-        Queue(const std::shared_ptr<Device>& device, const vk::Queue& queue = {}, const uint32_t& queueFamilyIndex = 0u) : device(device) {
+        Queue(const std::shared_ptr<Device>& device, const std::shared_ptr<QueueBase>& data = {}) : device(device), data(data) {
             this->constructor();
         };
 
@@ -74,10 +73,7 @@ namespace tom {
         virtual std::shared_ptr<ImageView> getImageViewObject(const ImageViewKey& imageViewKey);
 
 
-        // 
-        virtual vk::Buffer setDeviceBufferObject(const std::shared_ptr<DeviceBuffer>& deviceBuffer = {});
-        virtual vk::DeviceMemory setDeviceMemoryObject(const std::shared_ptr<DeviceMemory>& deviceMemoryObj = {});
-        virtual vk::DeviceAddress setBufferAllocationObject(const std::shared_ptr<BufferAllocation>& allocation = {});
+        //
         virtual ImageViewKey setImageViewObject(const std::shared_ptr<ImageView>& imageViewObj = {});
 
         // 

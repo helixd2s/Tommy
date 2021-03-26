@@ -6,6 +6,8 @@
 #include "../core.hpp"
 #include "./device.hpp"
 
+#include "../memory.hpp"
+
 // 
 namespace tom {
 
@@ -24,28 +26,21 @@ namespace tom {
         };
 
         //
-        class DeviceMemory: public std::enable_shared_from_this<DeviceMemory> {
+        class DeviceMemory: public tom::DeviceMemory {
         protected: friend MemoryAllocator; friend MemoryAllocatorVma;
-            std::weak_ptr<Device> device = {};
-            std::shared_ptr<DeviceMemoryData> data = {};
-            std::function<void()> destructor = {};
-
-            // 
-            void* allocation = nullptr;
-            void* mapped = nullptr;
-
-            //
-            //uint32_t glHandle = 0u;
+            virtual inline std::shared_ptr<DeviceMemoryData> getDataTyped() { return std::dynamic_pointer_cast<DeviceMemoryData>(data); };
+            virtual inline std::shared_ptr<DeviceMemoryData> getDataTyped() const { return std::dynamic_pointer_cast<DeviceMemoryData>(data); };
 
         public: // 
             // legacy
-            DeviceMemory(const std::shared_ptr<Device>& device, const vk::DeviceMemory& memory = {}): device(device) {
-                data = std::make_shared<DeviceMemoryData>();
+            DeviceMemory(const std::shared_ptr<tom::Device>& device, const vk::DeviceMemory& memory = {}) : tom::DeviceMemory(device, std::make_shared<DeviceMemoryData>()) {
+                auto data = this->getDataTyped();
                 data->memory = memory;
             };
 
             // 
             ~DeviceMemory() {
+                auto data = this->getDataTyped();
                 if (this->destructor) { this->destructor(); };
                 if (data->memory) { data->memory = vk::DeviceMemory{}; };
             };
@@ -54,39 +49,25 @@ namespace tom {
             std::shared_ptr<DeviceMemory> allocate(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
 
             // 
-            virtual inline std::shared_ptr<DeviceMemoryData> getData() { return data; };
-            virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
             virtual inline void*& getAllocation() { return allocation; };
             virtual inline void*& getMapped() { return mapped; };
 
             // 
-            virtual inline std::shared_ptr<DeviceMemoryData> getData() const { return data; };
-            virtual inline std::shared_ptr<Device> getDevice() const { return device.lock(); };
             virtual inline void* const& getAllocation() const { return allocation; };
             virtual inline void* const& getMapped() const { return mapped; };
         };
 
         // 
-        class MemoryAllocation: public std::enable_shared_from_this<MemoryAllocation> {
+        class MemoryAllocation: public tom::MemoryAllocation {
         protected: friend MemoryAllocator; friend MemoryAllocatorVma; friend DeviceMemory; friend MemoryAllocation;
-            std::weak_ptr<Device> device = {};
-            std::shared_ptr<DeviceMemory> deviceMemory = {};
-            std::shared_ptr<MemoryAllocationData> data = {};
-            std::function<void()> destructor = {};
-
-            // 
-            uintptr_t memoryOffset = 0ull;
-            void* allocation = nullptr;
-            void* mapped = nullptr;
 
         public: // 
-            MemoryAllocation(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const vk::DeviceSize& memoryOffset = 0ull): deviceMemory(deviceMemory), device(deviceMemory->getDevice()) {
+            MemoryAllocation(const std::shared_ptr<tom::DeviceMemory>& deviceMemory = {}, const vk::DeviceSize& memoryOffset = 0ull): tom::MemoryAllocation(deviceMemory, memoryOffset) {
                 data = std::make_shared<MemoryAllocationData>();
-                this->memoryOffset = memoryOffset;
             };
 
-            // legacy
-            MemoryAllocation(const std::shared_ptr<Device>& device = {}) : device(device) {
+            // 
+            MemoryAllocation(const std::shared_ptr<tom::Device>& device = {}) : tom::MemoryAllocation(device) {
 
             };
 
@@ -95,24 +76,6 @@ namespace tom {
                 if (this->destructor) { this->destructor(); };
                 if (this->deviceMemory) { this->deviceMemory = {}; };
             };
-
-            // 
-            virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
-            virtual inline std::shared_ptr<MemoryAllocationData> getData() { return data; };
-            virtual inline std::shared_ptr<DeviceMemory>& getDeviceMemory() { return deviceMemory; };
-            virtual inline void* getMapped() { return mapped ? mapped : ((uint8_t*)deviceMemory->getMapped() + this->memoryOffset); };
-            virtual inline void*& getAllocation() { return allocation; };
-            virtual inline void*& getMappedDefined() { return mapped; };
-            virtual inline uintptr_t& getMemoryOffset() { return memoryOffset; };
-
-            // 
-            virtual inline std::shared_ptr<Device> getDevice() const { return device.lock(); };
-            virtual inline std::shared_ptr<MemoryAllocationData> getData() const { return data; };
-            virtual inline const std::shared_ptr<DeviceMemory>& getDeviceMemory() const { return deviceMemory; };
-            virtual inline const void* getMapped() const { return mapped ? mapped : ((const uint8_t*)deviceMemory->getMapped() + this->memoryOffset); };
-            virtual inline void* const& getAllocation() const { return allocation; };
-            virtual inline void* const& getMappedDefined() const { return mapped; };
-            virtual inline const uintptr_t& getMemoryOffset() const { return memoryOffset; };
         };
 
     };

@@ -8,6 +8,7 @@
 namespace tom {
     namespace vulkan {
         // 
+        /*
         class Compute: public std::enable_shared_from_this<Compute> {
             protected:
             std::shared_ptr<tom::Device> device = {};
@@ -18,5 +19,6 @@ namespace tom {
                 
             };
         };
+        */
     };
 };

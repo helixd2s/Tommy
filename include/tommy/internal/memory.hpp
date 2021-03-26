@@ -24,7 +24,7 @@ namespace tom {
         //uint32_t glHandle = 0u;
 
     public: // 
-        // legacy
+        // 
         DeviceMemory(const std::shared_ptr<Device>& device, const std::shared_ptr<DeviceMemoryBase>& data = {}): device(device), data(data) {
             
         };
@@ -35,7 +35,8 @@ namespace tom {
         };
 
         // 
-        std::shared_ptr<DeviceMemory> allocate(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
+        virtual std::shared_ptr<DeviceMemory> allocate(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
+        virtual std::shared_ptr<DeviceBuffer> bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {});
 
         // 
         virtual inline std::shared_ptr<DeviceMemoryBase> getData() { return data; };
@@ -70,7 +71,7 @@ namespace tom {
         MemoryAllocation(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}): data(data), deviceMemory(deviceMemory), device(deviceMemory->getDevice()) {
         };
 
-        MemoryAllocation(const std::shared_ptr<Device>& device = {}) : device(device) {
+        MemoryAllocation(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}) : device(device), data(data) {
         };
 
         // 
@@ -81,6 +82,14 @@ namespace tom {
             this->deviceMemory = {};
             this->memoryOffset = 0ull;
         };
+
+        // 
+        virtual uintptr_t& getDeviceAddress();
+        virtual uintptr_t getDeviceAddress() const;
+
+        // 
+        virtual std::shared_ptr<MemoryAllocation> bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {});
+        virtual std::shared_ptr<MemoryAllocation> create(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {});
 
         // 
         virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
