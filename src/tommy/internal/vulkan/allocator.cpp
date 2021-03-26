@@ -1,15 +1,15 @@
 #pragma once
 
 // 
-#include <tommy/internal/instance.hpp>
-#include <tommy/internal/device.hpp>
-#include <tommy/internal/memory.hpp>
-#include <tommy/internal/buffer.hpp>
-#include <tommy/internal/image.hpp>
+#include <tommy/internal/vulkan/instance.hpp>
+#include <tommy/internal/vulkan/device.hpp>
+#include <tommy/internal/vulkan/memory.hpp>
+#include <tommy/internal/vulkan/buffer.hpp>
+#include <tommy/internal/vulkan/image.hpp>
 
 // 
 namespace tom {
-    namespace vktm {
+    namespace vulkan {
         // 
         std::shared_ptr<MemoryAllocator>& Device::createAllocator() {
             if (!this->allocator) {
@@ -26,7 +26,7 @@ namespace tom {
             auto data = self->getData();
 
             //
-            auto* vkInfo = (tom::vktm::MemoryAllocationInfo*)(allocInfo.apiInfo);
+            auto* vkInfo = (tom::vulkan::MemoryAllocationInfo*)(allocInfo.apiInfo);
 
             // TODO: smart allocation 
             data->memoryOffset = 0ull;

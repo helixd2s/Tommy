@@ -1,14 +1,14 @@
 #pragma once
 
 //#include <tommy/core.hpp>
-#include "./core.hpp"
+#include "../core.hpp"
 #include "./device.hpp"
 #include "./memory.hpp"
 
 // 
 namespace tom {
 
-    namespace vktm {
+    namespace vulkan {
 
         // 
         class DeviceImageData : public DeviceImageBase { public: 
@@ -36,6 +36,7 @@ namespace tom {
             
 
         public: // 
+            // legacy
             DeviceImage(const std::shared_ptr<Device>& device, const vk::Image& image = {}): device(device) {
                 data = std::make_shared<DeviceImageData>();
                 data->image = image;

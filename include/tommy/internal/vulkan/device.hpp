@@ -1,14 +1,14 @@
 #pragma once
 
 //#include <tommy/core.hpp>
-#include "./core.hpp"
+#include "../core.hpp"
 #include "./instance.hpp"
 
 // 
 namespace tom {
     
     // 
-    namespace vktm {
+    namespace vulkan {
 
         // 
         class QueueData: public QueueBase {
@@ -51,7 +51,7 @@ namespace tom {
             std::shared_ptr<QueueData> data = {};
 
         public: 
-            // Legacy
+            // legacy
             Queue(const std::shared_ptr<Device>& device, const vk::Queue& queue = {}, const uint32_t& queueFamilyIndex = 0u) : device(device) {
                 data = std::make_shared<QueueData>();
                 data->queue = queue;

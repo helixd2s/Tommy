@@ -1,13 +1,13 @@
 #pragma once
 
 //#include <tommy/core.hpp>
-#include "./core.hpp"
+#include "../core.hpp"
 #include "./device.hpp"
 #include "./memory.hpp"
 
 // 
 namespace tom {
-    namespace vktm {
+    namespace vulkan {
 
         // 
         class DeviceBufferData : public DeviceBufferBase { public: 
@@ -33,8 +33,8 @@ namespace tom {
             std::function<void()> destructor = {};
             void* allocation = nullptr;
 
-
         public: // 
+            // legacy
             DeviceBuffer(const std::shared_ptr<Device>& device, const vk::Buffer& buffer = {}): device(device) {
                 data = std::make_shared<DeviceBufferData>();
                 data->buffer = buffer;
@@ -83,6 +83,7 @@ namespace tom {
             std::shared_ptr<BufferAllocationData> data = {};
 
         public: // 
+            // legacy
             BufferAllocation(const std::shared_ptr<DeviceBuffer>& deviceBuffer, const vk::DeviceSize& offset = 0ull, const vk::DeviceSize& range = VK_WHOLE_SIZE): deviceBuffer(deviceBuffer) {
                 data = std::make_shared<BufferAllocationData>();
                 this->constructor(offset, range);

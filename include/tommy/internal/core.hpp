@@ -35,7 +35,7 @@ namespace tom {
     class MemoryAllocator;
 
     // 
-    namespace vktm {
+    namespace vulkan {
         class Device;
         class Instance;
         class BufferAllocation;
@@ -51,7 +51,7 @@ namespace tom {
     };
 
     // 
-    namespace d12tm {
+    namespace d3d12 {
         class Device;
         class Instance;
         class BufferAllocation;
@@ -91,14 +91,14 @@ namespace tom {
         eGPULazilyAllocated = 6u
     };
 
-    namespace d12tm {
+    namespace d3d12 {
         struct MemoryAllocationInfo {
             
         };
     };
 
     // 
-    namespace vktm {
+    namespace vulkan {
         // 
         class DescriptorSetSource: public std::enable_shared_from_this<DescriptorSetSource> { public: 
             std::vector<std::vector<std::shared_ptr<ImageView>>> typedImageViews = {};
@@ -145,12 +145,10 @@ namespace tom {
     // 
     struct MemoryAllocationInfo {
         MemoryUsage usage = MemoryUsage::eGPUOnly;
-        //vktm::MemoryAllocationInfo* vkInfo = nullptr;
-        //d12tm::MemoryAllocationInfo* d12Info = nullptr;
         void* apiInfo = nullptr;
 
         // 
-        MemoryAllocationInfo withVulkan(const vktm::MemoryAllocationInfo& vinfo = {}) {
+        MemoryAllocationInfo withVulkan(const vulkan::MemoryAllocationInfo& vinfo = {}) {
             auto info = MemoryAllocationInfo(*this);
             info.apiInfo = (void*)&vinfo;
             return info;

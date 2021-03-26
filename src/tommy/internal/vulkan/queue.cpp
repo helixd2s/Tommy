@@ -1,16 +1,16 @@
 #pragma once
 
 // 
-#include <tommy/internal/instance.hpp>
-#include <tommy/internal/device.hpp>
-#include <tommy/internal/memory.hpp>
-#include <tommy/internal/buffer.hpp>
+#include <tommy/internal/vulkan/instance.hpp>
+#include <tommy/internal/vulkan/device.hpp>
+#include <tommy/internal/vulkan/memory.hpp>
+#include <tommy/internal/vulkan/buffer.hpp>
 
 
 // 
 namespace tom {
 
-    namespace vktm {
+    namespace vulkan {
         //
         vk::Fence Queue::submitCmds(const std::vector<vk::CommandBuffer>& commandBuffers, vk::SubmitInfo2KHR submitInfo) const {
             if (commandBuffers.size() <= 0) return vk::Fence{};

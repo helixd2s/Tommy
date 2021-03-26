@@ -2,15 +2,15 @@
 
 // 
 #include <tommy/internal/core.hpp>
-#include <tommy/internal/instance.hpp>
-#include <tommy/internal/device.hpp>
-#include <tommy/internal/memory.hpp>
-#include <tommy/internal/buffer.hpp>
+#include <tommy/internal/vulkan/instance.hpp>
+#include <tommy/internal/vulkan/device.hpp>
+#include <tommy/internal/vulkan/memory.hpp>
+#include <tommy/internal/vulkan/buffer.hpp>
 
 
 // 
 namespace tom {
-    namespace vktm {
+    namespace vulkan {
         // 
         const std::vector<const char*> defaultLayers = {};
         const std::vector<const char*> defaultExtensions = { "VK_KHR_swapchain", "VK_KHR_buffer_device_address" };

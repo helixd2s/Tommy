@@ -1,14 +1,14 @@
 #pragma once
 
 // 
-#include <tommy/internal/instance.hpp>
-#include <tommy/internal/device.hpp>
-#include <tommy/internal/memory.hpp>
+#include <tommy/internal/vulkan/instance.hpp>
+#include <tommy/internal/vulkan/device.hpp>
+#include <tommy/internal/vulkan/memory.hpp>
 
 // 
 namespace tom {
 
-    namespace vktm { 
+    namespace vulkan { 
         // TODO: VMA allocation
         std::shared_ptr<DeviceMemory> DeviceMemory::allocate(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
             auto device = this->getDevice()->getData()->device;

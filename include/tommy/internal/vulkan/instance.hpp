@@ -1,13 +1,13 @@
 #pragma once
 
 //#include <tommy/core.hpp>
-#include "./core.hpp"
+#include "../core.hpp"
 
 // 
 namespace tom {
 
     // 
-    namespace vktm {
+    namespace vulkan {
 
         // 
         class PhysicalDeviceData: public PhysicalDeviceBase { public: 

@@ -3,13 +3,13 @@
 #pragma once
 
 //#include <tommy/core.hpp>
-#include "./core.hpp"
+#include "../core.hpp"
 #include "./device.hpp"
 
 // 
 namespace tom {
 
-    namespace vktm {
+    namespace vulkan {
 
         //
         class DeviceMemoryData: public DeviceMemoryBase { public: 
@@ -37,6 +37,7 @@ namespace tom {
             uint32_t glHandle = 0u;
 
         public: // 
+            // legacy
             DeviceMemory(const std::shared_ptr<Device>& device, const vk::DeviceMemory& memory = {}): device(device) {
                 data = std::make_shared<DeviceMemoryData>();
                 data->memory = memory;
