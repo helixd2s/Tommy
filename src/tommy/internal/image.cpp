@@ -27,15 +27,17 @@ namespace tom {
     std::shared_ptr<DeviceImage> DeviceImage::create(const vk::ImageCreateInfo& info = {}, const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
         this->image = this->getDevice()->getDevice().createImage( this->info = info.queueFamilyIndexCount ? vk::ImageCreateInfo(info) : vk::ImageCreateInfo(info).setQueueFamilyIndices(this->getDevice()->getQueueFamilyIndices()) );
         this->bindMemory(memoryAllocation);
-        this->layoutHistory.clear();
-        this->layoutHistory.push_back(info.initialLayout);
+        //this->layoutHistory.clear();
+        //this->layoutHistory.push_back(info.initialLayout);
         return shared_from_this();
     };
 
 
     // 
     std::shared_ptr<ImageView> ImageView::createImageView(const vk::ImageViewCreateInfo& info = {}) {
-        this->info.imageView = this->deviceImage->getDevice()->getDevice().createImageView(this->imageViewInfo = info);
+        this->info.imageView = this->deviceImage->getDevice()->getDevice().createImageView((this->imageViewInfo = info).setImage(this->deviceImage->getImage()));
+        this->layoutHistory.clear();
+        this->layoutHistory.push_back(this->deviceImage->info.initialLayout);
         return shared_from_this();
     };
 

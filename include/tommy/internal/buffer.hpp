@@ -10,7 +10,7 @@ namespace tom {
 
     // 
     class DeviceBuffer: public std::enable_shared_from_this<DeviceBuffer> {
-    protected: friend MemoryAllocator; friend MemoryAllocatorVma; // 
+    protected: friend MemoryAllocator; friend MemoryAllocatorVma; friend BufferAllocation; // 
         std::weak_ptr<tom::Device> device = {};
         std::shared_ptr<tom::MemoryAllocation> memoryAllocation = {};
         std::function<void()> destructor = {};
@@ -67,6 +67,7 @@ namespace tom {
     // abscent class...
     class BufferAllocation: public std::enable_shared_from_this<BufferAllocation> {
     protected:  // 
+        friend DeviceBuffer;
         std::shared_ptr<tom::DeviceBuffer> deviceBuffer = {};
 
         // 

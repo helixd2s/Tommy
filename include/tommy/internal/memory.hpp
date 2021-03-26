@@ -20,6 +20,12 @@ namespace tom {
         void* allocation = nullptr;
         void* mapped = nullptr;
 
+        //
+        uint32_t glHandle = 0u;
+
+        //
+        vk::MemoryAllocateInfo info = {};
+
     public: // 
         DeviceMemory(const std::shared_ptr<tom::Device>& device, const vk::DeviceMemory& memory = {}): device(device), memory(memory) {
             

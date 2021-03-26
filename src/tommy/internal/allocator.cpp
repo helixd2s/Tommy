@@ -32,9 +32,16 @@ namespace tom {
                 .memoryTypeIndex = device->getPhysicalDevice()->getMemoryType(memoryRequirements.memoryRequirements.memoryTypeBits),
             },
             vk::MemoryDedicatedAllocateInfoKHR{ .image = allocInfo.image, .buffer = allocInfo.buffer },
-            vk::ExternalMemoryBufferCreateInfo{}
+            vk::ExternalMemoryBufferCreateInfo{
+#ifdef _WIN32
+                .handleTypes = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueWin32
+#else
+                .handleTypes = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd
+#endif
+            }
         }.get<vk::MemoryAllocateInfo>());
 
+        // 
         return self;
     };
 

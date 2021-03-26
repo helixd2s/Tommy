@@ -2,6 +2,13 @@
 
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 
+#ifdef _WIN32
+#define VK_USE_PLATFORM_WIN32_KHR
+#else
+
+#endif
+
+
 #include <vulkan/vulkan.hpp>
 //#include <vulkan/vk_mem_alloc.h>
 #include <glm/glm.hpp>

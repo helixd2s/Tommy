@@ -170,8 +170,8 @@ namespace tom {
         vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)self->allocation), &allocInfo);
 
         // 
-        self->layoutHistory.clear();
-        self->layoutHistory.push_back(info.initialLayout);
+        //self->layoutHistory.clear();
+        //self->layoutHistory.push_back(info.initialLayout);
 
         // wrap device memory
         auto deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);
