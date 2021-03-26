@@ -209,4 +209,30 @@ namespace tom {
         public:
     };
 
+
+    // 
+    class MemoryAllocationBase: public std::enable_shared_from_this<MemoryAllocationBase> {
+        public:
+    };
+
+    // 
+    class DeviceImageBase: public std::enable_shared_from_this<DeviceImageBase> {
+        public:
+    };
+
+    // 
+    class DeviceBufferBase: public std::enable_shared_from_this<DeviceBufferBase> {
+        public:
+    };
+
+    // 
+    class BufferAllocationBase: public std::enable_shared_from_this<BufferAllocationBase> { 
+        public:
+    };
+
+    //
+    class ImageViewBase : public std::enable_shared_from_this<ImageViewBase> {
+        public:
+    };
+
 };

@@ -103,7 +103,7 @@ namespace tom {
             //virtual inline vk::DispatchLoaderDynamic& getDispatch() { return dispatch; };
             //virtual inline vk::Device& getDevice() { return device; };
             //virtual inline vk::DescriptorPool& getDescriptorPool() { return descriptorPool; };
-            //virtual inline std::vector<uint32_t>& getQueueFamilyIndices() { return queueFamilyIndices; };
+            virtual inline std::vector<uint32_t>& getQueueFamilyIndices() { return queueFamilyIndices; };
 
             virtual inline std::shared_ptr<DeviceData> getData() const { return data; };
             virtual inline std::shared_ptr<Instance> getInstance() { return instance.lock(); };
@@ -126,7 +126,7 @@ namespace tom {
             //virtual inline const vk::DispatchLoaderDynamic& getDispatch() const { return dispatch; };
             //virtual inline const vk::Device& getDevice() const { return device; };
             //virtual inline const vk::DescriptorPool& getDescriptorPool() const { return descriptorPool; };
-            //virtual inline const std::vector<uint32_t>& getQueueFamilyIndices() const { return queueFamilyIndices; };
+            virtual inline const std::vector<uint32_t>& getQueueFamilyIndices() const { return queueFamilyIndices; };
 
             virtual inline std::shared_ptr<DeviceData> getData() const { return data; };
             virtual inline std::shared_ptr<Instance> getInstance() const { return instance.lock(); };
