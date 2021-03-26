@@ -31,10 +31,6 @@ namespace tom {
         // 
         virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
         virtual inline std::shared_ptr<QueueBase> getData() { return data; };
-
-        // 
-        virtual vk::Fence submitCmds(const std::vector<vk::CommandBuffer>& commandBuffers, vk::SubmitInfo2KHR submitInfo = vk::SubmitInfo2KHR{}) const;
-        virtual std::future<vk::Result> submitOnce(const std::function<void(const vk::CommandBuffer&)>& submitCommand, const vk::SubmitInfo2KHR& submitInfo = vk::SubmitInfo2KHR{}) const;
     };
 
 
