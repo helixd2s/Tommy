@@ -3,7 +3,7 @@
 #pragma once
 
 //#include <tommy/core.hpp>
-#include "../core.hpp"
+#include "./core.hpp"
 #include "./device.hpp"
 
 // 

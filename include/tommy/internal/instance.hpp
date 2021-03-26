@@ -15,20 +15,16 @@ namespace tom {
     public: // 
         Instance() { this->constructor(); };
 
-        //
+        // 
         virtual std::shared_ptr<Instance> constructor();
 
         // 
         virtual inline std::shared_ptr<InstanceBase> getData() { return data; };
         virtual inline std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices();
-        //virtual inline vk::Instance& getInstance() { return instance; };
-        //virtual inline vk::DispatchLoaderDynamic& getDispatch() { return dispatch; };
 
         // 
         virtual inline const std::shared_ptr<InstanceBase> getData() const { return data; };
         virtual inline const std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices() const;
-        //virtual inline const vk::Instance& getInstance() const { return instance; };
-        //virtual inline const vk::DispatchLoaderDynamic& getDispatch() const { return dispatch; };
     };
 
     // 
@@ -44,9 +40,6 @@ namespace tom {
 
         //
         virtual std::shared_ptr<PhysicalDevice> constructor();
-        //virtual std::unordered_map<uint32_t, SurfaceProperties> getSurfaceInfo(const vk::SurfaceKHR& surface) const;
-
-        
 
         // 
         virtual std::shared_ptr<Instance> getInstance() { return instance.lock(); };

@@ -2,9 +2,11 @@
 
 //#include <tommy/core.hpp>
 #include "../core.hpp"
+#include "../image.hpp"
+
+#include "./core.hpp"
 #include "./device.hpp"
 #include "./memory.hpp"
-#include "../image.hpp"
 
 // 
 namespace tom {

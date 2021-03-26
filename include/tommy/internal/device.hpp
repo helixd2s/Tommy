@@ -1,7 +1,7 @@
 #pragma once
 
 //#include <tommy/core.hpp>
-#include "../core.hpp"
+#include "./core.hpp"
 #include "./instance.hpp"
 
 // 
@@ -65,7 +65,7 @@ namespace tom {
         virtual inline std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) { return queues.at(queueFamilyIndex)[index]; };
         virtual inline std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) { return physical; };
 
-        virtual std::shared_ptr<DeviceMemory> allocateMemoryObject(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
+        //MemoryAllocationInfo
         virtual std::shared_ptr<ImageView> getImageViewObject(const ImageViewKey& imageViewKey);
 
 

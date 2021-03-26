@@ -4,6 +4,8 @@
 #include "../core.hpp"
 #include "../instance.hpp"
 
+#include "./core.hpp"
+
 // 
 namespace tom {
 

@@ -1,7 +1,7 @@
 #pragma once
 
 //#include <tommy/core.hpp>
-#include "../core.hpp"
+#include "./core.hpp"
 #include "./device.hpp"
 #include "./memory.hpp"
 
@@ -17,7 +17,7 @@ namespace tom {
         void* allocation = nullptr;
 
     public: // 
-        DeviceBuffer(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const vk::DeviceSize& memoryOffset = 0ull, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceBufferBase>& api = {}): MemoryAllocation(deviceMemory, memoryOffset, data), api(api) {
+        DeviceBuffer(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const uintptr_t& memoryOffset = 0ull, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceBufferBase>& api = {}): MemoryAllocation(deviceMemory, memoryOffset, data), api(api) {
         };
 
         DeviceBuffer(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceBufferBase>& api = {}): MemoryAllocation(deviceMemory, data), api(api) {

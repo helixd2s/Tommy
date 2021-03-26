@@ -2,8 +2,10 @@
 
 //#include <tommy/core.hpp>
 #include "../core.hpp"
-#include "./instance.hpp"
 #include "../device.hpp"
+
+#include "./core.hpp"
+#include "./instance.hpp"
 
 // 
 namespace tom {
@@ -101,7 +103,6 @@ namespace tom {
             virtual std::shared_ptr<tom::DeviceMemory> allocateMemoryObject(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
             virtual std::shared_ptr<tom::BufferAllocation> getBufferAllocationObject(const vk::DeviceAddress& deviceAddress = 0ull);
             virtual std::shared_ptr<tom::ImageView> getImageViewObject(const tom::ImageViewKey& imageViewKey) override;
-            
 
             // 
             virtual vk::Buffer setDeviceBufferObject(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer = {});
