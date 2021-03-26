@@ -99,7 +99,7 @@ namespace tom {
 
                 // 
                 self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);
-                data->memoryOffset = allocInfo.offset;
+                self->memoryOffset = allocInfo.offset;
                 self->allocation = self->allocation;
                 self->mapped = allocInfo.pMappedData;
                 //deviceMemory->getMapped() = allocInfo.pMappedData; // not sure...
@@ -138,7 +138,7 @@ namespace tom {
 
             // wrap device memory
             self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);;
-            data->memoryOffset = allocInfo.offset;
+            self->memoryOffset = allocInfo.offset;
             self->allocation = self->allocation;
             self->mapped = allocInfo.pMappedData;
 
@@ -182,7 +182,7 @@ namespace tom {
 
             // wrap device memory
             self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);;
-            data->memoryOffset = allocInfo.offset;
+            self->memoryOffset = allocInfo.offset;
             self->allocation = self->allocation;
             self->mapped = allocInfo.pMappedData;
 

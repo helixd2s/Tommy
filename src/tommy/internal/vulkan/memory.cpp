@@ -26,6 +26,7 @@ namespace tom {
             auto handle = device.getMemoryFdKHR(vk::VkMemoryGetFdInfoKHR{.memory = data->memory, .handleType = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd});
     #endif
 
+/*
     #ifdef OPENGL
             glCreateMemoryObjectsEXT(1u, &this->glHandle);
     #ifdef _WIN32
@@ -34,6 +35,7 @@ namespace tom {
             glImportMemoryFdEXT(this->glHandle, data->info.allocationSize, HANDLE_TYPE_OPAQUE_FD_EXT, handle);
     #endif
     #endif
+*/
 
             return shared_from_this();
         };

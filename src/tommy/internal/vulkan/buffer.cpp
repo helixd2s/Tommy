@@ -13,26 +13,20 @@ namespace tom {
 
     // 
     namespace vulkan {
-        // 
-        vk::DeviceAddress& DeviceBuffer::getDeviceAddress() {
-            return (api->address = api->address ? api->address : this->getDeviceMemory()->getDevice()->getData()->device.getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = api->buffer }));
-        };
-
-        // 
-        vk::DeviceAddress DeviceBuffer::getDeviceAddress() const {
-            return (api->address ? api->address : this->getDeviceMemory()->getDevice()->getData()->device.getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = api->buffer }));
-        };
-
+        
         // 
         std::shared_ptr<DeviceBuffer> DeviceBuffer::bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) {
             if (memoryAllocation) {
                 this->data = memoryAllocation->getData();
+                this->memoryOffset = memoryAllocation->getMemoryOffset();
+                this->mapped = memoryAllocation->getMapped();
+                this->allocation = memoryAllocation->getAllocation();
             };
             if (this->data) {
                 this->getDeviceMemory()->getDevice()->getData()->device.bindBufferMemory2(vk::BindBufferMemoryInfo{
                     .buffer = api->buffer,
                     .memory = deviceMemory->getData()->memory,
-                    .memoryOffset = data->memoryOffset
+                    .memoryOffset = this->memoryOffset
                 });
             };
             return std::dynamic_pointer_cast<DeviceBuffer>(shared_from_this());
@@ -48,6 +42,17 @@ namespace tom {
             api->address = 0ull;
             return self;
         };
+
+        // 
+        vk::DeviceAddress& DeviceBuffer::getDeviceAddress() {
+            return (api->address = api->address ? api->address : this->getDeviceMemory()->getDevice()->getData()->device.getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = api->buffer }));
+        };
+
+        // 
+        vk::DeviceAddress DeviceBuffer::getDeviceAddress() const {
+            return (api->address ? api->address : this->getDeviceMemory()->getDevice()->getData()->device.getBufferAddress(vk::BufferDeviceAddressInfo{ .buffer = api->buffer }));
+        };
+
     };
 
 };

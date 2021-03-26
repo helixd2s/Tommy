@@ -168,7 +168,7 @@ namespace tom {
             };
 
             if (!imageView) { 
-                //data->imageViews[imageViewKey] = (imageView = std::make_shared<ImageView>());
+                //data->imageViews[imageViewKey] = (imageView = std::make_shared<ImageView>(std::make_shared<DeviceImage>(shared_from_this(), image)));
             };
 
             return imageView;
@@ -183,7 +183,7 @@ namespace tom {
             };
 
             if (!deviceBuffer) { 
-                //data->buffers[buffer] = (deviceBuffer = std::make_shared<DeviceBuffer>());
+                data->buffers[buffer] = (deviceBuffer = std::make_shared<DeviceBuffer>(shared_from_this(), buffer));
             };
 
             return deviceBuffer;

@@ -15,12 +15,15 @@ namespace tom {
         std::shared_ptr<DeviceImage> DeviceImage::bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) {
             if (memoryAllocation) {
                 this->data = memoryAllocation->getData();
+                this->memoryOffset = memoryAllocation->getMemoryOffset();
+                this->mapped = memoryAllocation->getMapped();
+                this->allocation = memoryAllocation->getAllocation();
             };
             if (this->data) {
                 this->getDeviceMemory()->getDevice()->getData()->device.bindImageMemory2(vk::BindImageMemoryInfo{
                     .image = api->image,
                     .memory = deviceMemory->getData()->memory,
-                    .memoryOffset = data->memoryOffset
+                    .memoryOffset = this->memoryOffset
                 });
             };
             return std::dynamic_pointer_cast<DeviceImage>(shared_from_this());

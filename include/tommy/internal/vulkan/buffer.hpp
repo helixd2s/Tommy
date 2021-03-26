@@ -39,7 +39,7 @@ namespace tom {
             };
 
             // legacy
-            DeviceBuffer(const vk::Buffer& buffer = {}) {
+            DeviceBuffer(const std::shared_ptr<Device>& device, const vk::Buffer& buffer = {}) : MemoryAllocation(device) {
                 api = std::make_shared<DeviceBufferData>();
                 api->buffer = buffer;
             };
