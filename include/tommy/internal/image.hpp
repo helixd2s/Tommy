@@ -26,10 +26,10 @@ namespace tom {
 
         // 
         virtual inline std::shared_ptr<MemoryAllocation> getMemoryAllocation() { return shared_from_this(); };
-        virtual inline std::shared_ptr<DeviceImageBase> getApi() { return api; };
+        virtual inline std::shared_ptr<DeviceImageBase>& getApi() { return api; };
 
         // 
-        virtual inline std::shared_ptr<DeviceImageBase> getApi() const { return api; };
+        virtual inline const std::shared_ptr<DeviceImageBase>& getApi() const { return api; };
     };
 
     // 
@@ -45,6 +45,7 @@ namespace tom {
 
         // 
         virtual std::shared_ptr<ImageView> constructor() {
+            if (!this->data) { this->data = std::make_shared<ImageViewBase>(); };
             return shared_from_this();
         };
 
@@ -54,9 +55,11 @@ namespace tom {
 
         // 
         virtual inline std::shared_ptr<DeviceImage>& getDeviceImage() { return deviceImage; };
+        virtual inline std::shared_ptr<ImageViewBase>& getData() { return data; };
 
         // 
         virtual inline const std::shared_ptr<DeviceImage>& getDeviceImage() const { return deviceImage; };
+        virtual inline const std::shared_ptr<ImageViewBase>& getData() const { return data; };
     };
 
 };

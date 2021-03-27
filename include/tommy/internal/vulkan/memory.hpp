@@ -46,6 +46,12 @@ namespace tom {
             };
 
             // 
+            virtual std::shared_ptr<tom::DeviceMemory> constructor() override {
+                if (!this->data) { this->data = std::make_shared<DeviceMemoryData>(); }; 
+                return shared_from_this();
+            };
+
+            // 
             virtual std::shared_ptr<tom::DeviceMemory> allocate(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
         };
 

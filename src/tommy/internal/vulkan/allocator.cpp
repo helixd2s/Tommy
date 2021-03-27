@@ -20,7 +20,7 @@ namespace tom {
 
         // 
         std::shared_ptr<tom::MemoryAllocation> MemoryAllocator::allocateMemory(const std::shared_ptr<tom::MemoryAllocation>& allocation, const tom::MemoryAllocationInfo& allocInfo = {}) {
-            auto self = std::dynamic_pointer_cast<MemoryAllocation>(allocation);
+            auto self = std::dynamic_pointer_cast<MemoryAllocation>(allocation); if (!self->getData()) { self->getData() = std::make_shared<MemoryAllocationData>(); };
             auto allocator = std::dynamic_pointer_cast<MemoryAllocator>(shared_from_this());
             auto device = std::dynamic_pointer_cast<Device>(this->getDevice());
             auto data = std::dynamic_pointer_cast<MemoryAllocationData>(self->getData());

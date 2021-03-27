@@ -17,15 +17,16 @@ namespace tom {
 
         // 
         virtual std::shared_ptr<Instance> constructor() {
+            if (!this->data) { this->data = std::make_shared<InstanceBase>(); };
             return shared_from_this();
         };
 
         // 
-        virtual inline std::shared_ptr<InstanceBase> getData() { return data; };
+        virtual inline std::shared_ptr<InstanceBase>& getData() { return data; };
         virtual inline std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices();
 
         // 
-        virtual inline const std::shared_ptr<InstanceBase> getData() const { return data; };
+        virtual inline const std::shared_ptr<InstanceBase>& getData() const { return data; };
         virtual inline const std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices() const;
     };
 
@@ -42,16 +43,17 @@ namespace tom {
 
         //
         virtual std::shared_ptr<PhysicalDevice> constructor() {
+            if (!this->data) { this->data = std::make_shared<PhysicalDeviceBase>(); };
             return shared_from_this();
         };
 
         // 
         virtual std::shared_ptr<Instance> getInstance() { return instance.lock(); };
-        virtual std::shared_ptr<PhysicalDeviceBase> getData() { return data; };
+        virtual std::shared_ptr<PhysicalDeviceBase>& getData() { return data; };
 
         // 
         virtual std::shared_ptr<Instance> getInstance() const { return instance.lock(); };
-        virtual std::shared_ptr<PhysicalDeviceBase> getData() const { return data; };
+        virtual const std::shared_ptr<PhysicalDeviceBase>& getData() const { return data; };
     };
 
 };

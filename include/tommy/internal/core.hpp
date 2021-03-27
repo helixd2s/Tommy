@@ -63,6 +63,14 @@ namespace tom {
         struct MemoryAllocationInfo;
     };
 
+
+
+#ifdef _WIN32
+    using ExtHandleType = HANDLE; // Win32
+#else
+    using ExtHandleType = int; // Fd
+#endif
+
     // 
     struct MemoryAllocationInfo {
         MemoryUsage usage = MemoryUsage::eGPUOnly;
@@ -145,6 +153,7 @@ namespace tom {
         void* allocation = nullptr;
         void* mapped = nullptr;
         std::function<void()> destructor = {};
+        ExtHandleType extHandle = {};
 
         // 
         ~DeviceMemoryBase() {
@@ -164,10 +173,6 @@ namespace tom {
         ImageViewKey key = {};
     };
 
-#ifdef _WIN32
-    using ExtHandleType = HANDLE; // Win32
-#else
-    using ExtHandleType = int; // Fd
-#endif
+
 
 };

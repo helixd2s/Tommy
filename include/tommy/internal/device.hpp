@@ -21,16 +21,17 @@ namespace tom {
 
         // 
         virtual std::shared_ptr<Queue> constructor() {
+            if (!this->data) { this->data = std::make_shared<QueueBase>(); };
             return shared_from_this();
         };
 
         // 
         virtual inline std::shared_ptr<Device> getDevice() const { return device.lock(); };
-        virtual inline std::shared_ptr<QueueBase> getData() const { return data; };
+        virtual inline const std::shared_ptr<QueueBase>& getData() const { return data; };
 
         // 
         virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
-        virtual inline std::shared_ptr<QueueBase> getData() { return data; };
+        virtual inline std::shared_ptr<QueueBase>& getData() { return data; };
     };
 
 
@@ -53,6 +54,7 @@ namespace tom {
 
         // 
         virtual std::shared_ptr<Device> constructor() {
+            if (!this->data) { this->data = std::make_shared<DeviceBase>(); };
             return shared_from_this();
         };
 
@@ -62,7 +64,7 @@ namespace tom {
         //virtual inline vk::DescriptorPool& getDescriptorPool() { return descriptorPool; };
         virtual inline std::vector<uint32_t>& getQueueFamilyIndices() { return queueFamilyIndices; };
 
-        virtual inline std::shared_ptr<DeviceBase> getData() const { return data; };
+        virtual inline std::shared_ptr<DeviceBase>& getData() { return data; };
         virtual inline std::shared_ptr<Instance> getInstance() { return instance.lock(); };
         virtual inline std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) { return queues.at(queueFamilyIndex)[index]; };
         virtual inline std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) { return physical; };
@@ -78,10 +80,9 @@ namespace tom {
         //virtual inline const vk::DispatchLoaderDynamic& getDispatch() const { return dispatch; };
         //virtual inline const vk::Device& getDevice() const { return device; };
         //virtual inline const vk::DescriptorPool& getDescriptorPool() const { return descriptorPool; };
-        virtual inline const std::vector<uint32_t>& getQueueFamilyIndices() const { return queueFamilyIndices; };
-
-        virtual inline std::shared_ptr<DeviceBase> getData() const { return data; };
         virtual inline std::shared_ptr<Instance> getInstance() const { return instance.lock(); };
+        virtual inline const std::vector<uint32_t>& getQueueFamilyIndices() const { return queueFamilyIndices; };
+        virtual inline const std::shared_ptr<DeviceBase>& getData() const { return data; };
         virtual inline const std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) const { return queues.at(queueFamilyIndex)[index]; };
         virtual inline const std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) const { return physical; };
         virtual std::shared_ptr<ImageView> getImageViewObject(const ImageViewKey& imageViewKey) const;
@@ -101,12 +102,12 @@ namespace tom {
 
     public: // 
         MemoryAllocator(const std::shared_ptr<Device>& device, const std::shared_ptr<MemoryAllocatorBase>& data = {}): device(device), data(data) {
-            if (!this->data) { this->data = std::make_shared<MemoryAllocatorBase>(); };
             this->constructor();
         };
 
         // 
-        virtual std::shared_ptr<MemoryAllocator> constructor() { 
+        virtual std::shared_ptr<MemoryAllocator> constructor() {
+            if (!this->data) { this->data = std::make_shared<MemoryAllocatorBase>(); }; 
             return shared_from_this();
         };
 
@@ -119,11 +120,11 @@ namespace tom {
 
         // 
         virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
-        virtual inline std::shared_ptr<MemoryAllocatorBase> getData() { return data; };
+        virtual inline std::shared_ptr<MemoryAllocatorBase>& getData() { return data; };
 
         // 
         virtual inline std::shared_ptr<Device> getDevice() const { return device.lock(); };
-        virtual inline std::shared_ptr<MemoryAllocatorBase> getData() const { return data; };
+        virtual inline const std::shared_ptr<MemoryAllocatorBase>& getData() const { return data; };
     };
 
 };

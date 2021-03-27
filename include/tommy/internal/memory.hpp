@@ -14,7 +14,7 @@ namespace tom {
     protected: friend MemoryAllocator;
         std::weak_ptr<Device> device = {};
         std::shared_ptr<DeviceMemoryBase> data = {};
-        std::shared_ptr<ExtHandleType> extHandle = {};
+        //std::shared_ptr<ExtHandleType> extHandle = {};
 
     public: // 
         // 
@@ -28,18 +28,19 @@ namespace tom {
 
         // 
         virtual std::shared_ptr<DeviceMemory> constructor() {
+            if (!this->data) { this->data = std::make_shared<DeviceMemoryBase>(); }; 
             return shared_from_this();
         };
 
         // 
-        virtual inline std::shared_ptr<DeviceMemoryBase> getData() { return data; };
+        virtual inline std::shared_ptr<DeviceMemoryBase>& getData() { return data; };
         virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
-        virtual inline std::shared_ptr<ExtHandleType> getExtHandle() { return extHandle; };
+        //virtual inline std::shared_ptr<ExtHandleType> getExtHandle() { return extHandle; };
 
         // 
-        virtual inline std::shared_ptr<DeviceMemoryBase> getData() const { return data; };
+        virtual inline const std::shared_ptr<DeviceMemoryBase>& getData() const { return data; };
         virtual inline std::shared_ptr<Device> getDevice() const { return device.lock(); };
-        virtual inline std::shared_ptr<ExtHandleType> getExtHandle() const { return extHandle; };
+        //virtual inline std::shared_ptr<ExtHandleType> getExtHandle() const { return extHandle; };
     };
 
     // 
@@ -67,6 +68,7 @@ namespace tom {
 
         // 
         virtual std::shared_ptr<MemoryAllocation> constructor() {
+            //if (!this->data) { this->data = std::make_shared<MemoryAllocationBase>(); }; 
             return shared_from_this();
         };
 
@@ -80,13 +82,13 @@ namespace tom {
 
         // 
         virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
-        virtual inline std::shared_ptr<MemoryAllocationBase> getData() { return data; };
+        virtual inline std::shared_ptr<MemoryAllocationBase>& getData() { return data; };
         virtual inline std::shared_ptr<DeviceMemory>& getDeviceMemory() { return deviceMemory; };
         virtual inline void* getMapped() { return data->mapped ? data->mapped : ((uint8_t*)deviceMemory->getData()->mapped + data->memoryOffset); };
 
         // 
         virtual inline std::shared_ptr<Device> getDevice() const { return device.lock(); };
-        virtual inline std::shared_ptr<MemoryAllocationBase> getData() const { return data; };
+        virtual inline const std::shared_ptr<MemoryAllocationBase>& getData() const { return data; };
         virtual inline const std::shared_ptr<DeviceMemory>& getDeviceMemory() const { return deviceMemory; };
         virtual inline const void* getMapped() const { return data->mapped ? data->mapped : ((const uint8_t*)deviceMemory->getData()->mapped + data->memoryOffset); };
     };

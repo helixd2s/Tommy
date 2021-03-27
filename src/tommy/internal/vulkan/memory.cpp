@@ -22,9 +22,9 @@ namespace tom {
             };
 
 #ifdef _WIN32
-            *(extHandle = std::make_shared<ExtHandleType>()) = device.getMemoryWin32HandleKHR(vk::MemoryGetWin32HandleInfoKHR{.memory = data->memory, .handleType = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueWin32});
+            data->extHandle = device.getMemoryWin32HandleKHR(vk::MemoryGetWin32HandleInfoKHR{.memory = data->memory, .handleType = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueWin32});
 #else
-            *(extHandle = std::make_shared<ExtHandleType>()) = std::make_shared(device.getMemoryFdKHR(vk::VkMemoryGetFdInfoKHR{.memory = data->memory, .handleType = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd});
+            data->extHandle = device.getMemoryFdKHR(vk::VkMemoryGetFdInfoKHR{.memory = data->memory, .handleType = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd});
 #endif
 
 /*
