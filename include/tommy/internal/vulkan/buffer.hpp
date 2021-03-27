@@ -45,10 +45,6 @@ namespace tom {
 
         public: // 
             // legacy
-            DeviceBuffer(const std::shared_ptr<tom::DeviceMemory>& deviceMemory = {}, const vk::Buffer& buffer = {}) : tom::DeviceBuffer(deviceMemory, {}, DeviceBufferData::makeShared(buffer)) 
-            {};
-
-            // legacy
             DeviceBuffer(const std::shared_ptr<tom::Device>& device, const vk::Buffer& buffer = {}) : tom::DeviceBuffer(device, {}, DeviceBufferData::makeShared(buffer)) 
             {};
 

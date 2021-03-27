@@ -49,10 +49,6 @@ namespace tom {
 
         public: // 
             // legacy
-            DeviceImage(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const vk::Image& image = {}): tom::DeviceImage(deviceMemory, {}, DeviceImageData::makeShared(image)) 
-            {};
-
-            // legacy
             DeviceImage(const std::shared_ptr<Device>& device, const vk::Image& image = {}) : tom::DeviceImage(device, {}, DeviceImageData::makeShared(image)) 
             {};
 
