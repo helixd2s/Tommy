@@ -62,7 +62,7 @@ namespace tom {
             vmaInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 
             // 
-            vk::throwResultException(vk::Result(vmaCreateAllocator(&vmaInfo, &(VmaAllocator&)this->allocator)), "Failed to create VMA allocator...");
+            vk::throwResultException(vk::Result(vmaCreateAllocator(&vmaInfo, &(VmaAllocator&)data->allocator)), "Failed to create VMA allocator...");
 
             //
             return shared_from_this();
@@ -70,7 +70,7 @@ namespace tom {
 
         // MemoryAllocationInfo
         std::shared_ptr<tom::MemoryAllocation> MemoryAllocator::allocateMemory(const std::shared_ptr<tom::MemoryAllocation>& allocation, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
-            auto self = std::dynamic_pointer_cast<MemoryAllocation>(allocation);
+            auto self = std::dynamic_pointer_cast<MemoryAllocation>(allocation); if (!self->getData()) { self->getData() = std::make_shared<MemoryAllocationData>(); };
             auto allocator = std::dynamic_pointer_cast<MemoryAllocator>(shared_from_this());
             auto device = std::dynamic_pointer_cast<Device>(this->getDevice());
             auto data = std::dynamic_pointer_cast<MemoryAllocationData>(self->getData());
@@ -88,13 +88,13 @@ namespace tom {
 
                 // 
                 if (vkInfo->buffer) {
-                    vk::throwResultException(vk::Result(vmaAllocateMemoryForBuffer((const VmaAllocator&)allocator->getAllocator(), vkInfo->buffer, &allocCreateInfo, &((VmaAllocation&)data->allocation), &allocInfo)), "VMA buffer allocation failed...");
+                    vk::throwResultException(vk::Result(vmaAllocateMemoryForBuffer((const VmaAllocator&)allocator->getData()->allocator, vkInfo->buffer, &allocCreateInfo, &((VmaAllocation&)data->allocation), &allocInfo)), "VMA buffer allocation failed...");
                 } else 
                 if (vkInfo->image) {
-                    vk::throwResultException(vk::Result(vmaAllocateMemoryForImage((const VmaAllocator&)allocator->getAllocator(), vkInfo->image, &allocCreateInfo, &((VmaAllocation&)data->allocation), &allocInfo)), "VMA image allocation failed...");
+                    vk::throwResultException(vk::Result(vmaAllocateMemoryForImage((const VmaAllocator&)allocator->getData()->allocator, vkInfo->image, &allocCreateInfo, &((VmaAllocation&)data->allocation), &allocInfo)), "VMA image allocation failed...");
                 } else 
                 {
-                    vk::throwResultException(vk::Result(vmaAllocateMemory((const VmaAllocator&)allocator->getAllocator(), (VkMemoryRequirements*)&vkInfo->requirements.memoryRequirements, &allocCreateInfo, &((VmaAllocation&)data->allocation), &allocInfo)), "VMA memory allocation failed...");
+                    vk::throwResultException(vk::Result(vmaAllocateMemory((const VmaAllocator&)allocator->getData()->allocator, (VkMemoryRequirements*)&vkInfo->requirements.memoryRequirements, &allocCreateInfo, &((VmaAllocation&)data->allocation), &allocInfo)), "VMA memory allocation failed...");
                 };
 
                 // 
@@ -106,7 +106,7 @@ namespace tom {
 
                 //
                 data->destructor = [allocator, allocation = data->allocation](){
-                    vmaFreeMemory((VmaAllocator&)allocator->getAllocator(), (VmaAllocation&)allocation);
+                    vmaFreeMemory((VmaAllocator&)allocator->getData()->allocator, (VmaAllocation&)allocation);
                 };
             };
 
@@ -115,7 +115,7 @@ namespace tom {
 
         //
         std::shared_ptr<tom::DeviceBuffer> MemoryAllocatorVma::allocateAndCreateBuffer(const std::shared_ptr<tom::DeviceBuffer>& buffer, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
-            auto self = std::dynamic_pointer_cast<DeviceBuffer>(buffer);
+            auto self = std::dynamic_pointer_cast<DeviceBuffer>(buffer); if (!self->getData()) { self->getData() = std::make_shared<MemoryAllocationData>(); };
             auto allocator = std::dynamic_pointer_cast<MemoryAllocator>(shared_from_this());
             auto device = std::dynamic_pointer_cast<Device>(this->getDevice());
             auto data = std::dynamic_pointer_cast<MemoryAllocationData>(self->getData());
@@ -129,8 +129,8 @@ namespace tom {
             };
 
             // 
-            vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getAllocator(), (const VkBufferCreateInfo*)&api->info, &allocCreateInfo, (VkBuffer*)&api->buffer, &((VmaAllocation&)data->allocation), nullptr)), "VMA buffer allocation failed...");
-            vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)data->allocation), &allocInfo);
+            vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getData()->allocator, (const VkBufferCreateInfo*)&api->info, &allocCreateInfo, (VkBuffer*)&api->buffer, &((VmaAllocation&)data->allocation), nullptr)), "VMA buffer allocation failed...");
+            vmaGetAllocationInfo((const VmaAllocator&)allocator->getData()->allocator, ((VmaAllocation&)data->allocation), &allocInfo);
             device->setDeviceBufferObject(self);
 
             // wrap device memory
@@ -142,7 +142,7 @@ namespace tom {
             //deviceMemory->getMapped() = allocInfo.pMappedData;
             //deviceMemory->getAllocation() = allocation;
 
-            data->destructor = [data, api, allocator = allocator->getAllocator(), allocation = self->getMemoryAllocation()](){
+            data->destructor = [data, api, allocator = allocator->getData()->allocator, allocation = self->getMemoryAllocation()](){
                 vmaDestroyBuffer((VmaAllocator&)allocator, api->buffer, (VmaAllocation&)allocation);
                 api->buffer = vk::Buffer{};
             };
@@ -152,7 +152,7 @@ namespace tom {
 
         //
         std::shared_ptr<tom::DeviceImage> MemoryAllocatorVma::allocateAndCreateImage(const std::shared_ptr<tom::DeviceImage>& image, const tom::MemoryAllocationInfo& memAllocInfo = {}) {
-            auto self = std::dynamic_pointer_cast<DeviceImage>(image);
+            auto self = std::dynamic_pointer_cast<DeviceImage>(image); if (!self->getData()) { self->getData() = std::make_shared<MemoryAllocationData>(); };
             auto allocator = std::dynamic_pointer_cast<MemoryAllocator>(shared_from_this());
             auto device = std::dynamic_pointer_cast<Device>(this->getDevice());
             auto data = std::dynamic_pointer_cast<MemoryAllocationData>(self->getData());
@@ -166,8 +166,8 @@ namespace tom {
             };
 
             // 
-            vk::throwResultException(vk::Result(vmaCreateImage((const VmaAllocator&)allocator->getAllocator(), (const VkImageCreateInfo*)&api->info, &allocCreateInfo, (VkImage*)&api->image, &((VmaAllocation&)data->allocation), nullptr)), "VMA image allocation failed...");
-            vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)data->allocation), &allocInfo);
+            vk::throwResultException(vk::Result(vmaCreateImage((const VmaAllocator&)allocator->getData()->allocator, (const VkImageCreateInfo*)&api->info, &allocCreateInfo, (VkImage*)&api->image, &((VmaAllocation&)data->allocation), nullptr)), "VMA image allocation failed...");
+            vmaGetAllocationInfo((const VmaAllocator&)allocator->getData()->allocator, ((VmaAllocation&)data->allocation), &allocInfo);
 
             // 
             //self->layoutHistory.clear();
@@ -182,7 +182,7 @@ namespace tom {
             //deviceMemory->getMapped() = allocInfo.pMappedData;
             //deviceMemory->getAllocation() = allocation;
 
-            data->destructor = [data, api, allocator = allocator->getAllocator(), allocation = self->getMemoryAllocation()](){
+            data->destructor = [data, api, allocator = allocator->getData()->allocator, allocation = self->getMemoryAllocation()](){
                 vmaDestroyImage((VmaAllocator&)allocator, api->image, (VmaAllocation&)allocation);
                 api->image = vk::Image{};
             };
