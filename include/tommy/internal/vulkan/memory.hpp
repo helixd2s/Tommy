@@ -19,6 +19,13 @@ namespace tom {
         class DeviceMemoryData: public DeviceMemoryBase { public: 
             vk::DeviceMemory memory = {};
             vk::MemoryAllocateInfo info = {};
+
+            // 
+            static std::shared_ptr<DeviceMemoryData> makeShared(const vk::DeviceMemory& memory = {}) {
+                std::shared_ptr<DeviceMemoryData> data = {};
+                data->memory = memory;
+                return data;
+            };
         };
 
         // 
@@ -34,9 +41,7 @@ namespace tom {
 
         public: // 
             // legacy
-            DeviceMemory(const std::shared_ptr<tom::Device>& device, const vk::DeviceMemory& memory = {}) : tom::DeviceMemory(device, std::make_shared<DeviceMemoryData>()) {
-                auto data = this->getDataTyped();
-                data->memory = memory;
+            DeviceMemory(const std::shared_ptr<tom::Device>& device, const vk::DeviceMemory& memory = {}) : tom::DeviceMemory(device, DeviceMemoryData::makeShared(memory)) {
             };
 
             // 
