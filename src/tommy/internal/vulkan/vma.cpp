@@ -88,24 +88,24 @@ namespace tom {
 
                 // 
                 if (vkInfo->buffer) {
-                    vk::throwResultException(vk::Result(vmaAllocateMemoryForBuffer((const VmaAllocator&)allocator->getAllocator(), vkInfo->buffer, &allocCreateInfo, &((VmaAllocation&)self->allocation), &allocInfo)), "VMA buffer allocation failed...");
+                    vk::throwResultException(vk::Result(vmaAllocateMemoryForBuffer((const VmaAllocator&)allocator->getAllocator(), vkInfo->buffer, &allocCreateInfo, &((VmaAllocation&)data->allocation), &allocInfo)), "VMA buffer allocation failed...");
                 } else 
                 if (vkInfo->image) {
-                    vk::throwResultException(vk::Result(vmaAllocateMemoryForImage((const VmaAllocator&)allocator->getAllocator(), vkInfo->image, &allocCreateInfo, &((VmaAllocation&)self->allocation), &allocInfo)), "VMA image allocation failed...");
+                    vk::throwResultException(vk::Result(vmaAllocateMemoryForImage((const VmaAllocator&)allocator->getAllocator(), vkInfo->image, &allocCreateInfo, &((VmaAllocation&)data->allocation), &allocInfo)), "VMA image allocation failed...");
                 } else 
                 {
-                    vk::throwResultException(vk::Result(vmaAllocateMemory((const VmaAllocator&)allocator->getAllocator(), (VkMemoryRequirements*)&vkInfo->requirements.memoryRequirements, &allocCreateInfo, &((VmaAllocation&)self->allocation), &allocInfo)), "VMA memory allocation failed...");
+                    vk::throwResultException(vk::Result(vmaAllocateMemory((const VmaAllocator&)allocator->getAllocator(), (VkMemoryRequirements*)&vkInfo->requirements.memoryRequirements, &allocCreateInfo, &((VmaAllocation&)data->allocation), &allocInfo)), "VMA memory allocation failed...");
                 };
 
                 // 
                 self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);
-                self->memoryOffset = allocInfo.offset;
-                self->allocation = self->allocation;
-                self->mapped = allocInfo.pMappedData;
+                data->memoryOffset = allocInfo.offset;
+                data->allocation = data->allocation;
+                data->mapped = allocInfo.pMappedData;
                 //deviceMemory->getMapped() = allocInfo.pMappedData; // not sure...
 
                 //
-                self->destructor = [allocator, allocation = self->getAllocation()](){
+                data->destructor = [allocator, allocation = data->allocation](){
                     vmaFreeMemory((VmaAllocator&)allocator->getAllocator(), (VmaAllocation&)allocation);
                 };
             };
@@ -129,21 +129,20 @@ namespace tom {
             };
 
             // 
-            vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getAllocator(), (const VkBufferCreateInfo*)&api->info, &allocCreateInfo, (VkBuffer*)&api->buffer, &((VmaAllocation&)self->allocation), nullptr)), "VMA buffer allocation failed...");
-            vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)self->allocation), &allocInfo);
+            vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getAllocator(), (const VkBufferCreateInfo*)&api->info, &allocCreateInfo, (VkBuffer*)&api->buffer, &((VmaAllocation&)data->allocation), nullptr)), "VMA buffer allocation failed...");
+            vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)data->allocation), &allocInfo);
             device->setDeviceBufferObject(self);
 
             // wrap device memory
             self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);;
-            self->memoryOffset = allocInfo.offset;
-            self->allocation = self->allocation;
-            self->mapped = allocInfo.pMappedData;
+            data->memoryOffset = allocInfo.offset;
+            data->mapped = allocInfo.pMappedData;
 
             // not sure...
             //deviceMemory->getMapped() = allocInfo.pMappedData;
             //deviceMemory->getAllocation() = allocation;
 
-            self->destructor = [data, api, allocator = allocator->getAllocator(), allocation = self->getMemoryAllocation()](){
+            data->destructor = [data, api, allocator = allocator->getAllocator(), allocation = self->getMemoryAllocation()](){
                 vmaDestroyBuffer((VmaAllocator&)allocator, api->buffer, (VmaAllocation&)allocation);
                 api->buffer = vk::Buffer{};
             };
@@ -167,8 +166,8 @@ namespace tom {
             };
 
             // 
-            vk::throwResultException(vk::Result(vmaCreateImage((const VmaAllocator&)allocator->getAllocator(), (const VkImageCreateInfo*)&api->info, &allocCreateInfo, (VkImage*)&api->image, &((VmaAllocation&)self->allocation), nullptr)), "VMA image allocation failed...");
-            vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)self->allocation), &allocInfo);
+            vk::throwResultException(vk::Result(vmaCreateImage((const VmaAllocator&)allocator->getAllocator(), (const VkImageCreateInfo*)&api->info, &allocCreateInfo, (VkImage*)&api->image, &((VmaAllocation&)data->allocation), nullptr)), "VMA image allocation failed...");
+            vmaGetAllocationInfo((const VmaAllocator&)allocator->getAllocator(), ((VmaAllocation&)data->allocation), &allocInfo);
 
             // 
             //self->layoutHistory.clear();
@@ -176,15 +175,14 @@ namespace tom {
 
             // wrap device memory
             self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);;
-            self->memoryOffset = allocInfo.offset;
-            self->allocation = self->allocation;
-            self->mapped = allocInfo.pMappedData;
+            data->memoryOffset = allocInfo.offset;
+            data->mapped = allocInfo.pMappedData;
 
             // not sure...
             //deviceMemory->getMapped() = allocInfo.pMappedData;
             //deviceMemory->getAllocation() = allocation;
 
-            self->destructor = [data, api, allocator = allocator->getAllocator(), allocation = self->getMemoryAllocation()](){
+            data->destructor = [data, api, allocator = allocator->getAllocator(), allocation = self->getMemoryAllocation()](){
                 vmaDestroyImage((VmaAllocator&)allocator, api->image, (VmaAllocation&)allocation);
                 api->image = vk::Image{};
             };

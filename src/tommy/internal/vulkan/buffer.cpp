@@ -13,21 +13,18 @@ namespace tom {
 
     // 
     namespace vulkan {
-        
+
         // 
         std::shared_ptr<tom::MemoryAllocation> DeviceBuffer::bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) {
             auto api = this->getApiTyped();
             if (memoryAllocation) {
                 this->data = memoryAllocation->getData();
-                this->memoryOffset = memoryAllocation->getMemoryOffset();
-                this->mapped = memoryAllocation->getMapped();
-                this->allocation = memoryAllocation->getAllocation();
             };
             if (this->data) {
                 std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData())->device.bindBufferMemory2(vk::BindBufferMemoryInfo{
                     .buffer = api->buffer,
                     .memory = std::dynamic_pointer_cast<DeviceMemoryData>(deviceMemory->getData())->memory,
-                    .memoryOffset = this->memoryOffset
+                    .memoryOffset = data->memoryOffset
                 });
             };
             return std::dynamic_pointer_cast<tom::MemoryAllocation>(shared_from_this());

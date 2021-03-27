@@ -29,7 +29,7 @@ namespace tom {
             auto* vkInfo = (tom::vulkan::MemoryAllocationInfo*)(allocInfo.apiInfo);
 
             // TODO: smart allocation 
-            self->memoryOffset = 0ull;
+            data->memoryOffset = 0ull;
             self->deviceMemory = device->allocateMemoryObject(allocator, vk::StructureChain<vk::MemoryAllocateInfo, vk::MemoryDedicatedAllocateInfoKHR, vk::ExternalMemoryBufferCreateInfo>{
                 vk::MemoryAllocateInfo{
                     .allocationSize = vkInfo->requirements.memoryRequirements.size,

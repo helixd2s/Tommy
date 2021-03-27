@@ -12,13 +12,8 @@ namespace tom {
     class DeviceImage: public MemoryAllocation {
     protected: friend MemoryAllocator; friend ImageView;// 
         std::shared_ptr<DeviceImageBase> api = {};
-        std::function<void()> destructor = {};
-        void* allocation = nullptr;
 
     public: // 
-        DeviceImage(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const vk::DeviceSize& memoryOffset = 0ull, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceImageBase>& api = {}): MemoryAllocation(deviceMemory, memoryOffset, data), api(api) {
-        };
-
         DeviceImage(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceImageBase>& api = {}): MemoryAllocation(deviceMemory, data), api(api) {
         };
 
@@ -39,11 +34,9 @@ namespace tom {
 
     // 
     class ImageView : public std::enable_shared_from_this<ImageView> { protected: 
-    protected:
-        friend DeviceImage;
+    protected: friend DeviceImage;  // 
         std::shared_ptr<DeviceImage> deviceImage = {};
         std::shared_ptr<ImageViewBase> data = {};
-        ImageViewKey key = {};
 
     public: // 
         ImageView(const std::shared_ptr<DeviceImage>& deviceImage, const std::shared_ptr<ImageViewBase>& data): deviceImage(deviceImage), data(data) {
@@ -61,11 +54,9 @@ namespace tom {
 
         // 
         virtual inline std::shared_ptr<DeviceImage>& getDeviceImage() { return deviceImage; };
-        virtual inline ImageViewKey& getKey() { return key; };
 
         // 
         virtual inline const std::shared_ptr<DeviceImage>& getDeviceImage() const { return deviceImage; };
-        virtual inline const ImageViewKey& getKey() const { return key; };
     };
 
 };

@@ -1,14 +1,14 @@
-# Tommy Lake
+# Tommy Lake (WIP)
 
 A new library for the Vulkan API, named after the character of GTA Vice City - Tommy Vercetti.
 
-## Features
+## Planned Features
 
-- Based on C++20 and Vulkan-Hpp
-- Compatible with C language
-- Extensible and modular
+- Based on C++20 and Vulkan-Hpp 
+- Compatible with C language (2017 and beyond)
+- Extensible and modular, and cheatful
 - Much simpler than regular Vulkan API
-- Made without VKt/VKh
+- Made without VKt/VKh (outdated)
 - Compatible with OpenGL 4.5 or beyond
 
 ### Compute

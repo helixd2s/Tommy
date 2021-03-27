@@ -13,13 +13,8 @@ namespace tom {
     class DeviceBuffer: public MemoryAllocation{
     protected: friend MemoryAllocator; friend BufferAllocation; // 
         std::shared_ptr<DeviceBufferBase> api = {};
-        std::function<void()> destructor = {};
-        void* allocation = nullptr;
 
     public: // 
-        DeviceBuffer(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const uintptr_t& memoryOffset = 0ull, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceBufferBase>& api = {}): MemoryAllocation(deviceMemory, memoryOffset, data), api(api) {
-        };
-
         DeviceBuffer(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceBufferBase>& api = {}): MemoryAllocation(deviceMemory, data), api(api) {
         };
 
@@ -47,19 +42,18 @@ namespace tom {
 
     // abscent class...
     class BufferAllocation: public std::enable_shared_from_this<BufferAllocation> {
-    protected:  // 
-        friend DeviceBuffer;
+    protected: friend DeviceBuffer; // 
         std::shared_ptr<DeviceBuffer> deviceBuffer = {};
         std::shared_ptr<BufferAllocationBase> data = {};
 
     public: // 
         // legacy
-        BufferAllocation(const std::shared_ptr<DeviceBuffer>& deviceBuffer, const uintptr_t& offset = 0ull, const uintptr_t& range = VK_WHOLE_SIZE, const std::shared_ptr<BufferAllocationBase>& data = {}): deviceBuffer(deviceBuffer), data(data) {
+        BufferAllocation(const std::shared_ptr<DeviceBuffer>& deviceBuffer, const uintptr_t& offset = 0ull, const uintptr_t& range = 0xFFFFFFFF, const std::shared_ptr<BufferAllocationBase>& data = {}): deviceBuffer(deviceBuffer), data(data) {
             this->constructor(offset, range);
         };
 
         // 
-        virtual std::shared_ptr<BufferAllocation> constructor(const uintptr_t& offset = 0ull, const uintptr_t& range = VK_WHOLE_SIZE) {
+        virtual std::shared_ptr<BufferAllocation> constructor(const uintptr_t& offset = 0ull, const uintptr_t& range = 0xFFFFFFFF) {
             return shared_from_this();
         };
 

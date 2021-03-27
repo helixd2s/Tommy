@@ -9,7 +9,7 @@
 
 // 
 namespace tom {
-    
+
     // 
     namespace vulkan {
 
@@ -18,7 +18,6 @@ namespace tom {
         public:
             vk::Queue queue = {};
             vk::CommandPool commandPool = {};
-            uint32_t queueFamilyIndex = 0u;
 
             // 
             static std::shared_ptr<QueueData> makeShared(const vk::Queue& queue = {}, const uint32_t& queueFamilyIndex = 0u) {

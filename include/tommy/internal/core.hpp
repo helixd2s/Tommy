@@ -8,6 +8,12 @@
 #include <future>
 #include <iostream>
 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+
+#endif
+
 // 
 namespace tom {
 
@@ -78,8 +84,8 @@ namespace tom {
     };
 
     // 
-    class QueueBase: public std::enable_shared_from_this<QueueBase> {
-        public:
+    class QueueBase: public std::enable_shared_from_this<QueueBase> { public: // 
+        uint32_t queueFamilyIndex = 0u;
     };
 
     // 
@@ -99,8 +105,29 @@ namespace tom {
 
 
     // 
-    class MemoryAllocationBase: public std::enable_shared_from_this<MemoryAllocationBase> {
-        public:
+    class MemoryAllocationBase: public std::enable_shared_from_this<MemoryAllocationBase> { public: // 
+        void* allocation = nullptr;
+        void* mapped = nullptr;
+        std::function<void()> destructor = {};
+        uintptr_t memoryOffset = 0ull;
+
+        // 
+        ~MemoryAllocationBase() {
+            if (this->destructor) { this->destructor(); };
+            this->destructor = {};
+        };
+
+        // 
+        static std::shared_ptr<MemoryAllocationBase> makeShared(const uintptr_t& memoryOffset = 0ull) {
+            std::shared_ptr<MemoryAllocationBase> data = {};
+            data->memoryOffset = memoryOffset;
+            return data;
+        };
+    };
+
+    // 
+    class MemoryAllocatorBase: public std::enable_shared_from_this<MemoryAllocatorBase> { public: // 
+        void* allocator = nullptr;
     };
 
     // 
@@ -114,8 +141,16 @@ namespace tom {
     };
 
     // 
-    class DeviceMemoryBase: public std::enable_shared_from_this<DeviceMemoryBase> {
-        public:
+    class DeviceMemoryBase: public std::enable_shared_from_this<DeviceMemoryBase> { public: //
+        void* allocation = nullptr;
+        void* mapped = nullptr;
+        std::function<void()> destructor = {};
+
+        // 
+        ~DeviceMemoryBase() {
+            if (this->destructor) { this->destructor(); };
+            this->destructor = {};
+        };
     };
 
     // 
@@ -126,6 +161,13 @@ namespace tom {
     //
     class ImageViewBase : public std::enable_shared_from_this<ImageViewBase> {
         public:
+        ImageViewKey key = {};
     };
+
+#ifdef _WIN32
+    using ExtHandleType = HANDLE; // Win32
+#else
+    using ExtHandleType = int; // Fd
+#endif
 
 };

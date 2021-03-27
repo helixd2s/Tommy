@@ -45,7 +45,7 @@ namespace tom {
 
         public: // 
             // legacy
-            DeviceBuffer(const std::shared_ptr<tom::DeviceMemory>& deviceMemory = {}, const vk::DeviceSize& memoryOffset = 0ull, const vk::Buffer& buffer = {}) : tom::DeviceBuffer(deviceMemory, memoryOffset, {}, DeviceBufferData::makeShared(buffer)) 
+            DeviceBuffer(const std::shared_ptr<tom::DeviceMemory>& deviceMemory = {}, const vk::Buffer& buffer = {}) : tom::DeviceBuffer(deviceMemory, {}, DeviceBufferData::makeShared(buffer)) 
             {};
 
             // legacy
@@ -54,11 +54,6 @@ namespace tom {
 
             // 
             ~DeviceBuffer() {
-                if (this->destructor) { 
-                    this->destructor();
-                };
-                this->destructor = {};
-
                 auto api = this->getApiTyped();
                 if (this->data) {
                     auto device = std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData());

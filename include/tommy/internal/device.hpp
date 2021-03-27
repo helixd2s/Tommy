@@ -92,12 +92,14 @@ namespace tom {
 
 
     //
-    class MemoryAllocator : public std::enable_shared_from_this<MemoryAllocator> { protected: // 
+    class MemoryAllocator : public std::enable_shared_from_this<MemoryAllocator> { 
+    protected: // 
         std::weak_ptr<Device> device = {};
-        void* allocator = nullptr;
+        std::shared_ptr<MemoryAllocatorBase> data = {};
 
     public: // 
-        MemoryAllocator(const std::shared_ptr<Device>& device): device(device) {
+        MemoryAllocator(const std::shared_ptr<Device>& device, const std::shared_ptr<MemoryAllocatorBase>& data = {}): device(device), data(data) {
+            if (!this->data) { this->data = std::make_shared<MemoryAllocatorBase>(); };
             this->constructor();
         };
 
@@ -114,12 +116,12 @@ namespace tom {
         virtual std::shared_ptr<DeviceImage> allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const tom::MemoryAllocationInfo& allocInfo = {});
 
         // 
-        virtual std::shared_ptr<Device> getDevice() { return device.lock(); };
-        virtual inline void*& getAllocator() { return allocator; };
+        virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
+        virtual inline std::shared_ptr<MemoryAllocatorBase> getData() { return data; };
 
         // 
-        virtual std::shared_ptr<Device> getDevice() const { return device.lock(); };
-        virtual inline void* const& getAllocator() const { return allocator; };
+        virtual inline std::shared_ptr<Device> getDevice() const { return device.lock(); };
+        virtual inline std::shared_ptr<MemoryAllocatorBase> getData() const { return data; };
     };
 
 };

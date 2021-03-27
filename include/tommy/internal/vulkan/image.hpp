@@ -49,7 +49,7 @@ namespace tom {
 
         public: // 
             // legacy
-            DeviceImage(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const vk::DeviceSize& memoryOffset = 0ull, const vk::Image& image = {}): tom::DeviceImage(deviceMemory, memoryOffset, {}, DeviceImageData::makeShared(image)) 
+            DeviceImage(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const vk::Image& image = {}): tom::DeviceImage(deviceMemory, {}, DeviceImageData::makeShared(image)) 
             {};
 
             // legacy
@@ -58,11 +58,6 @@ namespace tom {
 
             // 
             ~DeviceImage() {
-                if (this->destructor) { 
-                    this->destructor();
-                };
-                this->destructor = {};
-
                 auto api = this->getApiTyped();
                 if (this->data) {
                     auto device = std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData());

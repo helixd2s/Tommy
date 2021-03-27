@@ -42,20 +42,11 @@ namespace tom {
             // 
             ~DeviceMemory() {
                 auto data = this->getDataTyped();
-                if (this->destructor) { this->destructor(); };
                 if (data->memory) { data->memory = vk::DeviceMemory{}; };
             };
 
             // 
-            std::shared_ptr<tom::DeviceMemory> allocate(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
-
-            // 
-            virtual inline void*& getAllocation() { return allocation; };
-            virtual inline void*& getMapped() { return mapped; };
-
-            // 
-            virtual inline void* const& getAllocation() const { return allocation; };
-            virtual inline void* const& getMapped() const { return mapped; };
+            virtual std::shared_ptr<tom::DeviceMemory> allocate(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
         };
 
         // 
@@ -63,18 +54,16 @@ namespace tom {
         protected: friend MemoryAllocator; friend MemoryAllocatorVma; friend DeviceMemory; friend MemoryAllocation;
 
         public: // 
-            MemoryAllocation(const std::shared_ptr<tom::DeviceMemory>& deviceMemory = {}, const vk::DeviceSize& memoryOffset = 0ull): tom::MemoryAllocation(deviceMemory, memoryOffset, std::make_shared<MemoryAllocationData>()) {
+            MemoryAllocation(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}): tom::MemoryAllocation(deviceMemory, data) {
             };
 
-            // 
-            MemoryAllocation(const std::shared_ptr<tom::Device>& device = {}) : tom::MemoryAllocation(device) {
-
+            MemoryAllocation(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}) : tom::MemoryAllocation(device, data)  {
             };
 
             // 
             ~MemoryAllocation() {
-                if (this->destructor) { this->destructor(); };
-                if (this->deviceMemory) { this->deviceMemory = {}; };
+                this->deviceMemory = {};
+                this->data = {};
             };
         };
 
