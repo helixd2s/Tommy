@@ -87,8 +87,8 @@ namespace tom {
             };
 
             // 
-            virtual std::shared_ptr<tom::ImageView> createImageView(const vk::ImageViewCreateInfo& info = {}) override;
-            virtual std::shared_ptr<tom::ImageView> createSampler(const vk::SamplerCreateInfo& info = {}) override;
+            virtual std::shared_ptr<tom::ImageView> createImageView(const vk::ImageViewCreateInfo& info = {});
+            virtual std::shared_ptr<tom::ImageView> createSampler(const vk::SamplerCreateInfo& info = {});
 
             // 
             virtual inline vk::DescriptorImageInfo& getInfo() { auto data = getDataTyped(); data->info.imageLayout = data->layoutHistory.back(); return data->info; };

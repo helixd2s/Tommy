@@ -50,10 +50,6 @@ namespace tom {
         };
 
         // 
-        virtual std::shared_ptr<ImageView> createImageView(const vk::ImageViewCreateInfo& info = {});
-        virtual std::shared_ptr<ImageView> createSampler(const vk::SamplerCreateInfo& info = {});
-
-        // 
         virtual inline std::shared_ptr<DeviceImage>& getDeviceImage() { return deviceImage; };
         virtual inline std::shared_ptr<ImageViewBase>& getData() { return data; };
 
