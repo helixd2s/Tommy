@@ -19,7 +19,7 @@ namespace tom {
     public: // 
         // 
         DeviceMemory(const std::shared_ptr<Device>& device, const std::shared_ptr<DeviceMemoryBase>& data = {}): device(device), data(data) {
-            
+            this->constructor();
         };
 
         // 
@@ -27,7 +27,9 @@ namespace tom {
         };
 
         // 
-        virtual std::shared_ptr<DeviceBuffer> bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {});
+        virtual std::shared_ptr<DeviceMemory> constructor() {
+            return shared_from_this();
+        };
 
         // 
         virtual inline std::shared_ptr<DeviceMemoryBase> getData() { return data; };
@@ -46,19 +48,26 @@ namespace tom {
         std::weak_ptr<Device> device = {};
         std::shared_ptr<MemoryAllocationBase> data = {};
         std::shared_ptr<DeviceMemory> deviceMemory = {};
-        
 
     public: // 
         MemoryAllocation(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}): data(data), deviceMemory(deviceMemory), device(deviceMemory->getDevice()) {
+            this->constructor();
         };
 
+        // 
         MemoryAllocation(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}) : device(device), data(data) {
+            this->constructor();
         };
 
         // 
         ~MemoryAllocation() {
             this->deviceMemory = {};
             this->data = {};
+        };
+
+        // 
+        virtual std::shared_ptr<MemoryAllocation> constructor() {
+            return shared_from_this();
         };
 
         // 

@@ -16,7 +16,9 @@ namespace tom {
         Instance() { this->constructor(); };
 
         // 
-        virtual std::shared_ptr<Instance> constructor();
+        virtual std::shared_ptr<Instance> constructor() {
+            return shared_from_this();
+        };
 
         // 
         virtual inline std::shared_ptr<InstanceBase> getData() { return data; };
@@ -39,7 +41,9 @@ namespace tom {
         };
 
         //
-        virtual std::shared_ptr<PhysicalDevice> constructor();
+        virtual std::shared_ptr<PhysicalDevice> constructor() {
+            return shared_from_this();
+        };
 
         // 
         virtual std::shared_ptr<Instance> getInstance() { return instance.lock(); };

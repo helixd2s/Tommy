@@ -52,7 +52,9 @@ namespace tom {
         };
 
         // 
-        virtual std::shared_ptr<Device> constructor();
+        virtual std::shared_ptr<Device> constructor() {
+            return shared_from_this();
+        };
 
         // 
         //virtual inline vk::DispatchLoaderDynamic& getDispatch() { return dispatch; };
