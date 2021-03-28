@@ -10,6 +10,8 @@
 
 // 
 namespace tom {
+
+    // 
     namespace vulkan {
         // 
         const std::vector<const char*> defaultLayers = {};
@@ -26,7 +28,7 @@ namespace tom {
             std::vector<const char*> preferedLayers = defaultLayers;
             std::vector<const char*> preferedExtensions = defaultExtensions;
 
-            //
+            // 
             std::vector<const char*> excludedLayers = {};
             std::vector<const char*> excludedExtensions = {};
 
@@ -71,13 +73,13 @@ namespace tom {
             uint32_t I=0u; for (auto& property : queueFamilyProperties) { const uint32_t i = I++;
                 std::vector<float> queue_priorities = { 1.f }; // queues per every family
                 if (property.queueFamilyProperties.queueFlags & vk::QueueFlagBits::eCompute) {
-                    queues[i] = std::vector<std::shared_ptr<tom::Queue>>{};
+                    data->queues[i] = std::vector<std::shared_ptr<tom::Queue>>{};
                     queueCreateInfos.push_back(vk::DeviceQueueCreateInfo{
                         .queueFamilyIndex = i,
                         .queueCount = static_cast<uint32_t>(queue_priorities.size()),
                         .pQueuePriorities = queue_priorities.data()
                     });
-                    queueFamilyIndices.push_back(i);
+                    data->queueFamilyIndices.push_back(i);
                 };
             };
 
@@ -98,7 +100,7 @@ namespace tom {
                 const auto& info = queueCreateInfos[i];
                 const auto& queueFamilyIndex = info.queueFamilyIndex;
                 for (uint32_t j=0;j<info.queueCount;j++) {
-                    queues[info.queueFamilyIndex].push_back(std::make_shared<Queue>(shared_from_this(), data->device.getQueue(queueFamilyIndex, j), queueFamilyIndex));
+                    data->queues[info.queueFamilyIndex].push_back(std::make_shared<Queue>(shared_from_this(), data->device.getQueue(queueFamilyIndex, j), queueFamilyIndex));
                 };
             };
 

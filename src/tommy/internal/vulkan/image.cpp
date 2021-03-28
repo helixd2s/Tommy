@@ -9,6 +9,8 @@
 
 // 
 namespace tom {
+
+    // 
     namespace vulkan {
 
         // 
@@ -33,7 +35,8 @@ namespace tom {
             auto self = std::dynamic_pointer_cast<DeviceImage>(shared_from_this());
             auto device = this->getDevice();
             auto api = this->getApiTyped();
-            api->image = std::dynamic_pointer_cast<DeviceData>(device->getData())->device.createImage( api->info.queueFamilyIndexCount ? api->info : vk::ImageCreateInfo(api->info).setQueueFamilyIndices(device->getQueueFamilyIndices()) );
+            auto info = api->info.queueFamilyIndexCount ? api->info : vk::ImageCreateInfo(api->info).setQueueFamilyIndices(device->getData()->queueFamilyIndices);
+            api->image = std::dynamic_pointer_cast<DeviceData>(device->getData())->device.createImage( info );
             this->bindMemory(memoryAllocation);
             api->destructor = [image = api->image, device = std::dynamic_pointer_cast<DeviceData>(device->getData())->device]() { if (image) {
                 device.bindImageMemory2(vk::BindImageMemoryInfo{ .image = image, .memory = {}, .memoryOffset = 0ull });

@@ -9,6 +9,8 @@
 
 // 
 namespace tom {
+
+    // 
     namespace vulkan {
         // 
         std::shared_ptr<tom::MemoryAllocator>& Device::createAllocatorVk() {

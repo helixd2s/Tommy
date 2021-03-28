@@ -17,7 +17,16 @@ namespace tom {
         DeviceImage(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceImageBase>& api = {}): MemoryAllocation(deviceMemory, data), api(api) 
         {};
 
+        // 
         DeviceImage(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceImageBase>& api = {}) : MemoryAllocation(device, data), api(api) 
+        {};
+
+        // 
+        DeviceImage(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<DeviceImageBase>& api = {}): MemoryAllocation(deviceMemory), api(api) 
+        {};
+
+        // 
+        DeviceImage(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<DeviceImageBase>& api = {}) : MemoryAllocation(device), api(api) 
         {};
 
         // 

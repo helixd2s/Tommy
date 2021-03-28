@@ -49,8 +49,8 @@ namespace tom {
 
         public: // 
             // legacy
-            DeviceImage(const std::shared_ptr<Device>& device, const vk::Image& image = {}) : tom::DeviceImage(device, {}, DeviceImageData::makeShared(image)) 
-            {};
+            //DeviceImage(const std::shared_ptr<Device>& device, const vk::Image& image = {}) : tom::DeviceImage(device, {}, DeviceImageData::makeShared(image)) 
+            //{};
 
             // 
             virtual std::shared_ptr<tom::MemoryAllocation> bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) override;
@@ -65,8 +65,8 @@ namespace tom {
 
         public: 
             // legacy
-            ImageView(const std::shared_ptr<tom::DeviceImage>& deviceImage, const vk::DescriptorImageInfo& info = {}): tom::ImageView(deviceImage, ImageViewData::makeShared(info)) {
-            };
+            //ImageView(const std::shared_ptr<tom::DeviceImage>& deviceImage, const vk::DescriptorImageInfo& info = {}): tom::ImageView(deviceImage, ImageViewData::makeShared(info)) 
+            //{};
 
             // 
             virtual std::shared_ptr<tom::ImageView> constructor() override {

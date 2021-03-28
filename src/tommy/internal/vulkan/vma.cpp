@@ -120,6 +120,7 @@ namespace tom {
             auto device = std::dynamic_pointer_cast<Device>(this->getDevice());
             auto data = std::dynamic_pointer_cast<MemoryAllocationData>(self->getData());
             auto api = std::dynamic_pointer_cast<DeviceBufferData>(self->getApi());
+            auto info = api->info.queueFamilyIndexCount ? api->info : vk::BufferCreateInfo(api->info).setQueueFamilyIndices(device->getData()->queueFamilyIndices);
 
             // 
             VmaAllocationInfo allocInfo = {};
@@ -129,7 +130,7 @@ namespace tom {
             };
 
             // 
-            vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getData()->allocator, (const VkBufferCreateInfo*)&api->info, &allocCreateInfo, (VkBuffer*)&api->buffer, &((VmaAllocation&)data->allocation), nullptr)), "VMA buffer allocation failed...");
+            vk::throwResultException(vk::Result(vmaCreateBuffer((const VmaAllocator&)allocator->getData()->allocator, (const VkBufferCreateInfo*)&info, &allocCreateInfo, (VkBuffer*)&api->buffer, &((VmaAllocation&)data->allocation), nullptr)), "VMA buffer allocation failed...");
             vmaGetAllocationInfo((const VmaAllocator&)allocator->getData()->allocator, ((VmaAllocation&)data->allocation), &allocInfo);
             device->setDeviceBufferObject(self);
 
@@ -137,11 +138,6 @@ namespace tom {
             self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);;
             data->memoryOffset = allocInfo.offset;
             data->mapped = allocInfo.pMappedData;
-
-            // not sure...
-            //deviceMemory->getMapped() = allocInfo.pMappedData;
-            //deviceMemory->getAllocation() = allocation;
-
             data->destructor = [api, allocator = allocator->getData()->allocator, allocation = self->getMemoryAllocation()](){
                 vmaDestroyBuffer((VmaAllocator&)allocator, api->buffer, (VmaAllocation&)allocation); api->buffer = vk::Buffer{};
             };
@@ -156,6 +152,7 @@ namespace tom {
             auto device = std::dynamic_pointer_cast<Device>(this->getDevice());
             auto data = std::dynamic_pointer_cast<MemoryAllocationData>(self->getData());
             auto api = std::dynamic_pointer_cast<DeviceImageData>(self->getApi());
+            auto info = api->info.queueFamilyIndexCount ? api->info : vk::ImageCreateInfo(api->info).setQueueFamilyIndices(device->getData()->queueFamilyIndices);
 
             // 
             VmaAllocationInfo allocInfo = {};
@@ -165,22 +162,13 @@ namespace tom {
             };
 
             // 
-            vk::throwResultException(vk::Result(vmaCreateImage((const VmaAllocator&)allocator->getData()->allocator, (const VkImageCreateInfo*)&api->info, &allocCreateInfo, (VkImage*)&api->image, &((VmaAllocation&)data->allocation), nullptr)), "VMA image allocation failed...");
+            vk::throwResultException(vk::Result(vmaCreateImage((const VmaAllocator&)allocator->getData()->allocator, (const VkImageCreateInfo*)&info, &allocCreateInfo, (VkImage*)&api->image, &((VmaAllocation&)data->allocation), nullptr)), "VMA image allocation failed...");
             vmaGetAllocationInfo((const VmaAllocator&)allocator->getData()->allocator, ((VmaAllocation&)data->allocation), &allocInfo);
-
-            // 
-            //self->layoutHistory.clear();
-            //self->layoutHistory.push_back(info.initialLayout);
 
             // wrap device memory
             self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);;
             data->memoryOffset = allocInfo.offset;
             data->mapped = allocInfo.pMappedData;
-
-            // not sure...
-            //deviceMemory->getMapped() = allocInfo.pMappedData;
-            //deviceMemory->getAllocation() = allocation;
-
             data->destructor = [api, allocator = allocator->getData()->allocator, allocation = self->getMemoryAllocation()](){
                 vmaDestroyImage((VmaAllocator&)allocator, api->image, (VmaAllocation&)allocation); api->image = vk::Image{};
             };

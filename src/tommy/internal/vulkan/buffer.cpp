@@ -36,7 +36,8 @@ namespace tom {
             auto api = this->getApiTyped();
             auto self = std::dynamic_pointer_cast<DeviceBuffer>(shared_from_this());
             auto device = this->getDevice();
-            api->buffer = std::dynamic_pointer_cast<DeviceData>(device->getData())->device.createBuffer( api->info.queueFamilyIndexCount ? api->info : vk::BufferCreateInfo(api->info).setQueueFamilyIndices(device->getQueueFamilyIndices()) );
+            auto info = api->info.queueFamilyIndexCount ? api->info : vk::BufferCreateInfo(api->info).setQueueFamilyIndices(device->getData()->queueFamilyIndices);
+            api->buffer = std::dynamic_pointer_cast<DeviceData>(device->getData())->device.createBuffer( info );
             std::dynamic_pointer_cast<Device>(device)->setDeviceBufferObject(std::dynamic_pointer_cast<tom::DeviceBuffer>(shared_from_this()));
             this->bindMemory(memoryAllocation);
             api->address = 0ull;

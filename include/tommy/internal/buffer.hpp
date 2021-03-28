@@ -8,7 +8,6 @@
 // 
 namespace tom {
 
-
     // 
     class DeviceBuffer: public MemoryAllocation{
     protected: friend MemoryAllocator; friend BufferAllocation; // 
@@ -20,6 +19,14 @@ namespace tom {
 
         // 
         DeviceBuffer(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceBufferBase>& api = {}) : MemoryAllocation(device, data), api(api) 
+        {};
+
+        // 
+        DeviceBuffer(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<DeviceBufferBase>& api = {}): MemoryAllocation(deviceMemory), api(api) 
+        {};
+
+        // 
+        DeviceBuffer(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<DeviceBufferBase>& api = {}) : MemoryAllocation(device), api(api) 
         {};
 
         // 

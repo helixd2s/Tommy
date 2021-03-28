@@ -97,8 +97,9 @@ namespace tom {
     };
 
     // 
-    class DeviceBase: public std::enable_shared_from_this<DeviceBase> {
-        public:
+    class DeviceBase: public std::enable_shared_from_this<DeviceBase> { public: 
+        std::unordered_map<uint32_t, std::vector<std::shared_ptr<Queue>>> queues = {};
+        std::vector<uint32_t> queueFamilyIndices = {};
     };
 
     // 

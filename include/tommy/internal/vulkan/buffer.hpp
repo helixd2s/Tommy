@@ -45,8 +45,8 @@ namespace tom {
 
         public: // 
             // legacy
-            DeviceBuffer(const std::shared_ptr<tom::Device>& device, const vk::Buffer& buffer = {}) : tom::DeviceBuffer(device, {}, DeviceBufferData::makeShared(buffer)) 
-            {};
+            //DeviceBuffer(const std::shared_ptr<tom::Device>& device, const vk::Buffer& buffer = {}) : tom::DeviceBuffer(device, {}, DeviceBufferData::makeShared(buffer)) 
+            //{};
 
             // 
             virtual uintptr_t& getDeviceAddress();
@@ -73,28 +73,29 @@ namespace tom {
 
         public: // 
             // legacy
-            BufferAllocation(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer, const uintptr_t& offset = 0ull, const uintptr_t& range = VK_WHOLE_SIZE): tom::BufferAllocation(deviceBuffer, offset, range, std::make_shared<BufferAllocationData>()) 
-            {};
+            //BufferAllocation(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer, const uintptr_t& offset = 0ull, const uintptr_t& range = VK_WHOLE_SIZE): tom::BufferAllocation(deviceBuffer, offset, range, std::make_shared<BufferAllocationData>()) 
+            //{};
 
             // 
             virtual std::shared_ptr<tom::BufferAllocation> constructor(const uintptr_t& offset = 0ull, const uintptr_t& range = VK_WHOLE_SIZE) override {
+                if (!this->data) { this->data = std::make_shared<BufferAllocationData>(); };
                 auto data = this->getDataTyped();
-                if (deviceBuffer) { data->bufferInfo.buffer = std::dynamic_pointer_cast<DeviceBufferData>(deviceBuffer->getApi())->buffer; };
+                if (this->deviceBuffer) { data->bufferInfo.buffer = std::dynamic_pointer_cast<DeviceBufferData>(this->deviceBuffer->getApi())->buffer; };
                 data->bufferInfo.offset = offset;
                 data->bufferInfo.range = range;
                 return shared_from_this();
             };
 
             // 
-            virtual inline vk::DeviceAddress getDeviceAddress() override { auto data = this->getDataTyped(); data->address = (data->address ? data->address : (deviceBuffer->getDeviceAddress() + data->bufferInfo.offset)); return std::dynamic_pointer_cast<Device>(deviceBuffer->getDevice())->setBufferAllocationObject(shared_from_this()); };
-            virtual inline vk::DescriptorBufferInfo& getBufferInfo() { auto data = this->getDataTyped(); if (deviceBuffer) { data->bufferInfo.buffer = std::dynamic_pointer_cast<DeviceBufferData>(deviceBuffer->getApi())->buffer; }; return data->bufferInfo; };
+            virtual inline vk::DeviceAddress getDeviceAddress() override { auto data = this->getDataTyped(); data->address = ((data->address || !this->deviceBuffer) ? data->address : (this->deviceBuffer->getDeviceAddress() + data->bufferInfo.offset)); return std::dynamic_pointer_cast<Device>(deviceBuffer->getDevice())->setBufferAllocationObject(shared_from_this()); };
+            virtual inline vk::DescriptorBufferInfo& getBufferInfo() { auto data = this->getDataTyped(); if (this->deviceBuffer) { data->bufferInfo.buffer = std::dynamic_pointer_cast<DeviceBufferData>(this->deviceBuffer->getApi())->buffer; }; return data->bufferInfo; };
             virtual inline vk::DeviceSize& getOffset() { auto data = this->getDataTyped(); return data->bufferInfo.offset; };
             virtual inline vk::DeviceSize& getRange() { auto data = this->getDataTyped(); return data->bufferInfo.range; };
             virtual inline vk::DeviceAddress& getDeviceAddressDefined() { auto data = this->getDataTyped(); return (data->address = data->address ? data->address : this->getDeviceAddress()); };
 
             // 
-            virtual inline vk::DeviceAddress getDeviceAddress() const override { auto data = this->getDataTyped(); return data->address ? data->address : (deviceBuffer->getDeviceAddress() + data->bufferInfo.offset); };
-            virtual inline vk::DescriptorBufferInfo getBufferInfo() const { auto data = this->getDataTyped(); return vk::DescriptorBufferInfo{ std::dynamic_pointer_cast<DeviceBufferData>(deviceBuffer->getApi())->buffer, data->bufferInfo.offset, data->bufferInfo.range }; };
+            virtual inline vk::DeviceAddress getDeviceAddress() const override { auto data = this->getDataTyped(); return (data->address || !this->deviceBuffer) ? data->address : (this->deviceBuffer->getDeviceAddress() + data->bufferInfo.offset); };
+            virtual inline vk::DescriptorBufferInfo getBufferInfo() const { auto data = this->getDataTyped(); return vk::DescriptorBufferInfo{ std::dynamic_pointer_cast<DeviceBufferData>(this->deviceBuffer->getApi())->buffer, data->bufferInfo.offset, data->bufferInfo.range }; };
             virtual inline const vk::DeviceSize& getOffset() const { auto data = this->getDataTyped(); return data->bufferInfo.offset; };
             virtual inline const vk::DeviceSize& getRange() const { auto data = this->getDataTyped(); return data->bufferInfo.range; };
             virtual inline const vk::DeviceAddress& getDeviceAddressDefined() const { auto data = this->getDataTyped(); return data->address; };

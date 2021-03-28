@@ -7,7 +7,8 @@
 
 // 
 namespace tom {
-
+    
+    // 
     namespace vulkan { 
         // TODO: VMA allocation
         std::shared_ptr<tom::DeviceMemory> DeviceMemory::allocate(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {

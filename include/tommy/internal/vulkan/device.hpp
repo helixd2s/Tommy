@@ -59,8 +59,8 @@ namespace tom {
 
         public: 
             // legacy
-            Queue(const std::shared_ptr<tom::Device>& device, const vk::Queue& queue = {}, const uint32_t& queueFamilyIndex = 0u) : tom::Queue(device, QueueData::makeShared(queue, queueFamilyIndex)) 
-            {};
+            //Queue(const std::shared_ptr<tom::Device>& device, const vk::Queue& queue = {}, const uint32_t& queueFamilyIndex = 0u) : tom::Queue(device, QueueData::makeShared(queue, queueFamilyIndex)) 
+            //{};
 
             // 
             virtual std::shared_ptr<tom::Queue> constructor() override {
@@ -90,7 +90,6 @@ namespace tom {
             virtual std::shared_ptr<tom::Device> constructor() override;
 
             // 
-            virtual inline std::vector<uint32_t>& getQueueFamilyIndices() { return queueFamilyIndices; };
             virtual std::shared_ptr<tom::DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer);
             virtual std::shared_ptr<tom::DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory);
             virtual std::shared_ptr<tom::DeviceMemory> allocateMemoryObject(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
@@ -105,7 +104,6 @@ namespace tom {
             virtual std::shared_ptr<tom::DeviceMemory> allocateMemoryObject(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
 
             // 
-            virtual inline const std::vector<uint32_t>& getQueueFamilyIndices() const { return queueFamilyIndices; };
             virtual std::shared_ptr<tom::DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer) const;
             virtual std::shared_ptr<tom::DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) const;
             virtual std::shared_ptr<tom::ImageView> getImageViewObject(const tom::ImageViewKey& imageViewKey) const override;
