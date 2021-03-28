@@ -31,6 +31,11 @@ namespace tom {
         // 
         virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
         virtual inline std::shared_ptr<QueueBase>& getData() { return data; };
+
+        // 
+        virtual std::future<ApiResult> copyDeviceBuffers(const std::shared_ptr<BufferAllocation>& src, const std::shared_ptr<BufferAllocation>& dst);
+        virtual std::future<ApiResult> copyDeviceBufferToImage(const std::shared_ptr<BufferAllocation>& src, const std::shared_ptr<ImageView>& dst, const ImageRegion& dstRegion = {});
+        virtual std::future<ApiResult> copyDeviceImageToBuffer(const std::shared_ptr<ImageView>& src, const std::shared_ptr<BufferAllocation>& dst, const ImageRegion& srcRegion = {});
     };
 
 

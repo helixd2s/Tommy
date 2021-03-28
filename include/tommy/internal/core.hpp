@@ -112,6 +112,15 @@ namespace tom {
         public:
     };
 
+    //
+    struct ImageRegion {
+        glm::uvec3 offset = glm::uvec3{0u,0u,0u};
+        glm::uvec3 extent = glm::uvec3{65536u,65536u,65536u};
+        uint32_t mipLevel = 0u;
+    };
+
+    //
+    using ApiResult = uint32_t;
 
     // 
     class MemoryAllocationBase: public std::enable_shared_from_this<MemoryAllocationBase> { public: // 

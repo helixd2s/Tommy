@@ -74,7 +74,12 @@ namespace tom {
             // 
             virtual vk::Fence submitCmds(const vk::SubmitInfo2KHR& submitInfo = vk::SubmitInfo2KHR{}) const;
             virtual vk::Fence submitCmds(const std::vector<vk::CommandBuffer>& commandBuffers, vk::SubmitInfo2KHR submitInfo = vk::SubmitInfo2KHR{}) const;
-            virtual std::future<vk::Result> submitOnce(const std::function<void(const vk::CommandBuffer&)>& submitCommand, const vk::SubmitInfo2KHR& submitInfo = vk::SubmitInfo2KHR{}) const;
+            virtual std::future<ApiResult> submitOnce(const std::function<void(const vk::CommandBuffer&)>& submitCommand, const vk::SubmitInfo2KHR& submitInfo = vk::SubmitInfo2KHR{}) const;
+
+            // 
+            virtual std::future<ApiResult> copyDeviceBuffers(const std::shared_ptr<tom::BufferAllocation>& src, const std::shared_ptr<tom::BufferAllocation>& dst) override;
+            virtual std::future<ApiResult> copyDeviceBufferToImage(const std::shared_ptr<tom::BufferAllocation>& src, const std::shared_ptr<tom::ImageView>& dst, const ImageRegion& dstRegion = {}) override;
+            virtual std::future<ApiResult> copyDeviceImageToBuffer(const std::shared_ptr<tom::ImageView>& src, const std::shared_ptr<tom::BufferAllocation>& dst, const ImageRegion& srcRegion = {}) override;
         };
 
 
