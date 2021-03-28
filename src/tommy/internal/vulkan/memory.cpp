@@ -17,8 +17,8 @@ namespace tom {
             auto api = this->getApiTyped();
             api->info = info;
             api->memory = device.allocateMemory(info);
-            data->destructor = [api, device, memory = api->memory]() {
-                if (memory) { device.freeMemory(); };
+            data->destructor = [device, memory = api->memory]() {
+                if (memory) { device.freeMemory(memory); };
             };
 
 #ifdef _WIN32
