@@ -29,7 +29,8 @@ namespace tom {
 
         // 
         virtual std::shared_ptr<DeviceMemory> constructor() {
-            if (!this->data) { this->data = std::make_shared<DeviceMemoryBase>(); }; 
+            if (!this->api) { this->api = std::make_shared<DeviceMemoryApiBase>(); };
+            if (!this->data) { this->data = std::make_shared<DeviceMemoryBase>(); };
             return shared_from_this();
         };
 
