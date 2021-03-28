@@ -159,7 +159,7 @@ namespace tom {
         std::shared_ptr<tom::DeviceMemory> Device::allocateMemoryObject(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
             auto data = this->getDataTyped();
             auto deviceMemoryObj = std::make_shared<DeviceMemory>(shared_from_this())->allocate(std::dynamic_pointer_cast<MemoryAllocator>(allocator), info);
-            auto deviceMemory = std::dynamic_pointer_cast<DeviceMemoryData>(deviceMemoryObj->getData())->memory; // determine a key
+            auto deviceMemory = std::dynamic_pointer_cast<DeviceMemoryApi>(deviceMemoryObj->getApi())->memory; // determine a key
             return (data->memories[deviceMemory] = deviceMemoryObj);
         };
 
@@ -244,8 +244,8 @@ namespace tom {
         // 
         vk::DeviceMemory Device::setDeviceMemoryObject(const std::shared_ptr<tom::DeviceMemory>& deviceMemoryObj = {}) {
             auto data = this->getDataTyped();
-            vk::DeviceMemory deviceMemory = std::dynamic_pointer_cast<DeviceMemoryData>(deviceMemoryObj->getData())->memory; // determine key
-            if (data->memories.find(deviceMemory) == data->memories.end()) { 
+            vk::DeviceMemory deviceMemory = std::dynamic_pointer_cast<DeviceMemoryApi>(deviceMemoryObj->getApi())->memory; // determine key
+            if (data->memories.find(deviceMemory) == data->memories.end()) {
                 data->memories[deviceMemory] = deviceMemoryObj;
             };
             return deviceMemory;

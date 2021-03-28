@@ -14,11 +14,12 @@ namespace tom {
     protected: friend MemoryAllocator;
         std::weak_ptr<Device> device = {};
         std::shared_ptr<DeviceMemoryBase> data = {};
+        std::shared_ptr<DeviceMemoryApiBase> api = {};
         //std::shared_ptr<ExtHandleType> extHandle = {};
 
     public: // 
         // 
-        DeviceMemory(const std::shared_ptr<Device>& device, const std::shared_ptr<DeviceMemoryBase>& data = {}): device(device), data(data) {
+        DeviceMemory(const std::shared_ptr<Device>& device, const std::shared_ptr<DeviceMemoryBase>& data = {}, const std::shared_ptr<DeviceMemoryApiBase>& api = {}): device(device), data(data), api(api) {
             this->constructor();
         };
 
@@ -33,11 +34,13 @@ namespace tom {
         };
 
         // 
+        virtual inline std::shared_ptr<DeviceMemoryApiBase>& getApi() { return api; };
         virtual inline std::shared_ptr<DeviceMemoryBase>& getData() { return data; };
         virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
         //virtual inline std::shared_ptr<ExtHandleType> getExtHandle() { return extHandle; };
 
         // 
+        virtual inline const std::shared_ptr<DeviceMemoryApiBase>& getApi() const { return api; };
         virtual inline const std::shared_ptr<DeviceMemoryBase>& getData() const { return data; };
         virtual inline std::shared_ptr<Device> getDevice() const { return device.lock(); };
         //virtual inline std::shared_ptr<ExtHandleType> getExtHandle() const { return extHandle; };

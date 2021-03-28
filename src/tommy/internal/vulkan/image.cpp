@@ -16,11 +16,12 @@ namespace tom {
             auto api = this->getApiTyped();
             if (memoryAllocation) {
                 this->data = memoryAllocation->getData();
+                this->deviceMemory = memoryAllocation->getDeviceMemory();
             };
             if (this->data) {
                 std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData())->device.bindImageMemory2(vk::BindImageMemoryInfo{
                     .image = api->image,
-                    .memory = std::dynamic_pointer_cast<DeviceMemoryData>(deviceMemory->getData())->memory,
+                    .memory = std::dynamic_pointer_cast<DeviceMemoryApi>(deviceMemory->getApi())->memory,
                     .memoryOffset = data->memoryOffset
                 });
             };

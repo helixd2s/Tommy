@@ -16,16 +16,21 @@ namespace tom {
     namespace vulkan {
 
         // 
-        class DeviceMemoryData: public DeviceMemoryBase { public: 
+        class DeviceMemoryApi: public DeviceMemoryApiBase { public: 
             vk::DeviceMemory memory = {};
             vk::MemoryAllocateInfo info = {};
 
             // 
-            static std::shared_ptr<DeviceMemoryData> makeShared(const vk::DeviceMemory& memory = {}) {
-                std::shared_ptr<DeviceMemoryData> data = {};
+            static std::shared_ptr<DeviceMemoryApi> makeShared(const vk::DeviceMemory& memory = {}) {
+                std::shared_ptr<DeviceMemoryApi> data = {};
                 data->memory = memory;
                 return data;
             };
+        };
+
+        // 
+        class DeviceMemoryData: public DeviceMemoryBase { public: 
+            
         };
 
         // 
@@ -38,15 +43,17 @@ namespace tom {
         protected: friend MemoryAllocator; friend MemoryAllocatorVma;
             virtual inline std::shared_ptr<DeviceMemoryData> getDataTyped() { return std::dynamic_pointer_cast<DeviceMemoryData>(data); };
             virtual inline std::shared_ptr<DeviceMemoryData> getDataTyped() const { return std::dynamic_pointer_cast<DeviceMemoryData>(data); };
+            virtual inline std::shared_ptr<DeviceMemoryApi> getApiTyped() { return std::dynamic_pointer_cast<DeviceMemoryApi>(api); };
+            virtual inline std::shared_ptr<DeviceMemoryApi> getApiTyped() const { return std::dynamic_pointer_cast<DeviceMemoryApi>(api); };
 
         public: // 
             // legacy
-            DeviceMemory(const std::shared_ptr<tom::Device>& device, const vk::DeviceMemory& memory = {}) : tom::DeviceMemory(device, DeviceMemoryData::makeShared(memory)) {
+            DeviceMemory(const std::shared_ptr<tom::Device>& device, const vk::DeviceMemory& memory = {}) : tom::DeviceMemory(device, std::make_shared<DeviceMemoryData>(), DeviceMemoryApi::makeShared(memory)) {
             };
 
             // 
             ~DeviceMemory() {
-                auto data = this->getDataTyped();
+                auto data = this->getApiTyped();
                 if (data->memory) { data->memory = vk::DeviceMemory{}; };
             };
 

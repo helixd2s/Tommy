@@ -105,8 +105,8 @@ namespace tom {
                 //deviceMemory->getMapped() = allocInfo.pMappedData; // not sure...
 
                 //
-                data->destructor = [allocator, allocation = data->allocation](){
-                    vmaFreeMemory((VmaAllocator&)allocator->getData()->allocator, (VmaAllocation&)allocation);
+                data->destructor = [allocator = allocator->getData()->allocator, allocation = data->allocation]{
+                    vmaFreeMemory((VmaAllocator&)allocator, (VmaAllocation&)allocation);
                 };
             };
 
@@ -142,9 +142,8 @@ namespace tom {
             //deviceMemory->getMapped() = allocInfo.pMappedData;
             //deviceMemory->getAllocation() = allocation;
 
-            data->destructor = [data, api, allocator = allocator->getData()->allocator, allocation = self->getMemoryAllocation()](){
-                vmaDestroyBuffer((VmaAllocator&)allocator, api->buffer, (VmaAllocation&)allocation);
-                api->buffer = vk::Buffer{};
+            data->destructor = [api, allocator = allocator->getData()->allocator, allocation = self->getMemoryAllocation()](){
+                vmaDestroyBuffer((VmaAllocator&)allocator, api->buffer, (VmaAllocation&)allocation); api->buffer = vk::Buffer{};
             };
 
             return self;
@@ -182,9 +181,8 @@ namespace tom {
             //deviceMemory->getMapped() = allocInfo.pMappedData;
             //deviceMemory->getAllocation() = allocation;
 
-            data->destructor = [data, api, allocator = allocator->getData()->allocator, allocation = self->getMemoryAllocation()](){
-                vmaDestroyImage((VmaAllocator&)allocator, api->image, (VmaAllocation&)allocation);
-                api->image = vk::Image{};
+            data->destructor = [api, allocator = allocator->getData()->allocator, allocation = self->getMemoryAllocation()](){
+                vmaDestroyImage((VmaAllocator&)allocator, api->image, (VmaAllocation&)allocation); api->image = vk::Image{};
             };
 
             return self;

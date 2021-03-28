@@ -13,18 +13,17 @@ namespace tom {
         std::shared_ptr<tom::DeviceMemory> DeviceMemory::allocate(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
             auto device = std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData())->device;
             auto data = this->getDataTyped();
-            data->info = info;
-            data->memory = device.allocateMemory(info);
-            data->destructor = [data, device](){
-                auto& memory = data->memory;
+            auto api = this->getApiTyped();
+            api->info = info;
+            api->memory = device.allocateMemory(info);
+            data->destructor = [api, device, memory = api->memory]() {
                 if (memory) { device.freeMemory(); };
-                memory = vk::DeviceMemory{};
             };
 
 #ifdef _WIN32
-            data->extHandle = device.getMemoryWin32HandleKHR(vk::MemoryGetWin32HandleInfoKHR{.memory = data->memory, .handleType = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueWin32});
+            data->extHandle = device.getMemoryWin32HandleKHR(vk::MemoryGetWin32HandleInfoKHR{.memory = api->memory, .handleType = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueWin32});
 #else
-            data->extHandle = device.getMemoryFdKHR(vk::VkMemoryGetFdInfoKHR{.memory = data->memory, .handleType = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd});
+            data->extHandle = device.getMemoryFdKHR(vk::VkMemoryGetFdInfoKHR{.memory = api->memory, .handleType = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd});
 #endif
 
 /*
