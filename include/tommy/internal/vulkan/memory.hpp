@@ -48,8 +48,8 @@ namespace tom {
 
         public: // 
             // legacy
-            DeviceMemory(const std::shared_ptr<tom::Device>& device, const vk::DeviceMemory& memory = {}) : tom::DeviceMemory(device, std::make_shared<DeviceMemoryData>(), DeviceMemoryApi::makeShared(memory)) 
-            {};
+            //DeviceMemory(const std::shared_ptr<tom::Device>& device, const vk::DeviceMemory& memory = {}) : tom::DeviceMemory(device, std::make_shared<DeviceMemoryData>(), DeviceMemoryApi::makeShared(memory)) 
+            //{};
 
             // 
             virtual std::shared_ptr<tom::DeviceMemory> constructor() override {

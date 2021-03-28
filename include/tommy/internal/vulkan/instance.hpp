@@ -107,8 +107,8 @@ namespace tom {
 
         public: 
             // legacy
-            PhysicalDevice(const std::shared_ptr<tom::Instance>& instance, const vk::PhysicalDevice& physicalDevice): tom::PhysicalDevice(instance, PhysicalDeviceData::makeShared(physicalDevice)) 
-            {};
+            //PhysicalDevice(const std::shared_ptr<tom::Instance>& instance, const vk::PhysicalDevice& physicalDevice): tom::PhysicalDevice(instance, PhysicalDeviceData::makeShared(physicalDevice)) 
+            //{};
 
             //
             virtual std::shared_ptr<tom::PhysicalDevice> constructor() override;
