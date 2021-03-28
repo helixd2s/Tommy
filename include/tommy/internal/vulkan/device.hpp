@@ -18,6 +18,7 @@ namespace tom {
         public:
             vk::Queue queue = {};
             vk::CommandPool commandPool = {};
+            std::vector<vk::CommandBuffer> commandBuffers = {};
 
             // 
             static std::shared_ptr<QueueData> makeShared(const vk::Queue& queue = {}, const uint32_t& queueFamilyIndex = 0u) {
@@ -68,9 +69,10 @@ namespace tom {
                 auto device = std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData());
                 data->commandPool = device->device.createCommandPool(vk::CommandPoolCreateInfo{ .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer, .queueFamilyIndex = data->queueFamilyIndex });
                 return shared_from_this();
-            };
+            };//commandBuffers
 
             // 
+            virtual vk::Fence submitCmds(const vk::SubmitInfo2KHR& submitInfo = vk::SubmitInfo2KHR{}) const;
             virtual vk::Fence submitCmds(const std::vector<vk::CommandBuffer>& commandBuffers, vk::SubmitInfo2KHR submitInfo = vk::SubmitInfo2KHR{}) const;
             virtual std::future<vk::Result> submitOnce(const std::function<void(const vk::CommandBuffer&)>& submitCommand, const vk::SubmitInfo2KHR& submitInfo = vk::SubmitInfo2KHR{}) const;
         };

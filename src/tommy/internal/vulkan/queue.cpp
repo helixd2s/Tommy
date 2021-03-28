@@ -37,7 +37,18 @@ namespace tom {
             return fence;
         };
 
-        //
+        // 
+        vk::Fence Queue::submitCmds(const vk::SubmitInfo2KHR& submitInfo) const {
+            auto data = std::dynamic_pointer_cast<QueueData>(this->data);
+            auto fence = this->submitCmds(data->commandBuffers, submitInfo);
+            for (auto& commandBuffer : data->commandBuffers) {
+                
+            };
+            data->commandBuffers = {};
+            return fence;
+        };
+
+        // 
         std::future<vk::Result> Queue::submitOnce(const std::function<void(const vk::CommandBuffer&)>& cmdFn, const vk::SubmitInfo2KHR& submitInfo) const {
             auto device = std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData())->device;
             auto data = this->getDataTyped();
