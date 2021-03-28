@@ -53,7 +53,8 @@ namespace tom {
 
             // 
             virtual std::shared_ptr<tom::DeviceMemory> constructor() override {
-                if (!this->data) { this->data = std::make_shared<DeviceMemoryData>(); }; 
+                if (!this->api) { this->api = std::make_shared<DeviceMemoryApi>(); };
+                if (!this->data) { this->data = std::make_shared<DeviceMemoryData>(); };
                 return shared_from_this();
             };
 

@@ -84,7 +84,9 @@ namespace tom {
             };
 
             // 
-            data->dispatch = vk::DispatchLoaderDynamic( std::dynamic_pointer_cast<InstanceData>(this->getInstance()->getData())->instance, vkGetInstanceProcAddr, data->device = std::dynamic_pointer_cast<PhysicalDeviceData>(this->physical->getData())->physicalDevice.createDevice(vk::StructureChain<vk::DeviceCreateInfo, vk::PhysicalDeviceFeatures2>{
+            data->dispatch = vk::DispatchLoaderDynamic( 
+                std::dynamic_pointer_cast<InstanceData>(this->getInstance()->getData())->instance, vkGetInstanceProcAddr, 
+                data->device = std::dynamic_pointer_cast<PhysicalDeviceData>(this->physical->getData())->physicalDevice.createDevice(vk::StructureChain<vk::DeviceCreateInfo, vk::PhysicalDeviceFeatures2>{
                 vk::DeviceCreateInfo{
                     .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
                     .pQueueCreateInfos = queueCreateInfos.data(),
@@ -100,7 +102,7 @@ namespace tom {
                 const auto& info = queueCreateInfos[i];
                 const auto& queueFamilyIndex = info.queueFamilyIndex;
                 for (uint32_t j=0;j<info.queueCount;j++) {
-                    data->queues[info.queueFamilyIndex].push_back(std::make_shared<Queue>(shared_from_this(), data->device.getQueue(queueFamilyIndex, j), queueFamilyIndex));
+                    data->queues[info.queueFamilyIndex].push_back(std::make_shared<Queue>(shared_from_this(), QueueData::makeShared(data->device.getQueue(queueFamilyIndex, j), queueFamilyIndex)));
                 };
             };
 
@@ -192,7 +194,7 @@ namespace tom {
             };
 
             if (!deviceBuffer) { 
-                data->buffers[buffer] = (deviceBuffer = std::make_shared<DeviceBuffer>(shared_from_this(), buffer));
+                data->buffers[buffer] = (deviceBuffer = std::make_shared<DeviceBuffer>(shared_from_this(), DeviceBufferData::makeShared(buffer)));
             };
 
             return deviceBuffer;
@@ -208,7 +210,7 @@ namespace tom {
             };
 
             if (!deviceMemoryObj) { 
-                data->memories[deviceMemory] = (deviceMemoryObj = std::make_shared<DeviceMemory>(shared_from_this(), deviceMemory));
+                data->memories[deviceMemory] = (deviceMemoryObj = std::make_shared<DeviceMemory>(shared_from_this(), DeviceMemoryApi::makeShared(deviceMemory)));
             };
 
             return deviceMemoryObj;
@@ -256,8 +258,8 @@ namespace tom {
         // 
         ImageViewKey Device::setImageViewObject(const std::shared_ptr<tom::ImageView>& imageViewObj = {}) {
             auto data = this->getDataTyped();
-            ImageViewKey imageViewKey = {}; // determine key
-            if (data->imageViews.find(imageViewKey) == data->imageViews.end()) { 
+            ImageViewKey imageViewKey = {}; // TODO: determine key
+            if (data->imageViews.find(imageViewKey) == data->imageViews.end()) {
                 data->imageViews[imageViewKey] = imageViewObj;
             };
             return imageViewKey;

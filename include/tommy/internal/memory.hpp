@@ -23,6 +23,10 @@ namespace tom {
         { this->constructor(); };
 
         // 
+        DeviceMemory(const std::shared_ptr<Device>& device, const std::shared_ptr<DeviceMemoryApiBase>& api = {}): device(device), api(api) 
+        { this->constructor(); };
+
+        // 
         virtual std::shared_ptr<DeviceMemory> constructor() {
             if (!this->api) { this->api = std::make_shared<DeviceMemoryApiBase>(); };
             if (!this->data) { this->data = std::make_shared<DeviceMemoryBase>(); };
