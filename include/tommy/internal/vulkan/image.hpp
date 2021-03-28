@@ -53,19 +53,6 @@ namespace tom {
             {};
 
             // 
-            ~DeviceImage() {
-                auto api = this->getApiTyped();
-                if (this->data) {
-                    auto device = std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData());
-                    if (api->image) {
-                        device->device.bindImageMemory2(vk::BindImageMemoryInfo{ .image = api->image, .memory = {}, .memoryOffset = 0ull });
-                        device->device.destroyImage(api->image);
-                        api->image = vk::Image{};
-                    };
-                };
-            };
-
-            // 
             virtual std::shared_ptr<tom::MemoryAllocation> bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) override;
             virtual std::shared_ptr<tom::MemoryAllocation> create(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) override;
         };

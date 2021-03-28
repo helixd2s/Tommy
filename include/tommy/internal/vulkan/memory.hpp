@@ -48,14 +48,8 @@ namespace tom {
 
         public: // 
             // legacy
-            DeviceMemory(const std::shared_ptr<tom::Device>& device, const vk::DeviceMemory& memory = {}) : tom::DeviceMemory(device, std::make_shared<DeviceMemoryData>(), DeviceMemoryApi::makeShared(memory)) {
-            };
-
-            // 
-            ~DeviceMemory() {
-                auto data = this->getApiTyped();
-                if (data->memory) { data->memory = vk::DeviceMemory{}; };
-            };
+            DeviceMemory(const std::shared_ptr<tom::Device>& device, const vk::DeviceMemory& memory = {}) : tom::DeviceMemory(device, std::make_shared<DeviceMemoryData>(), DeviceMemoryApi::makeShared(memory)) 
+            {};
 
             // 
             virtual std::shared_ptr<tom::DeviceMemory> constructor() override {
@@ -72,11 +66,12 @@ namespace tom {
         protected: friend MemoryAllocator; friend MemoryAllocatorVma; friend DeviceMemory; friend MemoryAllocation;
 
         public: // 
-            MemoryAllocation(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}): tom::MemoryAllocation(deviceMemory, data) {
-            };
+            MemoryAllocation(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}): tom::MemoryAllocation(deviceMemory, data) 
+            {};
 
-            MemoryAllocation(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}) : tom::MemoryAllocation(device, data)  {
-            };
+            // 
+            MemoryAllocation(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}) : tom::MemoryAllocation(device, data)
+            {};
 
             // 
             ~MemoryAllocation() {

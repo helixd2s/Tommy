@@ -15,11 +15,12 @@ namespace tom {
         std::shared_ptr<DeviceBufferBase> api = {};
 
     public: // 
-        DeviceBuffer(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceBufferBase>& api = {}): MemoryAllocation(deviceMemory, data), api(api) {
-        };
+        DeviceBuffer(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceBufferBase>& api = {}): MemoryAllocation(deviceMemory, data), api(api) 
+        {};
 
-        DeviceBuffer(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceBufferBase>& api = {}) : MemoryAllocation(device, data), api(api) {
-        };
+        // 
+        DeviceBuffer(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceBufferBase>& api = {}) : MemoryAllocation(device, data), api(api) 
+        {};
 
         // 
         virtual uintptr_t& getDeviceAddress() override;
@@ -48,9 +49,8 @@ namespace tom {
 
     public: // 
         // legacy
-        BufferAllocation(const std::shared_ptr<DeviceBuffer>& deviceBuffer, const uintptr_t& offset = 0ull, const uintptr_t& range = 0xFFFFFFFF, const std::shared_ptr<BufferAllocationBase>& data = {}): deviceBuffer(deviceBuffer), data(data) {
-            this->constructor(offset, range);
-        };
+        BufferAllocation(const std::shared_ptr<DeviceBuffer>& deviceBuffer, const uintptr_t& offset = 0ull, const uintptr_t& range = 0xFFFFFFFF, const std::shared_ptr<BufferAllocationBase>& data = {}): deviceBuffer(deviceBuffer), data(data) 
+        { this->constructor(offset, range); };
 
         // 
         virtual std::shared_ptr<BufferAllocation> constructor(const uintptr_t& offset = 0ull, const uintptr_t& range = 0xFFFFFFFF) {

@@ -58,9 +58,8 @@ namespace tom {
             std::vector<vk::LayerProperties> layerProperties = {};
 
         public: 
-            Context() {
-                this->initialize();
-            };
+            // 
+            Context() { this->initialize(); };
 
             virtual void initialize();
         };
@@ -77,7 +76,7 @@ namespace tom {
             virtual inline std::shared_ptr<InstanceData> getDataTyped() const { return std::dynamic_pointer_cast<InstanceData>(this->data); };
 
         public: 
-            // legacy
+            // 
             Instance() : tom::Instance() {};
 
             // 

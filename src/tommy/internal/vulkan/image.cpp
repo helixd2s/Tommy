@@ -35,8 +35,10 @@ namespace tom {
             auto api = this->getApiTyped();
             api->image = std::dynamic_pointer_cast<DeviceData>(device->getData())->device.createImage( api->info.queueFamilyIndexCount ? api->info : vk::ImageCreateInfo(api->info).setQueueFamilyIndices(device->getQueueFamilyIndices()) );
             this->bindMemory(memoryAllocation);
-            //this->layoutHistory.clear();
-            //this->layoutHistory.push_back(info.initialLayout);
+            api->destructor = [image = api->image, device = std::dynamic_pointer_cast<DeviceData>(device->getData())->device]() { if (image) {
+                device.bindImageMemory2(vk::BindImageMemoryInfo{ .image = image, .memory = {}, .memoryOffset = 0ull });
+                device.destroyImage(image);
+            }; };
             return std::dynamic_pointer_cast<tom::MemoryAllocation>(shared_from_this());
         };
 

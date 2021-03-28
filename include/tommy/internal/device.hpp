@@ -15,9 +15,8 @@ namespace tom {
 
     public: 
         // legacy
-        Queue(const std::shared_ptr<Device>& device, const std::shared_ptr<QueueBase>& data = {}) : device(device), data(data) {
-            this->constructor();
-        };
+        Queue(const std::shared_ptr<Device>& device, const std::shared_ptr<QueueBase>& data = {}) : device(device), data(data) 
+        { this->constructor(); };
 
         // 
         virtual std::shared_ptr<Queue> constructor() {
@@ -48,9 +47,8 @@ namespace tom {
         std::vector<uint32_t> queueFamilyIndices = {};
 
     public: // 
-        Device(const std::shared_ptr<Instance>& instance, const std::shared_ptr<PhysicalDevice>& physical): instance(instance), physical(physical) { // 
-            this->constructor();
-        };
+        Device(const std::shared_ptr<Instance>& instance, const std::shared_ptr<PhysicalDevice>& physical): instance(instance), physical(physical) 
+        { this->constructor(); };
 
         // 
         virtual std::shared_ptr<Device> constructor() {
@@ -90,9 +88,8 @@ namespace tom {
         std::shared_ptr<MemoryAllocatorBase> data = {};
 
     public: // 
-        MemoryAllocator(const std::shared_ptr<Device>& device, const std::shared_ptr<MemoryAllocatorBase>& data = {}): device(device), data(data) {
-            this->constructor();
-        };
+        MemoryAllocator(const std::shared_ptr<Device>& device, const std::shared_ptr<MemoryAllocatorBase>& data = {}): device(device), data(data) 
+        { this->constructor(); };
 
         // 
         virtual std::shared_ptr<MemoryAllocator> constructor() {

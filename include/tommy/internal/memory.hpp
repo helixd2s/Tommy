@@ -19,13 +19,8 @@ namespace tom {
 
     public: // 
         // 
-        DeviceMemory(const std::shared_ptr<Device>& device, const std::shared_ptr<DeviceMemoryBase>& data = {}, const std::shared_ptr<DeviceMemoryApiBase>& api = {}): device(device), data(data), api(api) {
-            this->constructor();
-        };
-
-        // 
-        ~DeviceMemory() {
-        };
+        DeviceMemory(const std::shared_ptr<Device>& device, const std::shared_ptr<DeviceMemoryBase>& data = {}, const std::shared_ptr<DeviceMemoryApiBase>& api = {}): device(device), data(data), api(api) 
+        { this->constructor(); };
 
         // 
         virtual std::shared_ptr<DeviceMemory> constructor() {
@@ -55,14 +50,12 @@ namespace tom {
         std::shared_ptr<DeviceMemory> deviceMemory = {};
 
     public: // 
-        MemoryAllocation(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}): data(data), deviceMemory(deviceMemory), device(deviceMemory->getDevice()) {
-            this->constructor();
-        };
+        MemoryAllocation(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}): data(data), deviceMemory(deviceMemory), device(deviceMemory->getDevice()) 
+        { this->constructor(); };
 
         // 
-        MemoryAllocation(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}) : device(device), data(data) {
-            this->constructor();
-        };
+        MemoryAllocation(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}) : device(device), data(data) 
+        { this->constructor(); };
 
         // 
         ~MemoryAllocation() {

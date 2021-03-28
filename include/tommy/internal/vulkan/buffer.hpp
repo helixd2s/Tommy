@@ -49,19 +49,6 @@ namespace tom {
             {};
 
             // 
-            ~DeviceBuffer() {
-                auto api = this->getApiTyped();
-                if (this->data) {
-                    auto device = std::dynamic_pointer_cast<DeviceData>(this->getDevice()->getData());
-                    if (api->buffer) {
-                        device->device.bindBufferMemory2(vk::BindBufferMemoryInfo{ .buffer = api->buffer, .memory = {}, .memoryOffset = 0ull });
-                        device->device.destroyBuffer(api->buffer);
-                        api->buffer = vk::Buffer{};
-                    };
-                };
-            };
-
-            // 
             virtual uintptr_t& getDeviceAddress();
             virtual uintptr_t getDeviceAddress() const;
 
@@ -86,8 +73,8 @@ namespace tom {
 
         public: // 
             // legacy
-            BufferAllocation(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer, const uintptr_t& offset = 0ull, const uintptr_t& range = VK_WHOLE_SIZE): tom::BufferAllocation(deviceBuffer, offset, range, std::make_shared<BufferAllocationData>()) {
-            };
+            BufferAllocation(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer, const uintptr_t& offset = 0ull, const uintptr_t& range = VK_WHOLE_SIZE): tom::BufferAllocation(deviceBuffer, offset, range, std::make_shared<BufferAllocationData>()) 
+            {};
 
             // 
             virtual std::shared_ptr<tom::BufferAllocation> constructor(const uintptr_t& offset = 0ull, const uintptr_t& range = VK_WHOLE_SIZE) override {

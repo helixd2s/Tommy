@@ -37,9 +37,8 @@ namespace tom {
         std::shared_ptr<PhysicalDeviceBase> data = {};
 
     public: // 
-        PhysicalDevice(const std::shared_ptr<Instance>& instance, const std::shared_ptr<PhysicalDeviceBase> data = {}): instance(instance), data(data) {
-            this->constructor();
-        };
+        PhysicalDevice(const std::shared_ptr<Instance>& instance, const std::shared_ptr<PhysicalDeviceBase> data = {}): instance(instance), data(data) 
+        { this->constructor(); };
 
         //
         virtual std::shared_ptr<PhysicalDevice> constructor() {

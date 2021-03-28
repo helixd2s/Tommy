@@ -14,11 +14,11 @@ namespace tom {
         std::shared_ptr<DeviceImageBase> api = {};
 
     public: // 
-        DeviceImage(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceImageBase>& api = {}): MemoryAllocation(deviceMemory, data), api(api) {
-        };
+        DeviceImage(const std::shared_ptr<DeviceMemory>& deviceMemory = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceImageBase>& api = {}): MemoryAllocation(deviceMemory, data), api(api) 
+        {};
 
-        DeviceImage(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceImageBase>& api = {}) : MemoryAllocation(device, data), api(api) {
-        };
+        DeviceImage(const std::shared_ptr<Device>& device = {}, const std::shared_ptr<MemoryAllocationBase>& data = {}, const std::shared_ptr<DeviceImageBase>& api = {}) : MemoryAllocation(device, data), api(api) 
+        {};
 
         // 
         virtual std::shared_ptr<MemoryAllocation> bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) override;
@@ -39,9 +39,8 @@ namespace tom {
         std::shared_ptr<ImageViewBase> data = {};
 
     public: // 
-        ImageView(const std::shared_ptr<DeviceImage>& deviceImage, const std::shared_ptr<ImageViewBase>& data): deviceImage(deviceImage), data(data) {
-            this->constructor();
-        };
+        ImageView(const std::shared_ptr<DeviceImage>& deviceImage, const std::shared_ptr<ImageViewBase>& data): deviceImage(deviceImage), data(data) 
+        { this->constructor(); };
 
         // 
         virtual std::shared_ptr<ImageView> constructor() {

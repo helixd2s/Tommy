@@ -139,13 +139,13 @@ namespace tom {
     };
 
     // 
-    class DeviceImageBase: public std::enable_shared_from_this<DeviceImageBase> {
-        public:
+    class DeviceImageBase: public std::enable_shared_from_this<DeviceImageBase> { public:
+        std::function<void()> destructor = {};
     };
 
     // 
-    class DeviceBufferBase: public std::enable_shared_from_this<DeviceBufferBase> {
-        public:
+    class DeviceBufferBase: public std::enable_shared_from_this<DeviceBufferBase> { public: 
+        std::function<void()> destructor = {};
     };
 
     // 

@@ -40,6 +40,10 @@ namespace tom {
             std::dynamic_pointer_cast<Device>(device)->setDeviceBufferObject(std::dynamic_pointer_cast<tom::DeviceBuffer>(shared_from_this()));
             this->bindMemory(memoryAllocation);
             api->address = 0ull;
+            api->destructor = [buffer = api->buffer, device = std::dynamic_pointer_cast<DeviceData>(device->getData())->device]() { if (buffer) {
+                device.bindBufferMemory2(vk::BindBufferMemoryInfo{ .buffer = buffer, .memory = {}, .memoryOffset = 0ull });
+                device.destroyBuffer(buffer);
+            }; };
             return self;
         };
 
