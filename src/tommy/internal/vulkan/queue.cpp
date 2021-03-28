@@ -108,6 +108,37 @@ namespace tom {
             });
         };
 
+        // 
+        std::future<ApiResult> Queue::copyDeviceImageToBuffer(const std::shared_ptr<tom::ImageView>& src_, const std::shared_ptr<tom::BufferAllocation>& dst_, const ImageRegion& srcRegion = {}) {
+            auto dst = std::dynamic_pointer_cast<BufferAllocation>(dst_);
+            auto src = std::dynamic_pointer_cast<ImageView>(src_);
+
+            auto dstInfo = dst->getBufferInfo();
+            auto srcInfo = std::dynamic_pointer_cast<ImageViewData>(src->getData());
+
+            return this->submitOnce([src, dst, srcInfo, dstInfo, srcRegion](const vk::CommandBuffer& cmd) {
+                vk::BufferImageCopy2KHR bufferImageCopy = {
+                    .bufferOffset = dstInfo.offset,
+                    .imageSubresource = vk::ImageSubresourceLayers{ 
+                        .aspectMask = srcInfo->imageViewInfo.subresourceRange.aspectMask, 
+                        .mipLevel = srcInfo->imageViewInfo.subresourceRange.baseMipLevel + srcRegion.mipLevel,
+                        .baseArrayLayer = srcInfo->imageViewInfo.subresourceRange.baseArrayLayer,
+                        .layerCount = srcInfo->imageViewInfo.subresourceRange.layerCount
+                    },
+                    .imageOffset = (vk::Offset3D&)srcRegion.offset,
+                    .imageExtent = (vk::Extent3D&)srcRegion.extent
+                };
+
+                cmd.copyImageToBuffer2KHR(vk::CopyImageToBufferInfo2KHR{
+                    .srcImage = std::dynamic_pointer_cast<DeviceImageData>(src->getDeviceImage()->getApi())->image,
+                    .srcImageLayout = srcInfo->layoutHistory.back(),
+                    .dstBuffer = dstInfo.buffer,
+                    .regionCount = 1,
+                    .pRegions = &bufferImageCopy
+                });
+            });
+        };
+
 
         // 
         std::future<ApiResult> Queue::submitOnce(const std::function<void(const vk::CommandBuffer&)>& cmdFn, const vk::SubmitInfo2KHR& submitInfo) const {
