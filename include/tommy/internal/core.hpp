@@ -114,7 +114,7 @@ namespace tom {
 
     //
     struct ImageRegion {
-        glm::uvec3 offset = glm::uvec3{0u,0u,0u};
+        glm::ivec3 offset = glm::ivec3{0,0,0};
         glm::uvec3 extent = glm::uvec3{65536u,65536u,65536u};
         uint32_t mipLevel = 0u;
     };
