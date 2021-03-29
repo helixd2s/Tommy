@@ -43,12 +43,10 @@ namespace tom {
     class Device: public std::enable_shared_from_this<Device> {
     protected:  // 
         std::weak_ptr<Instance> instance = {};
-        std::shared_ptr<PhysicalDevice> physical = {};
         std::shared_ptr<DeviceBase> data = {};
-        std::shared_ptr<MemoryAllocator> allocator = {};
 
     public: // 
-        Device(const std::shared_ptr<Instance>& instance, const std::shared_ptr<PhysicalDevice>& physical): instance(instance), physical(physical) 
+        Device(const std::shared_ptr<Instance>& instance, const std::shared_ptr<DeviceBase>& data): instance(instance), data(data)
         { this->constructor(); };
 
         // 
@@ -61,7 +59,7 @@ namespace tom {
         virtual inline std::shared_ptr<DeviceBase>& getData() { return data; };
         virtual inline std::shared_ptr<Instance> getInstance() { return instance.lock(); };
         virtual inline std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) { return data->queues.at(queueFamilyIndex)[index]; };
-        virtual inline std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) { return physical; };
+        virtual inline std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) { return data->physicalDevices[deviceId]; };
         virtual std::shared_ptr<ImageView> getImageViewObject(const ImageViewKey& imageViewKey);
 
         // 
@@ -71,7 +69,7 @@ namespace tom {
         virtual inline std::shared_ptr<Instance> getInstance() const { return instance.lock(); };
         virtual inline const std::shared_ptr<DeviceBase>& getData() const { return data; };
         virtual inline const std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) const { return data->queues.at(queueFamilyIndex)[index]; };
-        virtual inline const std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) const { return physical; };
+        virtual inline const std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) const { return data->physicalDevices[deviceId]; };
         virtual std::shared_ptr<ImageView> getImageViewObject(const ImageViewKey& imageViewKey) const;
 
         //

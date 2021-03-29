@@ -100,6 +100,17 @@ namespace tom {
     class DeviceBase: public std::enable_shared_from_this<DeviceBase> { public: 
         std::unordered_map<uint32_t, std::vector<std::shared_ptr<Queue>>> queues = {};
         std::vector<uint32_t> queueFamilyIndices = {};
+
+        // 
+        std::vector<std::shared_ptr<PhysicalDevice>> physicalDevices = {};
+        std::vector<std::shared_ptr<MemoryAllocator>> allocators = {};
+
+        // 
+        static std::shared_ptr<DeviceBase> makeShared(std::vector<std::shared_ptr<PhysicalDevice>> physicalDevices = {}) {
+            auto data = std::make_shared<DeviceBase>();
+            data->physicalDevices = physicalDevices;
+            return data;
+        };
     };
 
     // 
@@ -108,8 +119,8 @@ namespace tom {
     };
 
     // 
-    class InstanceBase: public std::enable_shared_from_this<InstanceBase> {
-        public:
+    class InstanceBase: public std::enable_shared_from_this<InstanceBase> { public: 
+        
     };
 
     //

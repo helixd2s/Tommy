@@ -37,6 +37,9 @@ namespace tom {
             preferedExtensions.push_back("VK_EXT_debug_report");
     #endif
 
+            //
+            auto physical = data->physicalDevices[0];
+
             // 
             const auto& extensions = std::dynamic_pointer_cast<PhysicalDeviceData>(physical->getData())->extensionProperties;//getExtensionPropertiesDefined();
             for (uintptr_t i=0;i<preferedExtensions.size();i++) {
@@ -86,7 +89,7 @@ namespace tom {
             // 
             data->dispatch = vk::DispatchLoaderDynamic( 
                 std::dynamic_pointer_cast<InstanceData>(this->getInstance()->getData())->instance, vkGetInstanceProcAddr, 
-                data->device = std::dynamic_pointer_cast<PhysicalDeviceData>(this->physical->getData())->physicalDevice.createDevice(vk::StructureChain<vk::DeviceCreateInfo, vk::PhysicalDeviceFeatures2>{
+                data->device = std::dynamic_pointer_cast<PhysicalDeviceData>(physical->getData())->physicalDevice.createDevice(vk::StructureChain<vk::DeviceCreateInfo, vk::PhysicalDeviceFeatures2>{
                 vk::DeviceCreateInfo{
                     .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
                     .pQueueCreateInfos = queueCreateInfos.data(),
@@ -94,7 +97,7 @@ namespace tom {
                     .ppEnabledLayerNames = preferedLayers.data(),
                     .enabledExtensionCount = static_cast<uint32_t>(preferedExtensions.size()),
                     .ppEnabledExtensionNames = preferedExtensions.data()
-                }, std::dynamic_pointer_cast<PhysicalDeviceData>(this->physical->getData())->featuresChain.get<vk::PhysicalDeviceFeatures2>()
+                }, std::dynamic_pointer_cast<PhysicalDeviceData>(physical->getData())->featuresChain.get<vk::PhysicalDeviceFeatures2>()
             }.get<vk::DeviceCreateInfo>()), vkGetDeviceProcAddr );
 
             // 

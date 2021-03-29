@@ -48,7 +48,11 @@ namespace tom {
         std::shared_ptr<ImageViewBase> data = {};
 
     public: // 
-        ImageView(const std::shared_ptr<DeviceImage>& deviceImage, const std::shared_ptr<ImageViewBase>& data): deviceImage(deviceImage), data(data) 
+        ImageView(const std::shared_ptr<DeviceImage>& deviceImage, const std::shared_ptr<ImageViewBase>& data = {}): deviceImage(deviceImage), data(data) 
+        { this->constructor(); };
+
+        // 
+        ImageView(const std::shared_ptr<Device>& device, const std::shared_ptr<ImageViewBase>& data = {}): deviceImage(std::make_shared<DeviceImage>(device)), data(data) 
         { this->constructor(); };
 
         // 

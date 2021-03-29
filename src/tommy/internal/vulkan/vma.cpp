@@ -16,10 +16,9 @@ namespace tom {
     namespace vulkan {
         // 
         std::shared_ptr<tom::MemoryAllocator>& Device::createAllocatorVma() {
-            if (!this->allocator) {
-                this->allocator = std::dynamic_pointer_cast<MemoryAllocator>(std::make_shared<MemoryAllocatorVma>(shared_from_this()));
-            };
-            return this->allocator;
+            auto allocator = std::dynamic_pointer_cast<MemoryAllocator>(std::make_shared<MemoryAllocatorVma>(shared_from_this()));
+            data->allocators.push_back(allocator);
+            return data->allocators.back();
         };
 
         //
@@ -138,7 +137,7 @@ namespace tom {
             self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);;
             data->memoryOffset = allocInfo.offset;
             data->mapped = allocInfo.pMappedData;
-            data->destructor = [api, allocator = allocator->getData()->allocator, allocation = self->getMemoryAllocation()](){
+            data->destructor = [api, allocator = allocator->getData()->allocator, allocation = data->allocation](){
                 vmaDestroyBuffer((VmaAllocator&)allocator, api->buffer, (VmaAllocation&)allocation); api->buffer = vk::Buffer{};
             };
 
@@ -169,7 +168,7 @@ namespace tom {
             self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);;
             data->memoryOffset = allocInfo.offset;
             data->mapped = allocInfo.pMappedData;
-            data->destructor = [api, allocator = allocator->getData()->allocator, allocation = self->getMemoryAllocation()](){
+            data->destructor = [api, allocator = allocator->getData()->allocator, allocation = data->allocation](){
                 vmaDestroyImage((VmaAllocator&)allocator, api->image, (VmaAllocation&)allocation); api->image = vk::Image{};
             };
 

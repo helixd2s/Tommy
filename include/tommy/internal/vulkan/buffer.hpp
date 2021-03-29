@@ -41,13 +41,8 @@ namespace tom {
         protected: friend MemoryAllocator; friend MemoryAllocatorVma; friend BufferAllocation; // 
             virtual inline std::shared_ptr<DeviceBufferData> getApiTyped() { return std::dynamic_pointer_cast<DeviceBufferData>(this->api); };
             virtual inline std::shared_ptr<DeviceBufferData> getApiTyped() const { return std::dynamic_pointer_cast<DeviceBufferData>(this->api); };
-            //std::shared_ptr<DeviceBufferData> api = {};
 
-        public: // 
-            // legacy
-            //DeviceBuffer(const std::shared_ptr<tom::Device>& device, const vk::Buffer& buffer = {}) : tom::DeviceBuffer(device, {}, DeviceBufferData::makeShared(buffer)) 
-            //{};
-
+        public: 
             // 
             virtual uintptr_t& getDeviceAddress();
             virtual uintptr_t getDeviceAddress() const;
@@ -55,13 +50,6 @@ namespace tom {
             // 
             virtual std::shared_ptr<tom::MemoryAllocation> bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) override;
             virtual std::shared_ptr<tom::MemoryAllocation> create(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) override;
-
-            // 
-            //virtual inline std::shared_ptr<DeviceBufferData> getApi() { return api; };
-
-            // 
-            //virtual inline std::shared_ptr<MemoryAllocation> getMemoryAllocation() const { return shared_from_this(); };
-            //virtual inline std::shared_ptr<DeviceBufferData> getApi() { return api; };
         };
 
         // abscent class...
@@ -72,9 +60,6 @@ namespace tom {
             virtual inline std::shared_ptr<BufferAllocationData> getDataTyped() const { return std::dynamic_pointer_cast<BufferAllocationData>(this->data); };
 
         public: // 
-            // legacy
-            //BufferAllocation(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer, const uintptr_t& offset = 0ull, const uintptr_t& range = VK_WHOLE_SIZE): tom::BufferAllocation(deviceBuffer, offset, range, std::make_shared<BufferAllocationData>()) 
-            //{};
 
             // 
             virtual std::shared_ptr<tom::BufferAllocation> constructor(const uintptr_t& offset = 0ull, const uintptr_t& range = VK_WHOLE_SIZE) override {

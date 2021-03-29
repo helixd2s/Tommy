@@ -48,17 +48,25 @@ namespace tom {
 
         // 
         std::shared_ptr<tom::ImageView> ImageView::createImageView(const vk::ImageViewCreateInfo& info = {}) {
-            auto data = this->getDataTyped();
-            data->info.imageView = std::dynamic_pointer_cast<DeviceData>(this->deviceImage->getDevice()->getData())->device.createImageView((data->imageViewInfo = info).setImage(std::dynamic_pointer_cast<DeviceImageData>(this->deviceImage->getApi())->image));
-            data->layoutHistory.clear();
-            data->layoutHistory.push_back(std::dynamic_pointer_cast<DeviceImageData>(this->deviceImage->getApi())->info.initialLayout);
+            if (this->deviceImage) {
+                auto device = this->deviceImage->getDevice();
+                auto data = this->getDataTyped();
+                data->info.imageView = std::dynamic_pointer_cast<DeviceData>(device->getData())->device.createImageView((data->imageViewInfo = info).setImage(std::dynamic_pointer_cast<DeviceImageData>(this->deviceImage->getApi())->image));
+                data->layoutHistory.clear();
+                data->layoutHistory.push_back(std::dynamic_pointer_cast<DeviceImageData>(this->deviceImage->getApi())->info.initialLayout);
+                this->deviceImage->getDevice()->setImageViewObject(shared_from_this());
+            };
             return std::dynamic_pointer_cast<tom::ImageView>(shared_from_this());
         };
 
-        // 
+        // TODO: remove requirement of DeviceImage
         std::shared_ptr<tom::ImageView> ImageView::createSampler(const vk::SamplerCreateInfo& info = {}) {
-            auto data = this->getDataTyped();
-            data->info.sampler = std::dynamic_pointer_cast<DeviceData>(this->deviceImage->getDevice()->getData())->device.createSampler(data->samplerInfo = info);
+            if (this->deviceImage) {
+                auto device = this->deviceImage->getDevice();
+                auto data = this->getDataTyped();
+                data->info.sampler = std::dynamic_pointer_cast<DeviceData>(device->getData())->device.createSampler(data->samplerInfo = info);
+                this->deviceImage->getDevice()->setImageViewObject(shared_from_this());
+            };
             return std::dynamic_pointer_cast<tom::ImageView>(shared_from_this());
         };
 

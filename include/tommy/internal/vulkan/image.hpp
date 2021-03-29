@@ -48,10 +48,6 @@ namespace tom {
             virtual inline std::shared_ptr<DeviceImageData> getApiTyped() const { return std::dynamic_pointer_cast<DeviceImageData>(this->api); };
 
         public: // 
-            // legacy
-            //DeviceImage(const std::shared_ptr<Device>& device, const vk::Image& image = {}) : tom::DeviceImage(device, {}, DeviceImageData::makeShared(image)) 
-            //{};
-
             // 
             virtual std::shared_ptr<tom::MemoryAllocation> bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) override;
             virtual std::shared_ptr<tom::MemoryAllocation> create(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) override;
@@ -63,13 +59,17 @@ namespace tom {
             virtual inline std::shared_ptr<ImageViewData> getDataTyped() { return std::dynamic_pointer_cast<ImageViewData>(this->data); };
             virtual inline std::shared_ptr<ImageViewData> getDataTyped() const { return std::dynamic_pointer_cast<ImageViewData>(this->data); };
 
-        public: 
-            // legacy
-            //ImageView(const std::shared_ptr<tom::DeviceImage>& deviceImage, const vk::DescriptorImageInfo& info = {}): tom::ImageView(deviceImage, ImageViewData::makeShared(info)) 
-            //{};
+        public: // 
+            ImageView(const std::shared_ptr<DeviceImage>& deviceImage, const std::shared_ptr<ImageViewData>& data = {}): tom::ImageView(deviceImage, data)
+            { this->constructor(); };
+
+            // 
+            ImageView(const std::shared_ptr<Device>& device, const std::shared_ptr<ImageViewData>& data = {}): tom::ImageView(std::make_shared<DeviceImage>(device), data)
+            { this->constructor(); };
 
             // 
             virtual std::shared_ptr<tom::ImageView> constructor() override {
+                if (!this->data) { this->data = std::make_shared<ImageViewData>(); };
                 return shared_from_this();
             };
 

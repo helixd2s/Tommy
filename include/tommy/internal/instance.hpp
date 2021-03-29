@@ -11,7 +11,8 @@ namespace tom {
     protected:  // 
         std::shared_ptr<InstanceBase> data = {};
         std::vector<std::shared_ptr<PhysicalDevice>> physicalDevices = {};
-
+        std::vector<std::shared_ptr<Device>> devices = {};
+        
     public: // 
         Instance() { this->constructor(); };
 

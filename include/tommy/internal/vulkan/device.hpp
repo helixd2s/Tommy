@@ -90,7 +90,7 @@ namespace tom {
             virtual inline std::shared_ptr<DeviceData> getDataTyped() const { return std::dynamic_pointer_cast<DeviceData>(this->data); };
 
         public: // 
-            Device(const std::shared_ptr<tom::Instance>& instance, const std::shared_ptr<tom::PhysicalDevice>& physical): tom::Device(instance, physical) 
+            Device(const std::shared_ptr<tom::Instance>& instance, const std::shared_ptr<DeviceData>& data): tom::Device(instance, data) 
             {};
 
             // 

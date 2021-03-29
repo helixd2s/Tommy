@@ -38,11 +38,9 @@ namespace tom {
         virtual std::shared_ptr<MemoryAllocation> create(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) override;
 
         // 
-        virtual inline std::shared_ptr<MemoryAllocation> getMemoryAllocation() { return shared_from_this(); };
         virtual inline std::shared_ptr<DeviceBufferBase>& getApi() { return api; };
 
         // 
-        //virtual inline std::shared_ptr<MemoryAllocation> getMemoryAllocation() const { return shared_from_this(); };
         virtual inline const std::shared_ptr<DeviceBufferBase>& getApi() const { return api; };
     };
 

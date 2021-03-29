@@ -14,10 +14,9 @@ namespace tom {
     namespace vulkan {
         // 
         std::shared_ptr<tom::MemoryAllocator>& Device::createAllocatorVk() {
-            if (!this->allocator) {
-                this->allocator = std::make_shared<MemoryAllocator>(shared_from_this());
-            };
-            return this->allocator;
+            auto allocator = std::make_shared<MemoryAllocator>(shared_from_this());
+            data->allocators.push_back(allocator);
+            return data->allocators.back();
         };
 
         // 
