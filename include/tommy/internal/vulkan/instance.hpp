@@ -78,7 +78,7 @@ namespace tom {
 
         public: 
             // 
-            Instance() : tom::Instance() {};
+            Instance(const std::shared_ptr<InstanceData>& data = {}) : tom::Instance(data) {};
 
             // 
             virtual std::shared_ptr<tom::Instance> constructor() override;
@@ -107,9 +107,6 @@ namespace tom {
             virtual inline std::shared_ptr<PhysicalDeviceData> getDataTyped() const { return std::dynamic_pointer_cast<PhysicalDeviceData>(this->data); };
 
         public: 
-            // legacy
-            //PhysicalDevice(const std::shared_ptr<tom::Instance>& instance, const vk::PhysicalDevice& physicalDevice): tom::PhysicalDevice(instance, PhysicalDeviceData::makeShared(physicalDevice)) 
-            //{};
 
             //
             virtual std::shared_ptr<tom::PhysicalDevice> constructor() override;

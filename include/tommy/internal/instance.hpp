@@ -14,7 +14,7 @@ namespace tom {
         std::vector<std::shared_ptr<Device>> devices = {};
         
     public: // 
-        Instance() { this->constructor(); };
+        Instance(const std::shared_ptr<InstanceBase>& data = {}) : data(data) { this->constructor(); };
 
         // 
         virtual std::shared_ptr<Instance> constructor() {
