@@ -38,12 +38,6 @@ namespace tom {
             vk::DispatchLoaderDynamic dispatch = {};
 
             // 
-            std::unordered_map<vk::DeviceAddress, std::shared_ptr<BufferAllocation>> bufferAllocations = {};
-            std::unordered_map<vk::Buffer, std::shared_ptr<DeviceBuffer>> buffers = {};
-            std::unordered_map<vk::DeviceMemory, std::shared_ptr<DeviceMemory>> memories = {};
-            std::unordered_map<ImageViewKey, std::shared_ptr<ImageView>> imageViews = {};
-
-            // 
             std::shared_ptr<DescriptorSetSource> descriptions = {};
             std::shared_ptr<DescriptorSetLayouts> descriptorSetLayouts = {};
             std::shared_ptr<DescriptorSet> descriptorSets = {};
@@ -96,25 +90,25 @@ namespace tom {
             // 
             virtual std::shared_ptr<tom::Device> constructor() override;
 
-            // 
-            virtual std::shared_ptr<tom::DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer);
-            virtual std::shared_ptr<tom::DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory);
+            //
             virtual std::shared_ptr<tom::DeviceMemory> allocateMemoryObject(const std::shared_ptr<MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
-            virtual std::shared_ptr<tom::BufferAllocation> getBufferAllocationObject(const uintptr_t& deviceAddress = 0ull) override;
             virtual std::shared_ptr<tom::ImageView> getImageViewObject(const tom::ImageViewKey& imageViewKey) override;
+            virtual std::shared_ptr<tom::BufferAllocation> getBufferAllocationObject(const uintptr_t& deviceAddress = 0ull) override;
+            virtual std::shared_ptr<tom::DeviceBuffer> getDeviceBufferObject(const DeviceBufferKey& buffer) override;
+            virtual std::shared_ptr<tom::DeviceMemory> getDeviceMemoryObject(const DeviceMemoryKey& deviceMemory) override;
 
             // 
-            virtual vk::Buffer setDeviceBufferObject(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer = {});
-            virtual vk::DeviceMemory setDeviceMemoryObject(const std::shared_ptr<tom::DeviceMemory>& deviceMemoryObj = {});
-            virtual uintptr_t setBufferAllocationObject(const std::shared_ptr<tom::BufferAllocation>& allocation = {}) override;
-            virtual tom::ImageViewKey setImageViewObject(const std::shared_ptr<tom::ImageView>& imageViewObj = {}) override;
             virtual std::shared_ptr<tom::DeviceMemory> allocateMemoryObject(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
+            virtual tom::ImageViewKey setImageViewObject(const std::shared_ptr<tom::ImageView>& imageViewObj = {}) override;
+            virtual uintptr_t setBufferAllocationObject(const std::shared_ptr<tom::BufferAllocation>& allocation = {}) override;
+            virtual DeviceBufferKey setDeviceBufferObject(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer = {}) override;
+            virtual DeviceMemoryKey setDeviceMemoryObject(const std::shared_ptr<tom::DeviceMemory>& deviceMemoryObj = {}) override;
 
             // 
-            virtual std::shared_ptr<tom::DeviceBuffer> getDeviceBufferObject(const vk::Buffer& buffer) const;
-            virtual std::shared_ptr<tom::DeviceMemory> getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) const;
             virtual std::shared_ptr<tom::ImageView> getImageViewObject(const tom::ImageViewKey& imageViewKey) const override;
             virtual std::shared_ptr<tom::BufferAllocation> getBufferAllocationObject(const uintptr_t& deviceAddress = 0ull) const override;
+            virtual std::shared_ptr<tom::DeviceBuffer> getDeviceBufferObject(const DeviceBufferKey& buffer) const override;
+            virtual std::shared_ptr<tom::DeviceMemory> getDeviceMemoryObject(const DeviceMemoryKey& deviceMemory) const override;
 
             //
             virtual std::shared_ptr<tom::MemoryAllocator>& createAllocatorVk();

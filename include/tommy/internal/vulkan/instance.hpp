@@ -45,7 +45,7 @@ namespace tom {
             vk::DispatchLoaderDynamic dispatch = {};
 
             // 
-            std::unordered_map<uintptr_t, std::weak_ptr<Device>> deviceMap = {};
+            std::unordered_map<uintptr_t, std::shared_ptr<Device>> deviceMap = {};
             
         };
 
@@ -53,9 +53,10 @@ namespace tom {
         class Context: public std::enable_shared_from_this<Context> { public: 
             bool initialized = false;
             vk::DispatchLoaderDynamic dispatch = {};
-            std::unordered_map<uintptr_t, std::shared_ptr<Instance>> instanceMap = {};
+            std::unordered_map<uintptr_t, std::shared_ptr<tom::Instance>> instanceMap = {};
             std::vector<vk::ExtensionProperties> extensionProperties = {};
             std::vector<vk::LayerProperties> layerProperties = {};
+            //std::vector<std::shared_ptr<tom::Instance>> instances = {};
 
         public: 
             // 

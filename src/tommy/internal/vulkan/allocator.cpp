@@ -15,8 +15,9 @@ namespace tom {
         // 
         std::shared_ptr<tom::MemoryAllocator>& Device::createAllocatorVk() {
             auto allocator = std::make_shared<MemoryAllocator>(shared_from_this());
-            data->allocators.push_back(allocator);
-            return data->allocators.back();
+            auto allocatorHandle = uintptr_t(allocator->getData()->allocator);
+            data->allocators[allocatorHandle] = allocator;
+            return data->allocators.at(allocatorHandle);
         };
 
         // 

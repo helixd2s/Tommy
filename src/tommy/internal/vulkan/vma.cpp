@@ -13,12 +13,15 @@
 // 
 namespace tom {
 
+    // 
     namespace vulkan {
+
         // 
         std::shared_ptr<tom::MemoryAllocator>& Device::createAllocatorVma() {
             auto allocator = std::dynamic_pointer_cast<MemoryAllocator>(std::make_shared<MemoryAllocatorVma>(shared_from_this()));
-            data->allocators.push_back(allocator);
-            return data->allocators.back();
+            auto allocatorHandle = uintptr_t(allocator->getData()->allocator);
+            data->allocators[allocatorHandle] = allocator;
+            return data->allocators.at(allocatorHandle);
         };
 
         //
@@ -97,7 +100,7 @@ namespace tom {
                 };
 
                 // 
-                self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);
+                self->deviceMemory = device->getDeviceMemoryObject(reinterpret_cast<DeviceMemoryKey&>(allocInfo.deviceMemory));
                 data->memoryOffset = allocInfo.offset;
                 data->allocation = data->allocation;
                 data->mapped = allocInfo.pMappedData;
@@ -134,7 +137,7 @@ namespace tom {
             device->setDeviceBufferObject(self);
 
             // wrap device memory
-            self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);;
+            self->deviceMemory = device->getDeviceMemoryObject(reinterpret_cast<DeviceMemoryKey&>(allocInfo.deviceMemory));
             data->memoryOffset = allocInfo.offset;
             data->mapped = allocInfo.pMappedData;
             data->destructor = [api, allocator = allocator->getData()->allocator, allocation = data->allocation](){
@@ -165,7 +168,7 @@ namespace tom {
             vmaGetAllocationInfo((const VmaAllocator&)allocator->getData()->allocator, ((VmaAllocation&)data->allocation), &allocInfo);
 
             // wrap device memory
-            self->deviceMemory = device->getDeviceMemoryObject(allocInfo.deviceMemory);;
+            self->deviceMemory = device->getDeviceMemoryObject(reinterpret_cast<DeviceMemoryKey&>(allocInfo.deviceMemory));
             data->memoryOffset = allocInfo.offset;
             data->mapped = allocInfo.pMappedData;
             data->destructor = [api, allocator = allocator->getData()->allocator, allocation = data->allocation](){

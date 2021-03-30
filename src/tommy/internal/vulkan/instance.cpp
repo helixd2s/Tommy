@@ -87,6 +87,9 @@ namespace tom {
                 .ppEnabledExtensionNames = preferedExtensions.data()
             }), vkGetInstanceProcAddr);
 
+            //
+            context->instanceMap[reinterpret_cast<uintptr_t&>(data->instance)] = shared_from_this();
+
             // 
             return shared_from_this();
         };

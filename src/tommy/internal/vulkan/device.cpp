@@ -141,6 +141,9 @@ namespace tom {
             }.get<vk::DeviceCreateInfo>()), vkGetDeviceProcAddr );
 
             // 
+            std::dynamic_pointer_cast<InstanceData>(this->getInstance()->getData())->deviceMap[reinterpret_cast<uintptr_t&>(data->device)] = shared_from_this();
+
+            // 
             for (uint32_t i=0u;i<queueCreateInfos.size();i++) {
                 const auto& info = queueCreateInfos[i];
                 const auto& queueFamilyIndex = info.queueFamilyIndex;
@@ -192,13 +195,13 @@ namespace tom {
         };
 
         // 
-        std::shared_ptr<tom::DeviceBuffer> Device::getDeviceBufferObject(const vk::Buffer& buffer) const {
+        std::shared_ptr<tom::DeviceBuffer> Device::getDeviceBufferObject(const DeviceBufferKey& buffer) const {
             auto data = this->getDataTyped();
             return (data->buffers.find(buffer) != data->buffers.end()) ? data->buffers.at(buffer) : std::shared_ptr<tom::DeviceBuffer>{};
         };
 
         // 
-        std::shared_ptr<tom::DeviceMemory> Device::getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) const {
+        std::shared_ptr<tom::DeviceMemory> Device::getDeviceMemoryObject(const DeviceMemoryKey& deviceMemory) const {
             auto data = this->getDataTyped();
             return (data->memories.find(deviceMemory) != data->memories.end()) ? data->memories.at(deviceMemory) : std::shared_ptr<tom::DeviceMemory>{};
         };
@@ -213,7 +216,7 @@ namespace tom {
         std::shared_ptr<tom::DeviceMemory> Device::allocateMemoryObject(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {}) {
             auto data = this->getDataTyped();
             auto deviceMemoryObj = std::make_shared<DeviceMemory>(shared_from_this())->allocate(std::dynamic_pointer_cast<MemoryAllocator>(allocator), info);
-            auto deviceMemory = std::dynamic_pointer_cast<DeviceMemoryApi>(deviceMemoryObj->getApi())->memory; // determine a key
+            auto deviceMemory = reinterpret_cast<DeviceMemoryKey&>(std::dynamic_pointer_cast<DeviceMemoryApi>(deviceMemoryObj->getApi())->memory); // determine a key
             return (data->memories[deviceMemory] = deviceMemoryObj);
         };
 
@@ -235,7 +238,7 @@ namespace tom {
         };
 
         // 
-        std::shared_ptr<tom::DeviceBuffer> Device::getDeviceBufferObject(const vk::Buffer& buffer) {
+        std::shared_ptr<tom::DeviceBuffer> Device::getDeviceBufferObject(const DeviceBufferKey& buffer) {
             auto data = this->getDataTyped();
             std::shared_ptr<DeviceBuffer> deviceBuffer = {};
 
@@ -244,14 +247,14 @@ namespace tom {
             };
 
             if (!deviceBuffer) { 
-                data->buffers[buffer] = (deviceBuffer = std::make_shared<DeviceBuffer>(shared_from_this(), DeviceBufferData::makeShared(buffer)));
+                data->buffers[buffer] = (deviceBuffer = std::make_shared<DeviceBuffer>(shared_from_this(), DeviceBufferData::makeShared(reinterpret_cast<const vk::Buffer&>(buffer))));
             };
 
             return deviceBuffer;
         };
 
         // 
-        std::shared_ptr<tom::DeviceMemory> Device::getDeviceMemoryObject(const vk::DeviceMemory& deviceMemory) {
+        std::shared_ptr<tom::DeviceMemory> Device::getDeviceMemoryObject(const DeviceMemoryKey& deviceMemory) {
             auto data = this->getDataTyped();
             std::shared_ptr<DeviceMemory> deviceMemoryObj = {};
 
@@ -260,7 +263,7 @@ namespace tom {
             };
 
             if (!deviceMemoryObj) { 
-                data->memories[deviceMemory] = (deviceMemoryObj = std::make_shared<DeviceMemory>(shared_from_this(), DeviceMemoryApi::makeShared(deviceMemory)));
+                data->memories[deviceMemory] = (deviceMemoryObj = std::make_shared<DeviceMemory>(shared_from_this(), DeviceMemoryApi::makeShared(reinterpret_cast<const vk::DeviceMemory&>(deviceMemory))));
             };
 
             return deviceMemoryObj;
@@ -286,9 +289,9 @@ namespace tom {
 
 
         // 
-        vk::Buffer Device::setDeviceBufferObject(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer = {}) {
+        DeviceBufferKey Device::setDeviceBufferObject(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer = {}) {
             auto data = this->getDataTyped();
-            vk::Buffer buffer = std::dynamic_pointer_cast<DeviceBufferData>(deviceBuffer->getApi())->buffer; // determine key
+            auto buffer = reinterpret_cast<DeviceBufferKey&>(std::dynamic_pointer_cast<DeviceBufferData>(deviceBuffer->getApi())->buffer); // determine key
             if (data->buffers.find(buffer) == data->buffers.end()) {
                 data->buffers[buffer] = deviceBuffer;
             };
@@ -296,9 +299,9 @@ namespace tom {
         };
 
         // 
-        vk::DeviceMemory Device::setDeviceMemoryObject(const std::shared_ptr<tom::DeviceMemory>& deviceMemoryObj = {}) {
+        DeviceMemoryKey Device::setDeviceMemoryObject(const std::shared_ptr<tom::DeviceMemory>& deviceMemoryObj = {}) {
             auto data = this->getDataTyped();
-            vk::DeviceMemory deviceMemory = std::dynamic_pointer_cast<DeviceMemoryApi>(deviceMemoryObj->getApi())->memory; // determine key
+            auto deviceMemory = reinterpret_cast<DeviceMemoryKey&>(std::dynamic_pointer_cast<DeviceMemoryApi>(deviceMemoryObj->getApi())->memory); // determine key
             if (data->memories.find(deviceMemory) == data->memories.end()) {
                 data->memories[deviceMemory] = deviceMemoryObj;
             };

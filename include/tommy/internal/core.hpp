@@ -97,13 +97,28 @@ namespace tom {
     };
 
     // 
+    using DeviceBufferKey = uintptr_t;
+    using DeviceMemoryKey = uintptr_t;
+    
+    // 
+    using buffer_t = DeviceBufferKey;
+    using memory_t = DeviceMemoryKey;
+    using image_view_t = ImageViewKey;
+
+    // 
     class DeviceBase: public std::enable_shared_from_this<DeviceBase> { public: 
         std::unordered_map<uint32_t, std::vector<std::shared_ptr<Queue>>> queues = {};
         std::vector<uint32_t> queueFamilyIndices = {};
 
         // 
         std::vector<std::shared_ptr<PhysicalDevice>> physicalDevices = {};
-        std::vector<std::shared_ptr<MemoryAllocator>> allocators = {};
+
+        // 
+        std::unordered_map<uintptr_t, std::shared_ptr<MemoryAllocator>> allocators = {};
+        std::unordered_map<uintptr_t, std::shared_ptr<BufferAllocation>> bufferAllocations = {};
+        std::unordered_map<DeviceBufferKey, std::shared_ptr<DeviceBuffer>> buffers = {};
+        std::unordered_map<DeviceMemoryKey, std::shared_ptr<DeviceMemory>> memories = {};
+        std::unordered_map<ImageViewKey, std::shared_ptr<ImageView>> imageViews = {};
 
         // 
         static std::shared_ptr<DeviceBase> makeShared(std::vector<std::shared_ptr<PhysicalDevice>> physicalDevices = {}) {
