@@ -12,8 +12,16 @@ namespace tom {
     namespace vulkan {
 
         // 
-        const std::vector<const char*> defaultExtensions = { "VK_KHR_surface","VK_KHR_win32_surface" };
         const std::vector<const char*> defaultLayers = {  };
+        const std::vector<const char*> defaultExtensions = { 
+            "VK_KHR_surface",
+            "VK_KHR_win32_surface",
+            "VK_KHR_get_physical_device_properties2",
+            "VK_KHR_get_surface_capabilities2",
+            "VK_KHR_get_display_properties2",
+            "VK_EXT_validation_flags",
+            "VK_EXT_validation_features"
+        };
 
         // 
         std::shared_ptr<tom::Instance> Instance::constructor() {

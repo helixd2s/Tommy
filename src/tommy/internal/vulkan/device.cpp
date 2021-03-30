@@ -15,7 +15,47 @@ namespace tom {
     namespace vulkan {
         // 
         const std::vector<const char*> defaultLayers = {};
-        const std::vector<const char*> defaultExtensions = { "VK_KHR_swapchain", "VK_KHR_buffer_device_address" };
+        const std::vector<const char*> defaultExtensions = { 
+            "VK_KHR_swapchain",
+            "VK_KHR_buffer_device_address",
+            "VK_KHR_copy_commands2",
+            "VK_KHR_create_renderpass2",
+            "VK_KHR_bind_memory2",
+            "VK_KHR_synchronization2",
+            "VK_KHR_shader_float16_int8",
+            "VK_KHR_shader_draw_parameters",
+            "VK_KHR_shader_subgroup_extended_types",
+            "VK_KHR_vulkan_memory_model",
+            "VK_KHR_workgroup_memory_explicit_layout",
+            "VK_KHR_zero_initialize_workgroup_memory",
+            "VK_KHR_get_memory_requirements2",
+            "VK_KHR_relaxed_block_layout",
+            "VK_KHR_shader_atomic_int64",
+            "VK_KHR_variable_pointers",
+            "VK_KHR_dedicated_allocation",
+            "VK_KHR_timeline_semaphore",
+
+            "VK_KHR_acceleration_structure",
+            "VK_KHR_ray_tracing_pipeline",
+            "VK_KHR_ray_query",
+            "VK_KHR_pipeline_library",
+            "VK_KHR_pipeline_executable_properties",
+            "VK_KHR_deferred_host_operations",
+
+            "VK_EXT_subgroup_size_control",
+            "VK_EXT_transform_feedback",
+            "VK_EXT_validation_cache",
+            "VK_EXT_scalar_block_layout",
+            "VK_EXT_sampler_filter_minmax",
+            "VK_EXT_sample_locations",
+            "VK_EXT_queue_family_foreign",
+            "VK_EXT_index_type_uint8",
+            "VK_EXT_depth_range_unrestricted",
+            "VK_EXT_depth_clip_enable",
+            "VK_EXT_descriptor_indexing",
+            "VK_EXT_conservative_rasterization",
+            "VK_EXT_extended_dynamic_state"
+        };
 
         // 
         std::shared_ptr<tom::Device> Device::constructor() {
