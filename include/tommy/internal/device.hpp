@@ -61,9 +61,11 @@ namespace tom {
         virtual inline std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) { return data->queues.at(queueFamilyIndex)[index]; };
         virtual inline std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) { return data->physicalDevices[deviceId]; };
         virtual std::shared_ptr<ImageView> getImageViewObject(const ImageViewKey& imageViewKey);
+        virtual std::shared_ptr<BufferAllocation> getBufferAllocationObject(const uintptr_t& deviceAddress = 0ull);
 
         // 
         virtual ImageViewKey setImageViewObject(const std::shared_ptr<ImageView>& imageViewObj = {});
+        virtual uintptr_t setBufferAllocationObject(const std::shared_ptr<BufferAllocation>& allocation = {});
 
         // 
         virtual inline std::shared_ptr<Instance> getInstance() const { return instance.lock(); };
@@ -71,6 +73,7 @@ namespace tom {
         virtual inline const std::shared_ptr<Queue>& getQueueDefined(const uint32_t& queueFamilyIndex = 0u, const uint32_t& index = 0) const { return data->queues.at(queueFamilyIndex)[index]; };
         virtual inline const std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) const { return data->physicalDevices[deviceId]; };
         virtual std::shared_ptr<ImageView> getImageViewObject(const ImageViewKey& imageViewKey) const;
+        virtual std::shared_ptr<BufferAllocation> getBufferAllocationObject(const uintptr_t& deviceAddress = 0ull) const;
 
         //
         virtual std::shared_ptr<MemoryAllocator>& createAllocator();

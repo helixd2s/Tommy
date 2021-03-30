@@ -184,6 +184,13 @@ namespace tom {
         };
 
 
+
+        // 
+        std::shared_ptr<tom::BufferAllocation> Device::getBufferAllocationObject(const uintptr_t& address) const {
+            auto data = this->getDataTyped();
+            return (data->bufferAllocations.find(address) != data->bufferAllocations.end()) ? data->bufferAllocations.at(address) : std::shared_ptr<tom::BufferAllocation>{};
+        };
+
         // 
         std::shared_ptr<tom::DeviceBuffer> Device::getDeviceBufferObject(const vk::Buffer& buffer) const {
             auto data = this->getDataTyped();
@@ -260,7 +267,7 @@ namespace tom {
         };
 
         //
-        std::shared_ptr<tom::BufferAllocation> Device::getBufferAllocationObject(const vk::DeviceAddress& deviceAddress = 0ull) {
+        std::shared_ptr<tom::BufferAllocation> Device::getBufferAllocationObject(const uintptr_t& deviceAddress = 0ull) {
             auto data = this->getDataTyped();
             std::shared_ptr<BufferAllocation> bufferAllocation = {};
 
@@ -309,9 +316,9 @@ namespace tom {
         };
 
         //
-        vk::DeviceAddress Device::setBufferAllocationObject(const std::shared_ptr<tom::BufferAllocation>& bufferAllocation = {}) {
+        uintptr_t Device::setBufferAllocationObject(const std::shared_ptr<tom::BufferAllocation>& bufferAllocation = {}) {
             auto data = this->getDataTyped();
-            vk::DeviceAddress deviceAddress = std::dynamic_pointer_cast<BufferAllocation>(bufferAllocation)->getDeviceAddressDefined(); // determine key
+            auto deviceAddress = std::dynamic_pointer_cast<BufferAllocation>(bufferAllocation)->getDeviceAddressDefined(); // determine key
             if (data->bufferAllocations.find(deviceAddress) == data->bufferAllocations.end()) {
                 data->bufferAllocations[deviceAddress] = bufferAllocation;
             };
