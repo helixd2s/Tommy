@@ -76,14 +76,14 @@ namespace tom {
             virtual inline vk::DescriptorBufferInfo& getBufferInfo() { auto data = this->getDataTyped(); if (this->deviceBuffer) { data->bufferInfo.buffer = std::dynamic_pointer_cast<DeviceBufferData>(this->deviceBuffer->getApi())->buffer; }; return data->bufferInfo; };
             virtual inline vk::DeviceSize& getOffset() { auto data = this->getDataTyped(); return data->bufferInfo.offset; };
             virtual inline vk::DeviceSize& getRange() { auto data = this->getDataTyped(); return data->bufferInfo.range; };
-            virtual inline vk::DeviceAddress& getDeviceAddressDefined() { auto data = this->getDataTyped(); return (data->address = data->address ? data->address : this->getDeviceAddress()); };
+            //virtual inline vk::DeviceAddress& getDeviceAddressDefined() { auto data = this->getDataTyped(); return (data->address = data->address ? data->address : this->getDeviceAddress()); };
 
             // 
             virtual inline vk::DeviceAddress getDeviceAddress() const override { auto data = this->getDataTyped(); return (data->address || !this->deviceBuffer) ? data->address : (this->deviceBuffer->getDeviceAddress() + data->bufferInfo.offset); };
             virtual inline vk::DescriptorBufferInfo getBufferInfo() const { auto data = this->getDataTyped(); return vk::DescriptorBufferInfo{ std::dynamic_pointer_cast<DeviceBufferData>(this->deviceBuffer->getApi())->buffer, data->bufferInfo.offset, data->bufferInfo.range }; };
             virtual inline const vk::DeviceSize& getOffset() const { auto data = this->getDataTyped(); return data->bufferInfo.offset; };
             virtual inline const vk::DeviceSize& getRange() const { auto data = this->getDataTyped(); return data->bufferInfo.range; };
-            virtual inline const vk::DeviceAddress& getDeviceAddressDefined() const { auto data = this->getDataTyped(); return data->address; };
+            //virtual inline const vk::DeviceAddress& getDeviceAddressDefined() const { auto data = this->getDataTyped(); return data->address; };
         };
 
     };

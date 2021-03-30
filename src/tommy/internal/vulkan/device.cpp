@@ -277,7 +277,7 @@ namespace tom {
 
             if (!bufferAllocation) {
                 data->bufferAllocations[deviceAddress] = (bufferAllocation = std::make_shared<BufferAllocation>());
-                bufferAllocation->getDeviceAddressDefined() = deviceAddress;
+                std::dynamic_pointer_cast<BufferAllocationData>(bufferAllocation->getData())->address = deviceAddress;
             };
 
             return bufferAllocation;
@@ -315,10 +315,10 @@ namespace tom {
             return imageViewKey;
         };
 
-        //
+        // 
         uintptr_t Device::setBufferAllocationObject(const std::shared_ptr<tom::BufferAllocation>& bufferAllocation = {}) {
             auto data = this->getDataTyped();
-            auto deviceAddress = std::dynamic_pointer_cast<BufferAllocation>(bufferAllocation)->getDeviceAddressDefined(); // determine key
+            auto deviceAddress = std::dynamic_pointer_cast<BufferAllocationData>(bufferAllocation->getData())->address; // determine key
             if (data->bufferAllocations.find(deviceAddress) == data->bufferAllocations.end()) {
                 data->bufferAllocations[deviceAddress] = bufferAllocation;
             };
