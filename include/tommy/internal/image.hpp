@@ -30,10 +30,12 @@ namespace tom {
         {};
 
         // 
+        virtual inline DeviceImageKey getKey() { return DeviceImageKey(0ull); };
         virtual std::shared_ptr<MemoryAllocation> bindMemory(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) override;
         virtual std::shared_ptr<MemoryAllocation> create(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) override;
 
         // 
+        virtual inline DeviceImageKey getKey() const { return DeviceImageKey(0ull); };
         virtual inline std::shared_ptr<MemoryAllocation> getMemoryAllocation() { return shared_from_this(); };
         virtual inline std::shared_ptr<DeviceImageBase>& getApi() { return api; };
 
@@ -68,6 +70,12 @@ namespace tom {
         // 
         virtual inline const std::shared_ptr<DeviceImage>& getDeviceImage() const { return deviceImage; };
         virtual inline const std::shared_ptr<ImageViewBase>& getData() const { return data; };
+
+        // 
+        virtual inline ImageViewKey getKey() { return ImageViewKey{ImageViewType::eSampler,0u}; };
+
+        // 
+        virtual inline ImageViewKey getKey() const { return ImageViewKey{ImageViewType::eSampler,0u}; };
     };
 
 };

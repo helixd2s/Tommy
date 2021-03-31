@@ -6,7 +6,7 @@
 #include <tommy/internal/vulkan/device.hpp>
 #include <tommy/internal/vulkan/memory.hpp>
 #include <tommy/internal/vulkan/buffer.hpp>
-
+#include <tommy/internal/vulkan/image.hpp>
 
 // 
 namespace tom {
@@ -201,6 +201,12 @@ namespace tom {
         };
 
         // 
+        std::shared_ptr<tom::DeviceImage> Device::getDeviceImageObject(const DeviceImageKey& image) const {
+            auto data = this->getDataTyped();
+            return (data->images.find(image) != data->images.end()) ? data->images.at(image) : std::shared_ptr<tom::DeviceImage>{};
+        };
+
+        // 
         std::shared_ptr<tom::DeviceMemory> Device::getDeviceMemoryObject(const DeviceMemoryKey& deviceMemory) const {
             auto data = this->getDataTyped();
             return (data->memories.find(deviceMemory) != data->memories.end()) ? data->memories.at(deviceMemory) : std::shared_ptr<tom::DeviceMemory>{};
@@ -235,6 +241,22 @@ namespace tom {
             };
 
             return std::dynamic_pointer_cast<tom::ImageView>(imageView);
+        };
+
+        // 
+        std::shared_ptr<tom::DeviceImage> Device::getDeviceImageObject(const DeviceImageKey& image) {
+            auto data = this->getDataTyped();
+            std::shared_ptr<DeviceImage> deviceImage = {};
+
+            if (data->images.find(image) != data->images.end()) {
+                deviceImage = data->images.at(image);
+            };
+
+            if (!deviceImage) { 
+                data->images[image] = (deviceImage = std::make_shared<DeviceImage>(shared_from_this(), DeviceImageData::makeShared(reinterpret_cast<const vk::Image&>(image))));
+            };
+
+            return deviceImage;
         };
 
         // 
@@ -296,6 +318,16 @@ namespace tom {
                 data->buffers[buffer] = deviceBuffer;
             };
             return buffer;
+        };
+
+        // 
+        DeviceImageKey Device::setDeviceImageObject(const std::shared_ptr<tom::DeviceImage>& deviceImage = {}) {
+            auto data = this->getDataTyped();
+            auto image = reinterpret_cast<DeviceImageKey&>(std::dynamic_pointer_cast<DeviceImageData>(deviceImage->getApi())->image); // determine key
+            if (data->images.find(image) == data->images.end()) {
+                data->images[image] = deviceImage;
+            };
+            return image;
         };
 
         // 

@@ -52,6 +52,12 @@ namespace tom {
             // 
             virtual std::shared_ptr<tom::MemoryAllocation> bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) override;
             virtual std::shared_ptr<tom::MemoryAllocation> create(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) override;
+
+            // 
+            virtual inline DeviceBufferKey getKey() override { return reinterpret_cast<DeviceBufferKey&>(std::dynamic_pointer_cast<DeviceBufferData>(this->getApi())->buffer); };
+
+            // 
+            virtual inline DeviceBufferKey getKey() const override { return reinterpret_cast<DeviceBufferKey&>(std::dynamic_pointer_cast<DeviceBufferData>(this->getApi())->buffer); };
         };
 
         // abscent class...
@@ -84,6 +90,12 @@ namespace tom {
             virtual inline vk::DescriptorBufferInfo getBufferInfo() const { auto data = this->getDataTyped(); return vk::DescriptorBufferInfo{ std::dynamic_pointer_cast<DeviceBufferData>(this->deviceBuffer->getApi())->buffer, data->bufferInfo.offset, data->bufferInfo.range }; };
             virtual inline const vk::DeviceSize& getOffset() const { auto data = this->getDataTyped(); return data->bufferInfo.offset; };
             virtual inline const vk::DeviceSize& getRange() const { auto data = this->getDataTyped(); return data->bufferInfo.range; };
+
+            // 
+            virtual inline uintptr_t getKey() override { return std::dynamic_pointer_cast<BufferAllocationData>(this->getData())->address; };
+
+            // 
+            virtual inline uintptr_t getKey() const override { return std::dynamic_pointer_cast<BufferAllocationData>(this->getData())->address; };
         };
 
     };

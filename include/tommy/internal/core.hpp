@@ -97,10 +97,12 @@ namespace tom {
     };
 
     // 
+    using DeviceImageKey = uintptr_t;
     using DeviceBufferKey = uintptr_t;
     using DeviceMemoryKey = uintptr_t;
-    
+
     // 
+    using image_t = DeviceImageKey;
     using buffer_t = DeviceBufferKey;
     using memory_t = DeviceMemoryKey;
     using image_view_t = ImageViewKey;
@@ -116,6 +118,7 @@ namespace tom {
         // 
         std::unordered_map<uintptr_t, std::shared_ptr<MemoryAllocator>> allocators = {};
         std::unordered_map<uintptr_t, std::shared_ptr<BufferAllocation>> bufferAllocations = {};
+        std::unordered_map<DeviceImageKey, std::shared_ptr<DeviceImage>> images = {};
         std::unordered_map<DeviceBufferKey, std::shared_ptr<DeviceBuffer>> buffers = {};
         std::unordered_map<DeviceMemoryKey, std::shared_ptr<DeviceMemory>> memories = {};
         std::unordered_map<ImageViewKey, std::shared_ptr<ImageView>> imageViews = {};

@@ -52,6 +52,13 @@ namespace tom {
             // 
             virtual std::shared_ptr<tom::MemoryAllocation> bindMemory(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) override;
             virtual std::shared_ptr<tom::MemoryAllocation> create(const std::shared_ptr<tom::MemoryAllocation>& memoryAllocation = {}) override;
+
+            // 
+            virtual inline DeviceImageKey getKey() override { return reinterpret_cast<DeviceImageKey&>(std::dynamic_pointer_cast<DeviceImageData>(this->getApi())->image); };
+
+            // 
+            virtual inline DeviceImageKey getKey() const override { return reinterpret_cast<DeviceImageKey&>(std::dynamic_pointer_cast<DeviceImageData>(this->getApi())->image); };
+
         };
 
         // 
@@ -74,6 +81,7 @@ namespace tom {
                 return shared_from_this();
             };
 
+
             // 
             virtual std::shared_ptr<tom::ImageView> createImageView(const vk::ImageViewCreateInfo& info = {});
             virtual std::shared_ptr<tom::ImageView> createSampler(const vk::SamplerCreateInfo& info = {});
@@ -83,6 +91,12 @@ namespace tom {
 
             // 
             virtual inline vk::DescriptorImageInfo getInfo() const { auto data = getDataTyped(); return vk::DescriptorImageInfo{ data->info.sampler, data->info.imageView, data->layoutHistory.back() }; }
+
+            // 
+            virtual inline ImageViewKey getKey() override { return std::dynamic_pointer_cast<ImageViewData>(this->getData())->key; };
+
+            // 
+            virtual inline ImageViewKey getKey() const override { return std::dynamic_pointer_cast<ImageViewData>(this->getData())->key; };
         };
 
     };

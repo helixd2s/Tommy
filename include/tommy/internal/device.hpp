@@ -62,12 +62,14 @@ namespace tom {
         virtual inline std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) { return data->physicalDevices[deviceId]; };
         virtual std::shared_ptr<ImageView> getImageViewObject(const ImageViewKey& imageViewKey);
         virtual std::shared_ptr<BufferAllocation> getBufferAllocationObject(const uintptr_t& deviceAddress = 0ull);
+        virtual std::shared_ptr<tom::DeviceImage> getDeviceImageObject(const DeviceImageKey& image);
         virtual std::shared_ptr<tom::DeviceBuffer> getDeviceBufferObject(const DeviceBufferKey& buffer);
         virtual std::shared_ptr<tom::DeviceMemory> getDeviceMemoryObject(const DeviceMemoryKey& deviceMemory);
 
         // 
         virtual ImageViewKey setImageViewObject(const std::shared_ptr<ImageView>& imageViewObj = {});
         virtual uintptr_t setBufferAllocationObject(const std::shared_ptr<BufferAllocation>& allocation = {});
+        virtual DeviceImageKey setDeviceImageObject(const std::shared_ptr<tom::DeviceImage>& image = {});
         virtual DeviceBufferKey setDeviceBufferObject(const std::shared_ptr<tom::DeviceBuffer>& deviceBuffer = {});
         virtual DeviceMemoryKey setDeviceMemoryObject(const std::shared_ptr<tom::DeviceMemory>& deviceMemoryObj = {});
 
@@ -78,6 +80,7 @@ namespace tom {
         virtual inline const std::shared_ptr<PhysicalDevice>& getPhysicalDevice(const uint32_t& deviceId = 0u) const { return data->physicalDevices[deviceId]; };
         virtual std::shared_ptr<ImageView> getImageViewObject(const ImageViewKey& imageViewKey) const;
         virtual std::shared_ptr<BufferAllocation> getBufferAllocationObject(const uintptr_t& deviceAddress = 0ull) const;
+        virtual std::shared_ptr<tom::DeviceImage> getDeviceImageObject(const DeviceImageKey& image) const;
         virtual std::shared_ptr<tom::DeviceBuffer> getDeviceBufferObject(const DeviceBufferKey& buffer) const;
         virtual std::shared_ptr<tom::DeviceMemory> getDeviceMemoryObject(const DeviceMemoryKey& deviceMemory) const;
 

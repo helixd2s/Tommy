@@ -60,6 +60,12 @@ namespace tom {
 
             // 
             virtual std::shared_ptr<tom::DeviceMemory> allocate(const std::shared_ptr<tom::MemoryAllocator>& allocator, const vk::MemoryAllocateInfo& info = {});
+
+            // 
+            virtual inline DeviceMemoryKey getKey() override { return reinterpret_cast<DeviceMemoryKey&>(std::dynamic_pointer_cast<DeviceMemoryApi>(this->getApi())->memory); };
+
+            // 
+            virtual inline DeviceMemoryKey getKey() const override { return reinterpret_cast<DeviceMemoryKey&>(std::dynamic_pointer_cast<DeviceMemoryApi>(this->getApi())->memory); };
         };
 
         // 

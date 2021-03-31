@@ -38,9 +38,11 @@ namespace tom {
         virtual std::shared_ptr<MemoryAllocation> create(const std::shared_ptr<MemoryAllocation>& memoryAllocation = {}) override;
 
         // 
+        virtual inline DeviceBufferKey getKey() { return DeviceBufferKey(0ull); };
         virtual inline std::shared_ptr<DeviceBufferBase>& getApi() { return api; };
 
         // 
+        virtual inline DeviceBufferKey getKey() const { return DeviceBufferKey(0ull); };
         virtual inline const std::shared_ptr<DeviceBufferBase>& getApi() const { return api; };
     };
 
@@ -72,6 +74,12 @@ namespace tom {
         virtual inline uintptr_t getDeviceAddress() const { return 0ull; };
         virtual inline const std::shared_ptr<DeviceBuffer>& getDeviceBuffer() const { return deviceBuffer; };
         virtual inline const std::shared_ptr<BufferAllocationBase>& getData() const { return data; };
+
+        // 
+        virtual inline uintptr_t getKey() { return 0ull; };
+
+        // 
+        virtual inline uintptr_t getKey() const { return 0ull; };
     };
 
 };
