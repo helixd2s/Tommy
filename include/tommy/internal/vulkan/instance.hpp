@@ -84,7 +84,11 @@ namespace tom {
             virtual std::shared_ptr<tom::Instance> constructor() override;
 
             // 
+            virtual inline uintptr_t getKey() override { return reinterpret_cast<uintptr_t&>(std::dynamic_pointer_cast<InstanceData>(this->getData())->instance); };
             virtual inline std::vector<std::shared_ptr<tom::PhysicalDevice>>& enumeratePhysicalDevices() override;
+
+            // 
+            virtual inline uintptr_t getKey() const override { return reinterpret_cast<const uintptr_t&>(std::dynamic_pointer_cast<InstanceData>(this->getData())->instance); };
             virtual inline const std::vector<std::shared_ptr<tom::PhysicalDevice>>& enumeratePhysicalDevices() const override;
         };
 
@@ -110,8 +114,14 @@ namespace tom {
 
             //
             virtual std::shared_ptr<tom::PhysicalDevice> constructor() override;
+
+            // 
             virtual std::unordered_map<uint32_t, SurfaceProperties> getSurfaceInfo(const vk::SurfaceKHR& surface) const;
             virtual uint32_t getMemoryType(const uint32_t& memoryTypeBitsRequirement, const vk::MemoryPropertyFlags& requiredProperties = vk::MemoryPropertyFlagBits::eDeviceLocal) const;
+
+            // 
+            virtual inline uintptr_t getKey() override { return reinterpret_cast<uintptr_t&>(std::dynamic_pointer_cast<PhysicalDeviceData>(this->getData())->physicalDevice); };
+            virtual inline uintptr_t getKey() const override { return reinterpret_cast<const uintptr_t&>(std::dynamic_pointer_cast<PhysicalDeviceData>(this->getData())->physicalDevice); };
         };
 
     };

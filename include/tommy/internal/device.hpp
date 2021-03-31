@@ -25,10 +25,12 @@ namespace tom {
         };
 
         // 
+        virtual inline uintptr_t getKey() const { return 0ull; };
         virtual inline std::shared_ptr<Device> getDevice() const { return device.lock(); };
         virtual inline const std::shared_ptr<QueueBase>& getData() const { return data; };
 
         // 
+        virtual inline uintptr_t getKey() { return 0ull; };
         virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
         virtual inline std::shared_ptr<QueueBase>& getData() { return data; };
 
@@ -86,6 +88,12 @@ namespace tom {
 
         //
         virtual std::shared_ptr<MemoryAllocator>& createAllocator();
+
+        // 
+        virtual inline uintptr_t getKey() { return 0ull; };
+
+        // 
+        virtual inline uintptr_t getKey() const { return 0ull; };
     };
 
 
@@ -114,10 +122,12 @@ namespace tom {
         virtual std::shared_ptr<DeviceImage> allocateAndCreateImage(const std::shared_ptr<DeviceImage>& image, const tom::MemoryAllocationInfo& allocInfo = {});
 
         // 
+        virtual inline uintptr_t getKey() { return uintptr_t(data->allocator); };
         virtual inline std::shared_ptr<Device> getDevice() { return device.lock(); };
         virtual inline std::shared_ptr<MemoryAllocatorBase>& getData() { return data; };
 
         // 
+        virtual inline uintptr_t getKey() const { return uintptr_t(data->allocator); };
         virtual inline std::shared_ptr<Device> getDevice() const { return device.lock(); };
         virtual inline const std::shared_ptr<MemoryAllocatorBase>& getData() const { return data; };
     };

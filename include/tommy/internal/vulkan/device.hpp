@@ -74,6 +74,10 @@ namespace tom {
             virtual std::future<ApiResult> copyDeviceBuffers(const std::shared_ptr<tom::BufferAllocation>& src, const std::shared_ptr<tom::BufferAllocation>& dst) override;
             virtual std::future<ApiResult> copyDeviceBufferToImage(const std::shared_ptr<tom::BufferAllocation>& src, const std::shared_ptr<tom::ImageView>& dst, const ImageRegion& dstRegion = {}) override;
             virtual std::future<ApiResult> copyDeviceImageToBuffer(const std::shared_ptr<tom::ImageView>& src, const std::shared_ptr<tom::BufferAllocation>& dst, const ImageRegion& srcRegion = {}) override;
+
+            // 
+            virtual inline uintptr_t getKey() override { return reinterpret_cast<uintptr_t&>(std::dynamic_pointer_cast<QueueData>(this->getData())->queue); };
+            virtual inline uintptr_t getKey() const override { return reinterpret_cast<const uintptr_t&>(std::dynamic_pointer_cast<QueueData>(this->getData())->queue); };
         };
 
 
@@ -112,6 +116,10 @@ namespace tom {
             virtual std::shared_ptr<tom::DeviceImage> getDeviceImageObject(const DeviceImageKey& image) const override;
             virtual std::shared_ptr<tom::DeviceBuffer> getDeviceBufferObject(const DeviceBufferKey& buffer) const override;
             virtual std::shared_ptr<tom::DeviceMemory> getDeviceMemoryObject(const DeviceMemoryKey& deviceMemory) const override;
+
+            // 
+            virtual inline uintptr_t getKey() override { return reinterpret_cast<uintptr_t&>(std::dynamic_pointer_cast<DeviceData>(this->getData())->device); };
+            virtual inline uintptr_t getKey() const override { return reinterpret_cast<const uintptr_t&>(std::dynamic_pointer_cast<DeviceData>(this->getData())->device); };
 
             //
             virtual std::shared_ptr<tom::MemoryAllocator>& createAllocatorVk();

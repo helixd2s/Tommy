@@ -23,10 +23,12 @@ namespace tom {
         };
 
         // 
+        virtual inline uintptr_t getKey() { return 0ull; };
         virtual inline std::shared_ptr<InstanceBase>& getData() { return data; };
         virtual inline std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices();
 
         // 
+        virtual inline uintptr_t getKey() const { return 0ull; };
         virtual inline const std::shared_ptr<InstanceBase>& getData() const { return data; };
         virtual inline const std::vector<std::shared_ptr<PhysicalDevice>>& enumeratePhysicalDevices() const;
     };
@@ -48,12 +50,14 @@ namespace tom {
         };
 
         // 
-        virtual std::shared_ptr<Instance> getInstance() { return instance.lock(); };
-        virtual std::shared_ptr<PhysicalDeviceBase>& getData() { return data; };
+        virtual inline uintptr_t getKey() { return 0ull; };
+        virtual inline std::shared_ptr<Instance> getInstance() { return instance.lock(); };
+        virtual inline std::shared_ptr<PhysicalDeviceBase>& getData() { return data; };
 
         // 
-        virtual std::shared_ptr<Instance> getInstance() const { return instance.lock(); };
-        virtual const std::shared_ptr<PhysicalDeviceBase>& getData() const { return data; };
+        virtual inline uintptr_t getKey() const { return 0ull; };
+        virtual inline std::shared_ptr<Instance> getInstance() const { return instance.lock(); };
+        virtual inline const std::shared_ptr<PhysicalDeviceBase>& getData() const { return data; };
     };
 
 };
