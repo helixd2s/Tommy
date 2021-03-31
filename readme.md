@@ -2,6 +2,10 @@
 
 A new library for the Vulkan API, named after the character of GTA Vice City - Tommy Vercetti.
 
+## Freezing...
+
+The project turned out to be prohibitively difficult for me... I am putting on hold on it...
+
 ## Planned Features
 
 - Based on C++20 and Vulkan-Hpp 
