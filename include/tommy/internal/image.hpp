@@ -36,7 +36,6 @@ namespace tom {
 
         // 
         virtual inline DeviceImageKey getKey() const { return DeviceImageKey(0ull); };
-        virtual inline std::shared_ptr<MemoryAllocation> getMemoryAllocation() { return shared_from_this(); };
         virtual inline std::shared_ptr<DeviceImageBase>& getApi() { return api; };
 
         // 
