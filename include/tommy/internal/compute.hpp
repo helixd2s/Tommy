@@ -6,13 +6,16 @@
 
 // 
 namespace tom {
+
+    // 
     namespace vulkan {
         // 
-        class Compute: public std::enable_shared_from_this<Compute> { protected:
+        class ComputePipeline: public std::enable_shared_from_this<ComputePipeline> { protected:
             std::weak_ptr<tom::Device> device = {};
+            std::shared_ptr<ComputePipelineBase> data = {};
 
-            public: 
-            Compute() {
+        public: 
+            ComputePipeline() {
                 
             };
         };

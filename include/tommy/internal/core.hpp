@@ -200,21 +200,25 @@ namespace tom {
             this->destructor = {};
         };
     };
-    
-    //
+
+    // 
     class DeviceMemoryApiBase: public std::enable_shared_from_this<DeviceMemoryApiBase> { public: //
         
     };
 
     // 
-    class BufferAllocationBase: public std::enable_shared_from_this<BufferAllocationBase> { 
-        public:
+    class BufferAllocationBase: public std::enable_shared_from_this<BufferAllocationBase> { public: //
     };
 
-    //
+    // 
     class ImageViewBase : public std::enable_shared_from_this<ImageViewBase> {
         public:
         ImageViewKey key = {};
+    };
+
+    // 
+    class ComputePipelineBase: public std::enable_shared_from_this<ComputePipelineBase> { public: //
+        
     };
 
 
