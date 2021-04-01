@@ -4,7 +4,8 @@ A new library for the Vulkan API, named after the character of GTA Vice City - T
 
 ## Freezing...
 
-The project turned out to be prohibitively difficult for me... I am putting on hold on it...
+The project turned out to be prohibitively difficult for me... I am putting on hold on it... <br>
+New now busy on [Ramen](https://github.com/helixd2s/Ramen) project, that simpler than Tommy, and supports only Vulkan API. 
 
 ## Planned Features
 
